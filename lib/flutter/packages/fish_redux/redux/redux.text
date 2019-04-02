@@ -1,0 +1,31 @@
+https://www.cnblogs.com/wilber2013/p/5403350.html
+action:        通过ActionCreator创建action
+Action是一个对象，用来代表所有会引起状态（state）变化的行为
+Action对象是行为的描述，一般都会包含下面的信息：
+一个字符串类型的type字段来表示将要执行的动作
+需要传递给应用的其他数据信息（例子中的name和category），数据形式用户可以自定义
+
+Reducer
+关于Reducer，最简单的描述就是:
+Reducer是一个函数
+该函数接收两个参数，一个旧的状态previousState和一个Action对象
+返回一个新的状态newState
+
+store
+Actions描述了"what happened"的事实，Reducers则根据这些actions来更新state，而Store则是Actions和Reducers连接在一起的对象。
+Store是Redux中数据的统一存储，维护着state的所有内容，所以Store的主要功能就是：
+维护应用的state内容
+提供getState()方法获取 state
+提供dispatch(action)方法更新 state
+提供subscribe(listener)方法注册监听器
+
+看到Store提供的方法，就可以把Action、Reducer和Store联系在一起了：
+Store通过dispatch(action)方法来接收不同的Action
+根据Action对象的type和数据信息，Store对象可以通过Reducer函数来更新state的内容
+
+
+Middleware
+针对Action的特征，Reudx Middleware可以采取不同的操作：
+可以选择传递给下一个中间件，如：next(action)
+可以选择跳过某些中间件，如：dispatch(action)
+或者更直接了当的结束传递，如：return

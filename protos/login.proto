@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package login;
+option java_package = "com.login";
+option java_multiple_files = true;
+
+
+
+service Login {
+    rpc startLogin (Empty) returns (LoginResponse) {
+
+    }
+    rpc startLoginAgain (stream LoginResponse) returns (stream LoginResponse) {
+
+    }
+}
+message Empty{
+
+}
+//login response
+message LoginResponse{
+  int32 appId =1;
+  int64 userId =2;
+  string userName =3;
+  map<string,string> extras =4;
+  repeated string msg = 5;
+  bool isVip = 6;
+}
