@@ -6,7 +6,16 @@ class TextPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("text")),
+      appBar: AppBar(
+        title: Text(
+          "text",
+          key: Key("TextPageTitle"),
+        ),
+        automaticallyImplyLeading: false,
+        leading: BackButton(
+          key: Key("BackBtn"),
+        ),
+      ),
       body: Column(
         children: <Widget>[
           Text(
@@ -86,9 +95,7 @@ class TextPage extends StatelessWidget {
             TextSpan(
               text: 'Hello', // default text style
               children: <TextSpan>[
-                TextSpan(
-                    text: ' beautiful ',
-                    style: TextStyle(color: Colors.blue, fontStyle: FontStyle.italic)),
+                TextSpan(text: ' beautiful ', style: TextStyle(color: Colors.blue, fontStyle: FontStyle.italic)),
                 TextSpan(
                   text: 'world',
                   style: TextStyle(fontWeight: FontWeight.w500),
@@ -116,9 +123,7 @@ class TextPage extends StatelessWidget {
               style: TextStyle(inherit: false, fontWeight: FontWeight.w500, color: Colors.red),
               children: <TextSpan>[
                 TextSpan(
-                    text: 'bold',
-                    style:
-                        TextStyle(inherit: false, fontWeight: FontWeight.w500, color: Colors.red)),
+                    text: 'bold', style: TextStyle(inherit: false, fontWeight: FontWeight.w500, color: Colors.red)),
                 TextSpan(text: ' world!'),
               ],
             ),

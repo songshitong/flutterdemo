@@ -1,7 +1,13 @@
-class People {
+class ContentA {}
+
+class ContentB extends ContentA {}
+
+abstract class People {
   sayHello() {
     print(" people hello");
   }
+
+  ContentA getContent();
 }
 
 ///继承
@@ -10,6 +16,17 @@ class Student extends People {
     sayHello();
     print(" student hello ");
   }
+
+  @override
+  ContentB getContent() {
+    return ContentB();
+  }
+}
+
+class StudentA extends Student {
+  //继承只继承父类的属性，不在向上查找
+  @override
+  ContentB getContent() {}
 }
 
 ///实现  类实现了一个默认接口
@@ -17,6 +34,12 @@ class Robot implements People {
   @override
   sayHello() {
     print("robot hello ");
+    return null;
+  }
+
+  @override
+  ContentA getContent() {
+    // TODO: implement getContent
     return null;
   }
 }

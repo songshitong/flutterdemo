@@ -19,6 +19,7 @@ import 'package:flutterdemo/flutter/widget/container/padding.dart';
 import 'package:flutterdemo/flutter/widget/container/transformation_widget.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/CanvasWidget.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/buttom_btn.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/dismissible.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/futurebuilder.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/inherited_widget.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/will_pop_scope.dart';
@@ -91,15 +92,20 @@ class _HomeState extends State<Home> {
             BottomNavigationBarItem(icon: Icon(Icons.add), title: buildText(4)),
           ]),
       body: SingleChildScrollView(
+        key: Key("long_list"),
         child: Column(
           children: <Widget>[
             FlatButton(
+                key: Key("FlatButton"),
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return TextPage();
                   }));
                 },
-                child: Text("text")),
+                child: Text(
+                  "text",
+                  key: Key("FlatButtonChild"),
+                )),
             FlatButton(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -272,6 +278,13 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("widget数据共享")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return DismissiblePage();
+                  }));
+                },
+                child: Text("DismissiblePage")),
             Text("动画animation ----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -348,12 +361,13 @@ class _HomeState extends State<Home> {
                 },
                 child: Text("咸鱼 annotation route")),
             FlatButton(
+                key: Key("list_last"),
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return FishReduxPageWidget();
                   }));
                 },
-                child: Text("咸鱼 fish_redux")),
+                child: Text("咸鱼 fish_redux", key: Key("list_last_text"))),
           ],
         ),
       ),
