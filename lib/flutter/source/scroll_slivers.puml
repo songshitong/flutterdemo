@@ -1,0 +1,108 @@
+@startuml
+
+abstract class ScrollView{
+  List<Widget> buildSlivers(BuildContext context)
+  Widget buildViewport(BuildContext context,ViewportOffset offset,AxisDirection axisDirection,List<Widget> slivers)
+  Widget build(BuildContext context)
+}
+'note right of ScrollView{
+'  定义：滚动的widget
+'  可滚动widget由三部分组成:
+'    1 一个[Scrollable]widget，用于监听各种用户手势和实现滚动的交互设计
+'    2 一个视口窗口widget，例如[Viewport]或[ShrinkWrappingViewport]通过仅显示滚动视图中widget的部分来实现滚动的视觉设计
+'    3 一个或多个slivers，它们是可以组成创建各种滚动效果，例如列表，网格和扩展标题的widget
+'  [ScrollView]通过创建[Scrollable]和视口并推迟到其子类来创建slivers来帮助编排这些片段
+'  要控制滚动视图的初始滚动偏移，请提供设置了[ScrollController.initialScrollOffset]属性的[controller]
+'
+'  buildSlivers 构建要放置在视口内的窗口widget列表,子类应重写此方法以构建视口内部的slivers
+'  buildSlivers 构建视口 子类可以重写此方法以更改视口的构建方式。如果[shrinkWrap]为true，则默认实现使用[ShrinkWrappingViewport]，否则使用常规[Viewport]
+'
+'  build 重写方法，将通过buildSlivers从子类获取的widget列表，通过buildSlivers构建的viewport和Scrollable这
+'        三者组装到一起
+'}
+
+abstract class BoxScrollView{
+  List<Widget> buildSlivers(BuildContext context)
+  Widget buildChildLayout(BuildContext context)
+}
+'note left of BoxScrollView{
+'  定义：使用单个子布局模型的[ScrollView]
+'  buildSlivers: 重写ScrollView的方法，将从buildChildLayout获取的widget包裹在SliverPadding中，将其作为list返回
+'  buildChildLayout :子类应重写此方法以构建布局模型 获取子类构建的widget
+'}
+
+class CustomScrollView{
+   final List<Widget> slivers
+   List<Widget> buildSlivers(BuildContext context)
+}
+'note right of CustomScrollView{
+'  定义：使用slivers创建自定义滚动效果的[ScrollView]
+'  [CustomScrollView]允许您直接提供[slivers]以创建各种滚动效果，例如列表，网格和扩展标题.例如，创建一个滚动视图，其中包含一个展开的app bar，
+'  后跟一个列表和网格，使用三个slivers列表：[SliverAppBar]，[SliverList]，和[SliverGrid]
+'  [Widget]中的[slivers]必须生成[RenderSliv​​er]对象，Viewport的createRenderObject为RenderViewport，而RenderViewport的父类RenderViewportBase
+'      接受一个RenderSliver范型
+
+'  要控制滚动视图的初始滚动偏移，请提供设置了[ScrollController.initialScrollOffset]属性的[controller]
+'  [CustomScrollView]可以允许滚动状态更改时Talkback / VoiceOver通知用户。例如，在Android上公告可能被解读为“显示第1项至23项中的第10项”
+'     生产这个公告，滚动视图需要三条信息：
+'        1 第一个可见的子的索引index
+'        2 孩子总数
+'        3 可见孩子的总数
+'  最后一个值可以由框架精确计算，但是前两个必须提供。大多数更高级别的可滚动widget自动提供此信息.例如，[ListView]为每个子widget自动提供
+'    具有语义索引设并设置语义子级列表的长度
+'  要确定可见索引，滚动视图需要一种方式关联每个可滚动item和一个语义索引index生成的语义。这个可以通过将子窗口小部件包装在[IndexedSemantics]中来完成
+'  此语义索引不一定与可滚动widget的索引相同.因为某些小部件可能无法提供语义信息.考虑一个[new ListView.separated（）]：每个其他小部件都是
+'  没有语义信息的分隔符.在这种情况下，只有奇数编号widget有一个语义索引（等于索引〜/ 2）.而且，此示例中的子项总数将是widgets数量的一半.
+'    （[new ListView.separated（）]构造函数自动处理此问题.这仅用于此处作为示例
+'  可见子项的总数可以通过构造函数参数`semanticChildCount`提供，这应该始终与[IndexedSemantics]中包含的小部件数相同
+'
+'  buildSlivers 重写方法，将slivers返回
+'}
+
+class ListView{
+   Widget buildChildLayout(BuildContext context)
+}
+
+'note left of ListView{
+'  buildChildLayout方法重写，如果子在滚动方向宽度itemExtent确定，返回SliverFixedExtentList，不确定则返回SliverList。这两者都是接受
+'    SliverChildDelegate作为参数，至此将普通widget转换为sliver系列
+'}
+
+class GridView {
+   Widget buildChildLayout(BuildContext context)
+}
+'note right of GridView{
+'   重写buildChildLayout方法将SliverGridDelegate和SliverChildDelegate包装进SliverGrid返回
+'}
+
+class Scrollable{
+  final bool excludeFromSemantics
+  ScrollableState createState()
+}
+
+note left of Scrollable{
+  定义：滚动的的widget
+  excludeFromSemantics  此[Scrollable]引入的滚动操作是否在语义树中公开,带溢出的文本字段通常是可滚动的，以确保用户可以到达输入文本的开头结尾.
+     但是，这些滚动操作通常不会暴露给语义层
+}
+
+class ScrollableState{
+   Widget build(BuildContext context)
+}
+note left of ScrollableState{
+   build 重写方法，excludeFromSemantics为false，创建_ScrollSemantics，为true,创建_ScrollableScope。最后将结果通过ScrollBehavior的
+      buildViewportChrome创建widget
+}
+StatelessWidget <|-- ScrollView
+ScrollView      <|-- BoxScrollView
+ScrollView      <|-- CustomScrollView
+ScrollView      <.. Scrollable
+ScrollView      <.. Viewport
+
+BoxScrollView   <|-- ListView
+BoxScrollView   <|-- GridView
+
+StatefulWidget  <|-- Scrollable
+Scrollable      <.. ScrollableState
+
+@enduml

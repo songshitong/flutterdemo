@@ -1,0 +1,19 @@
+# Read about `build.yaml` at https://pub.dartlang.org/packages/build_config
+targets:
+  $default:
+    builders:
+      # 在pubspec中声明的包名 | builder的类名
+      flutterdemo|todoBuilder:
+        enabled: true
+        generate_for:
+          exclude: ['**.todo_generate.dart']
+
+
+builders:
+  todoBuilder:
+    # package:包名/builder类文件的相对路径
+    import: 'package:flutterdemo/dart/version_2x/script/todo_builder.dart'
+    builder_factories: ['todoBuilder']
+    build_extensions: { '.dart': ['.todo_generate.dart'] }
+    auto_apply: root_package
+    build_to: source

@@ -1,0 +1,30 @@
+@startuml
+'文章连接 https://mp.weixin.qq.com/s?__biz=MzU4MDUxOTI5NA==&mid=2247484154&idx=1&sn=577e34bb29f2ceeda703de2c114d8828&chksm=fd54d6ebca235ffd9a7f50a73ad6cdef55dfae3fdd9ea1571a72a63b4fdf593d4bce224634b1&token=1642928151&lang=zh_CN#rd
+[-> FlutterApplication : FlutterApplication.onCreate
+activate FlutterApplication
+FlutterApplication -> FlutterMain : FlutterMain.startInitialization(Context)
+note right of FlutterApplication : initConfig  initAot  initResources  \n加载flutter环境
+deactivate FlutterApplication
+
+activate FlutterMain
+deactivate FlutterMain
+FlutterActivity -> FlutterActivityDelegate : FlutterActivity.onCreate
+activate FlutterActivityDelegate
+FlutterActivityDelegate ->FlutterMain  : FlutterMain.ensureInitializationComplete
+FlutterMain -> FlutterActivityDelegate : FlutterMain.ensureInitializationComplete
+FlutterActivityDelegate ->FlutterNativeView : ViewFactory.createFlutterView
+activate FlutterNativeView
+FlutterNativeView ->FlutterActivityDelegate : ViewFactory.createFlutterView
+
+note left of FlutterView : 确保FlutterNativeView创建成功 \n 一些view的配置 \n 注册SurfaceHolder监听\n初始化了Flutter系统需要用到的一系列桥接方法
+FlutterActivityDelegate -> FlutterView : new FlutterView(Context,AttributeSet,FlutterNativeView)
+activate FlutterView
+FlutterView->FlutterActivityDelegate  : new FlutterView(Context,AttributeSet,FlutterNativeView)
+deactivate FlutterView
+
+FlutterActivityDelegate -> FlutterActivityDelegate : FlutterActivityDelegate.runBundle
+FlutterActivityDelegate -> FlutterView : FlutterView.runFromBundle
+note over of FlutterView : 发送消息来调用Flutter的入口方法
+deactivate FlutterActivityDelegate
+activate FlutterView
+@enduml

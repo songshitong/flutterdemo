@@ -1,0 +1,581 @@
+@startuml
+abstract class Widget {
+  Element createElement()
+  static bool canUpdate(Widget oldWidget, Widget newWidget)
+}
+'note top of Widget
+'   widget是描述element配置的类，element管理着底层渲染树
+'   createElement方法将配置解析为具体的实例
+'   canUpdate方法是否可以使用`newWidget`来更新当前具有`oldWidget`作为其配置的[Element]
+'      通过runtimeType和key进行判断
+'end note
+
+abstract class StatelessWidget{
+  Widget build(BuildContext context)
+}
+'note left of StatelessWidget
+'  定义：一个不需要可变状态的widget
+'  build方法通常在三种情况下调用
+'    1 第一次插入tree
+'    2 父widget改变他的配置
+'    3 他依赖的InheritedWidget发生改变
+'  性能优化 父widget定期改变配置或依赖的InheritedWidget经常改变
+'    1 最小化构建方法传递的节点数量它创建的任何小部件
+'      使用CustomPaint而不是Container和Decoration来实现绘图效果
+'      使用align而不是Row，Padding，SizedBox来实现对其效果
+'    2 尽可能使用const Widget并且提供const的构造器以便使用者也能做到
+'    3 将StatelessWidget转为StatefulWidget,以便使用StatefulWidget的黑科技
+'      缓存子树的公共部分或者更改树结构时使用[GlobalKey]
+'    4 如果widget因为使用InheritedWidget而频繁创建，将子widget分为多个，改变部分由tree变为leave叶子
+'
+'  build方法
+'    如果build方法依赖于任何事情，使用StatefulWidget
+'end note
+
+abstract class StatefulWidget{
+   State createState()
+}
+'note right of StatefulWidget
+'  定义：一个具有可变状态的widget
+'  StatefulWidget主要有两类：
+'    1 在State.initState分配资源并在State.dispose回收，但是不依赖于InheritedWidget
+'      也不调用State.setState。通常用于application或者page的根widget,和子widget通过ChangeNotifier，stream
+'      或其他方式通信。这种widget构建一次并且不再更新，对于cpu和GPU周期是相对便宜的。
+'      因此，它们可能有些复杂和深度build方法
+'    2 调用State.setState或依赖于InheritedWidget，这些通常会在应用程序的生命周期期间重建多次，
+'      因此减少重建的影响很重要
+'  性能优化
+'    1 将状态推到树叶上，创建一个只更新自己的widget
+'    2 最小化构建方法传递的节点数量它创建的任何小部件
+'      理想情况下，有状态小部件只会创建一个单个小部件，该小部件将是[RenderObjectWidget]。
+'      显然这并不总是实用，但是小部件越接近这个理想，效率会更高
+'    3 如果子树不发生改变，缓存子树，每次使用时重用他，通常是将stateful的部分重构为一个widget
+'    4 尽可能使用`const`widget。 （这相当于缓存小部件并重新使用它。）
+'      可查看源码注释的例子 将State中依赖外部的属性，重构到具有const构造器的StatefulWidget中
+'    5 避免改变任何创建子树的深度和改变子树中任何widget的类型
+'      例如：比起返回child或将child包装在IgnorePointer里面，更好的做法是将child一直包装在IgnorePointer
+'      里面，然后控制IgnorePointer.ignoring的属性。这是因为更改子树的深度需要
+'      重建，布局和绘制整个子树，而只是更改属性将需要尽可能少的更改渲染树
+'      （例如，在[IgnorePointer]的情况下，没有布局或重绘是必要的）
+'    6 如果必须改变子树的深度，考虑将子树的公共部分重构为一个拥有GlobalKey的widget,这部分widget
+'      将会在StatefulWidget的生命周期中保持一致
+'end note
+
+abstract class State{
+   void initState()
+   Widget build(BuildContext context)
+   void setState(VoidCallback fn)
+   void dispose()
+}
+'note right of State
+' 定义：[StatefulWidget]的逻辑和内部状态
+' state的生命周期
+' ...
+'end note
+abstract class BuildContext{
+   Widget get widget
+   BuildOwner get  owner
+   Size get size
+   RenderObject findRenderObject()
+   InheritedWidget inheritFromWidgetOfExactType(Type targetType)
+   Widget ancestorWidgetOfExactType(Type targetType)
+
+}
+'note bottom of BuildContext
+'  定义：定位一个widget到widget树的句柄
+'  可以通过WidgetBuilder(如build方法)或State.context成员获取
+'  每个widget都有自己的BuildContext,并通过父widget的build方法返回
+'  在一个build方法里面，build方法的build context和build方法返回的widget的build context不一致
+'     这会导致一些棘手的情况。比如Theme.of(context)会在给定的build context寻找最近的封闭theme
+'     如果widgetQ的build方法返回包括[主题]在内的widget树中，并尝试使用[Theme.of]传递它自己的上下文，
+'     Q的build方法将找不到[Theme]对象，theme.of使用的context与build方法的context不一致
+'     具体看代码注释例子，如果需要为返回树的子部分构建上下文，可以使用Builder widget进行构建上下文
+'  随着时间推移，特定widget的BuildContext会改变location当widget在树周围移动时，
+'     因此该类的返回值不应该在返回方法之外缓存
+'  [BuildContext]对象实际上是[Element]对象。 [BuildContext]接口用于阻止对[Element]对象的直接操作
+'end note
+
+abstract class Element{
+  Widget _widget
+  BuildOwner _owner
+  Element _parent
+  bool _dirty
+  void markNeedsBuild()
+  void mount(Element parent, dynamic newSlot)
+  RenderBox createRenderObject(BuildContext context)
+  void attachRenderObject(dynamic newSlot)
+}
+
+'note right of Element{
+'  定义：在树中的特定位置[Widget]的实例化
+'  widget描述了如何配置子树，但可以使用相同的widget同时配置多个子树，因为widget是不可变的
+'  [Element]表示在树上特定位置的配置的widget的使用
+'  元素形成一棵树。大多数元素都有一个独特的子元素，但有一些小部件（例如，[RenderObjectElement]的子类）可以有多个子元素
+'  _widget 是Element的配置
+'  _owner 是管理当前Element生命周期的对象
+'  bool _dirty true标记当前element需要重建
+'  markNeedsBuild 将元素标记为脏，并将其添加到全局widget列表中，以便在下一帧中重建，
+'   由于在一个帧中构建一个元素两次是低效的，应用程序和widget应该被构造仅在帧开始的事件处理程序期间标记widget脏，而不是在构建本身期间
+
+'   1 框架通过调用[Widget.createElement]来创建一个元素小部件将用作元素的初始配置
+'   2 框架调用[mount]将新创建的元素添加到在给定父级的给定位置的树中，[mount]方法负责给任何子窗口小部件解析并调用[attachRenderObject]
+'     来将任何关联的渲染对象附加到渲染树
+'   3 此时，该元素被视为“活动”并可能出现在屏幕
+'   4 在某些时候，父母可能决定更改用于配置此element的widget,例如因为父项使用重建新状态。发生这种情况时，框架将使用new调用widget的[update]
+'     新窗口小部件将始终具有相同的[runtimeType]和key与旧小部件。如果父级希望更改树中此位置的小部件的[runtimeType]或key，可以通过卸载
+'     元素并在此位置解析新小部件来做到这一点
+'   5 在某些时候，祖先可能会决定删除树中这个元素（或者中间祖先），祖先通过调用本身的[deactivateChild]做到。停用中间祖先会从渲染树中
+'     删除该元素的渲染对象并添加这个元素到[owner]的非活动元素列表，导致框架在此元素上调用[deactivate]
+'   6 此时，该元素被视为“无效”，不会出现在屏幕上。元素只能保持在非活动状态，直到当前动画帧的结尾。在动画结束时frame，将卸载任何仍处于非活动状态的元素
+'   7 如果元素被重新并入树中（例如，因为它或一个其祖先有一个重用的global key）.框架将从[owner]的非活动元素列表中删除元素，调用元素[activate]，
+'     并重新附加元素的渲染对象到渲染树。（此时，该元素再次被视为“active”并可能出现在屏幕上。）
+'   8 如果元素在当前动画帧结束时没有重新纳入树中，框架将调用元素的[unmount]
+'   9 此时，元素被认为是“defunct”而不会在将来并入树中  defunct--死人，非现存的，停业
+'  Element的生命周期
+'}
+
+abstract class ComponentElement{
+  Element _child
+  void _firstBuild()
+  Widget build()
+}
+'note right of ComponentElement
+' 定义：构成其他[Element]的[Element]
+' [ComponentElement]通过创建其他[Element]来间接创建[RenderObject]而不是直接创建RenderObject
+'
+'end note
+
+class StatelessElement{
+   Widget build()
+   void update(StatelessWidget newWidget)
+}
+
+'note right of StatelessElement{
+'  定义：使用[StatelessWidget]作为其配置的[Element]
+'}
+
+class StatefulElement{
+   Widget build()
+   void update(StatefulWidget newWidget)
+}
+
+'note left of StatefulElement{
+' 定义：使用[StatefulWidget]作为其配置的[Element]
+'}
+
+abstract class AbstractNode{
+   int _depth
+   Object _owner
+   AbstractNode get parent
+   void redepthChild(AbstractNode child)
+   void attach(covariant Object owner)
+   void detach()
+   void adoptChild(covariant AbstractNode child)
+   void dropChild(covariant AbstractNode child)
+}
+'note right of AbstractNode{
+'  定义：在树的一个抽象节点
+'  AbstractNode具有深度，附件和父级的概念，但没有有一个child模型
+'  节点的[深度]总是比他们的祖先更大
+'  没保证兄弟姐妹之间的深度
+'  节点的深度用于确保按深度顺序处理节点
+'  孩子的[深度]可以比父亲的[深度]大一个以上，因为[深度]值永远不会减少：重要的是它大于父母
+'  比如树的根节点是A，子节点B，孙子节点C，这时A的深度为0，B的深度为1，C的深度为2，
+'     如果将C移动到A的子节点，C和B成为兄弟节点，这时深度不会发生变化
+'     [深度]由[adoptChild]和[dropChild]方法自动维护
+'  _depth 节点在树中的深度，当你遍历树时，树中节点的深度单调增加
+'  _owner 此节点的所有者（如果未attached，则为null,此节点所属的整个子树将具有相同的所有者
+'
+' redepthChild将给定[child]的[depth]调整为大于自己节点的[depth]
+' attach 将此节点标记为attached到给定所有者,通常只从[parent]的[attach]方法调用，并由[owner]标记为附加树的根
+' detach 将此节点标记为detached,通常只从[parent]的[detach]调用，并由[owner]调用并将树的根标记为已分离
+' adoptChild 将给定节点标记为此节点的子节点，子类在获取新child时应调用此函数
+' dropChild  断开给定节点与此节点的连接，子类应该在失去孩子时调用此函数
+'}
+
+abstract class RenderObject{
+  ParentData parentData
+  bool get isRepaintBoundary
+  bool get sizedByParent
+  PipelineOwner get owner
+  void reassemble()
+  void setupParentData(covariant RenderObject child)
+  void markNeedsLayout()
+  void layout(Constraints constraints, { bool parentUsesSize = false })
+  void performResize()
+  void performLayout()
+  void paint(PaintingContext context, Offset offset)
+}
+'
+'note right of RenderObject{
+' 定义： 渲染树中的对象
+' [RenderObject]类层次结构是渲染库的核心的存在理由
+'  [RenderObject]有一个[parent]，并且有一个名为[parentData]的插槽。父[RenderObject]可以存储子特定数据，例如，孩子的位置
+'  [RenderObject]类也实现了布局和绘制协议
+'   RenderObject没有定义子类的模型(比如一个node是否拥有0，1多个child)，
+'      它也没有定义坐标系（例如，孩子是否位于笛卡尔坐标系中坐标，极坐标等)或者特定的布局协议(如layout是width输入，height输出
+'      还是constraint输入size输出，或者父设置子的大小和位置在child lays out之前还是之后，或者
+'      确定是否允许孩子访问他们父母的[parentData]插槽)
+'  [RenderBox]子类引入了布局系统使用笛卡尔坐标的意见
+'  layout方法需要传入两个参数，第一个为constraints，即 父节点对子节点大小的限制，该值根据父节点的布局逻辑确定。另外一个参数是 parentUsesSize，
+'     该值用于确定 relayoutBoundary，该参数表示子节点布局变化是否影响父节点，如果为true，当子节点布局发生变化时父节点都会标记为需要重新布局，
+'     如果为false，则子节点布局发生变化后不会影响父节点
+'
+'   PipelineOwner 重写AbstractNode的Owner
+'
+'  确定重新布局的边界
+'  _relayoutBoundary 在layout方法中根据parentUsesSize设置，false _relayoutBoundary是自己，true _relayoutBoundary是父节点的
+'  _relayoutBoundary，在markNeedsLayout中如果_relayoutBoundary不等于自己则调用markParentNeedsLayout，否则调用owner的Layout更新自己
+'
+'  isRepaintBoundary  是否为他的child创建一个分离的渲染列表，默认为false
+'      在子类中重写此项以指示您的类的实例应该独立重绘。例如，重新渲染的渲染对象可能想要重绘自己，而不需要他们的父重绘
+'      如果此getter返回true，则[paintBounds]将应用于此对象和所有后代
+'    sizedByParent意为该节点的大小是否仅通过 parent 传给它的 constraints 就可以确定了，即该节点的大小与它自身的属性和其子节点无关
+'        比如如果一个控件永远充满 parent 的大小，那么 sizedByParent就应该返回true，此时其大小在 performResize() 中就确定了，
+'        在后面的 performLayout() 方法中将不会再被修改了，这种情况下 performLayout() 只负责布局子节点。
+'    performResize 仅使用constraints更新渲染对象大小 在layout方法中，sizedByParent为true时调用。不要调用该函数使用layout替代
+'       将[sizesByParent]设置为true的子类应覆盖此方法以计算其大小
+'
+'    performLayout每次都被layout方法调用，在 performLayout() 方法中除了完成自身布局，也必须完成子节点的布局，
+'       这是因为只有父子节点全部完成后布局流程才算真正完成。所以最终的调用栈将会变成：layout() > performResize()/performLayout() > child.layout() > ... ，如此递归完成整个UI的布局。
+'
+'    paint方法 绘制child时当前canvas持有的context可能发生变化因为绘制操作前后要绘制的child可能需要记录在单独的合成图层上
+'       非必须三条
+'       1 边界内绘制 类似RenderFlex 根_overflow<0进行绘制,调用defaultPaint
+'       2 剪裁超出部分 context.pushClipRect
+'       3 paintOverflowIndicator 绘制错误部分提示
+'
+'    语义化即Semantics，主要是提供给读屏软件的接口，也是实现辅助功能的基础，通过语义化接口可以让机器理解页面上的内容，对于有视力障碍用户可以使用读屏软件来理解UI内容
+'     如果一个RenderObject要支持语义化接口，可以实现 describeApproximatePaintClip和 visitChildrenForSemantics方法和semanticsAnnotator getter
+'      可以使用的widget有Semantics(一个widget，用以描述widget树的具体语义)，MergeSemantic(合并其后代语义的widget)，ExcludeSemantics(删除后代所有语义的widget)
+'
+'  编写RenderObject子类
+'  在大多数情况下，子类继承[RenderObject]本身是过度的，并且[RenderBox]将是一个更好的起点，如果一个不想使用
+'     笛卡尔坐标可以直接继承RenderObject。编写[RenderBox]的大多数方面都适用于将[RenderObject]编写，因此关于RenderBox的讨论
+'     是推荐背景阅读。主要区别在于布局和命中测试，因为那些是[RenderBox]主要专注的方面
+'  1 layout 布局协议以[Constraints]的子类开头，更改布局协议查看Constraints怎么协Constraints的子类
+'      performLayout方法应该采用[constraints]并应用它们。布局算法的输出是在描述用于父级布局几何对象的对象上设置的字段
+'      任何时候渲染对象上的任何更改都会影响布局那个对象，它应该调用[markNeedsLayout]
+'  2 Hit Testing
+'    命中测试比布局更开放。没有方法可以覆盖，你应该提供一个
+'  3 适应从一种协议到另一种协议  通常，Flutter渲染对象树的根是[RenderView]。这个对象有一个子节点，它必须是[RenderBox]
+'     因此，如果你想在渲染树中有一个自定义的[RenderObject]子类，你有两个选择：您需要替换[RenderView]本身，或者您需要
+'     有一个[RenderBox]，它将您的类作为其子类。 （后者很多更常见的情况。）
+'    这个[RenderBox]子类从box协议转换为你的类的协议
+'    特别是，这意味着对于命中测试它会覆盖[RenderBox.hitTest]，并为命中测试调用类中的任何方法
+'    同样，它会覆盖[performLayout]来创建适合您的class[Constraints]对象并将其传递给孩子的[布局]方法
+'  4 渲染对象之间的布局交互
+'    通常，渲染对象的布局应该仅取决于它的孩子的布局输出，`parentUsesSize`只有在[layout]调用中设置为true
+'    此外，如果设置为true，如果孩子要被渲染则父级必须调用孩子的[layout]，否则当子项更改其布局输出时，不会通知父/父
+'
+'
+'}
+
+abstract class RenderBox{
+   bool hitTest(HitTestResult result, { @required Offset position })
+}
+'note right of RenderBox{
+'
+'   定义：2D笛卡尔坐标系中的渲染对象
+'
+'   通过将[BoxConstraints]对象传递到树中来执行框布局。框约束为子宽度和高度建立最小值和最大值。在确定其大小时，孩子必须尊重由其父级给予它的约束
+'
+'   该协议足以表达许多常见的盒子布局数据流。例如，要实现width-in-height-out数据流，请调用你孩子的[layout]功能，带有一组严格的
+'   框约束宽度值（并为parentUsesSize传递true）。孩子决定之后它的高度，使用孩子的身高来确定你的size
+'
+'   编写RenderBox子类
+'   人们可以实现一个新的[RenderBox]子类来描述一个新的布局模型，新的绘制模型，新的命中测试模型或新的语义模型，同时保留在[RenderBox]协议定义的笛卡尔空间中
+'   要创建新协议，请考虑改为子类化[RenderObject]
+'   1 新RenderBox子类的构造函数和属性
+'     构造函数通常会为类每个属性获取一个命名参数。然后将该值传递给类的私有字段和构造函数断言其正确性（例如，如果它不应为null，则为断言它不是null
+'     属性具有getter / setter / field组的形式，如下所示 见注释例子
+'     如果布局使用此属性，设置器通常会在调用[markNeedsLayout]时完成，或如果只有画家功能呢，调用[markNeedsPaint]。（无需同时调用两者，
+'     [markNeedsLayout]暗示[markNeedsPaint]。）
+'     考虑布局和paint是昂贵的;对于调用[markNeedsLayout]或[markNeedsPaint]要保守。它们只应该在布局（或分别是paint）实际上已经改变时被调用
+'   2 Children
+'     如果渲染对象是叶子，也就是说，它不能有任何子对象，忽略此部分。 （叶子渲染对象的示例是[RenderImage]和[RenderParagraph]）
+'     对于具有子项的渲染对象，有四种可能的场景
+'         单个[RenderBox]子项。在这种情况下，请考虑继承自[RenderProxyBox]（如果渲染对象调整自身以匹配子项）或[RenderShiftedBox]
+'         （如果孩子小于盒子和盒子将孩子本身对齐）
+'         单个孩子，但它不是[RenderBox]。使用[RenderObjectWithChildMixin] mixin
+'         多个child。使用[ContainerRenderObjectMixin] mixin
+'         一个更复杂的child模型
+'   3  使用RenderProxyBox
+'      默认情况下，[RenderProxyBox]渲染对象调整自身大小适合其子级，或如果没有孩子，尽可能小;它通过所有命中测试并绘制给孩子，
+'      内在维度和基线测量类似地代表孩子
+'      [RenderProxyBox]的子类只需要覆盖[RenderBox]协议的重要部分，例如，[RenderOpacity]就是覆盖paint方法（和[alwaysNeedsCompositing]
+'      来反映出 paint方法做了什么）和[visitChildrenForSemantics] 方法，所以这样当隐藏时，子对辅助功能工具隐藏了，并添加了一个
+'      [RenderOpacity.opacity]字段
+'      [RenderProxyBox]假定子节点是父节点的大小并且位于0,0。如果不是这样，那么请改用[RenderShiftedBox]
+'   4  Using RenderShiftedBox
+'      默认情况下，[RenderShiftedBox]的行为很像[RenderProxyBox]但是不假设孩子位于0,0（实际位置记录在孩子的[parentData]字段中）
+'      并且没有提供默认布局算法
+'   5  使用 RenderObjectWithChildMixin
+'      如果渲染对象有一个子节点但它不是[RenderBox]，那么[RenderObjectWithChildMixin]类，这是一个将处理的mixin管理孩子的样板，将是有用的
+'      它是一个带有一个类型参数的泛型类，即子类型。例如，如果你要构建一个`RenderFoo`类带有单一的`RenderBar`child，你可以使用mixin如下
+'      见注释例子
+'      既然`RenderFoo`类本身在这种情况下仍然是[RenderBox]，那么你仍然必须实现[RenderBox]布局算法，以及内在函数和基线，绘画和命中测试等功能
+'   6  使用 ContainerRenderObjectMixin
+'       如果一个渲染框可以有多个子节点，那么[ContainerRenderObjectMixin] mixin可用于处理样板。它使用链接列表以易于变异的方式为子项动态地建模
+'       ，可以有效地运行。在这个模型中随机访问不是有效率;如果你需要随机访问孩子考虑下一节关于更复杂的子模型
+'       [ContainerRenderObjectMixin]类有两个类型参数。首先是子对象的类型，第二个是他们的类型[parentData]。用于[parentData]的类本身必须具有
+'       [ContainerParentDataMixin]类混入其中;这是[ContainerRenderObjectMixin]存储链表的位置。一个[ParentData]类可以继承[ContainerBoxParentData];
+'       这本质上是 [BoxParentData]与[ContainerParentDataMixin]混合
+'       在[RenderBox]中使用[ContainerRenderObjectMixin]时，请考虑混入[RenderBoxContainerDefaultsMixin]，它提供了一组实用程序
+'       实现[RenderBox]协议公共部分的方法（例如画child）
+'       当孩子走路时（例如在布局期间），以下模式是常用（在这种情况下假设孩子都是[RenderBox]对象以及此渲染对象使用`FooParentData`是
+'         children的[parentData]字段
+'         RenderBox child = firstChild;
+'         /// while (child != null) {
+'         ///   final FooParentData childParentData = child.parentData;
+'         ///   // ...operate on child and childParentData...
+'         ///   assert(child.parentData == childParentData);
+'         ///   child = childParentData.nextSibling;
+'         /// }
+'
+'   7 更复杂的儿童模型
+'     渲染对象可以有更复杂的模型，例如a map of child键入枚举，或有效随机访问的2D网格child，或多个child 列表等,如果渲染对象具有
+'      上面的mixins无法处理的模型，它必须实现[RenderObject]子协议，如下
+'      删除孩子的任何时候，调用孩子的dropChild]
+'      每次添加孩子时，调用孩子的[adopChild]
+'      实现[attach]方法，使其在每个子节点上调用[attach]
+'      实现[detach]方法，使其在每个子节点上调用[detach]
+'      实现[redepthChildren]方法，使其在每个子节点上调用[redepthChild]
+'      实现[visitChildren]方法，使其调用每个孩子的参数，通常按照paint顺序（从最前面到最前面）
+'      实现[debugDescribeChildren]，使其为每个孩子输出[DiagnosticsNode]
+'     实现这七个要点基本上就是前面提到的两者mixins做的
+'   8  各种child和特定child数据
+'      孩子可以拥有父母拥有的其他数据，但存储在child使用的[parentData]字段用于该数据的类必须从[ParentData]继承。 [setupParentData]方法
+'        用于在附加子项时初始化子项的[parentData]字段
+'      按照惯例，[RenderBox]子对象的[RenderBox]对象使用[BoxParentData]类，它有一个[BoxParentData.offset]字段来存储孩子相对于父母的位置
+'      [RenderProxyBox]没有需要此偏移量，因此是此规则的一个例外
+'   9  layout
+'      [RenderBox]类实现布局算法。他们有为他们提供了一套约束，他们根据这些约束自己大小和他们可能拥有的任何其他输入（例如，他们的
+'      child或属性）
+'      实现[RenderBox]子类时，必须做出选择。可以仅根据约束大小本身，或者它是否使用任何其他约束调整大小的信息？纯粹基于的尺寸的一个例子
+'      是约束会增长以适应父母
+'      纯粹基于约束的大小允许系统做出一些重要的优化。使用此方法的类应该覆盖[sizesByParent]返回true，然后覆盖[performResize]来设置
+'      [size]只使用约束，例如
+'      @override
+'      /// bool get sizedByParent => true;
+'      ///
+'      /// @override
+'      /// void performResize() {
+'      ///   size = constraints.smallest;
+'      /// }
+'      否则，在[performLayout]函数中设置大小
+'      [performLayout]函数是渲染框位置的决定，如果不是[sizesByParent]，它们应该是什么[大小]，以及它们决定他们的孩子应该在哪里
+'   10 RenderBox子项的layout
+'      [performLayout]函数应该调用每个child（box）的[layout]函数，传递一个描述约束的孩子可以在其中呈现[BoxConstraints]对象
+'      通过严格的约束（见[BoxConstraints.isTight]）给孩子将允许渲染库应用一些优化，因为它知道如果约束条件很紧，那么即使孩子本身的布局变化，
+'      孩子的尺寸也不会改变
+'      如果[performLayout]函数将使用子的大小来影响其他布局的各个方面，例如，如果渲染框在child周围调整大小，或根据孩子的大小定位几个孩子，
+'      然后它必须为子项的[layout]指定`parentUsesSize`参数功能，将其设置为true
+'      这个标志关闭了一些优化;不依赖于child的尺寸的算法会更有效率
+'      特别是依赖child's [size]表示如果孩子被标记为脏布局，那么parent也可能被标记为脏布局，除非父母给孩子的[约束]是严格的约束
+'      对于不会从[RenderProxyBox]继承的[RenderBox]类，布置了他们的孩子，也应该通过设置每个子节点的[parentData]对象的[BoxParentData.offset]字段
+'        来定位他们
+'   11 非RenderBox子项的layout
+'      [RenderBox]的子元素不一定是[RenderBox]，如果他们使用另一种协议（如[RenderObject]所述），父级将传入子类相应的[Constraints]，
+'      ，而不是[BoxConstraints]，父母会读用于该布局协议的[布局]的输出，而不是阅读孩子的大小。parentUsesSize起相同作用
+'
+'   12 Painting
+'      该canvas对象不应该通过对[PaintingContext]方法的调用进行缓存。每次调用[PaintingContext]上的方法时，画布都会有一个改变身份的机会
+'      偏移量offset指定了[PaintingContext.canvas]框的左上角位置的坐标系
+'      画字使用TextPainter
+'      画image,使用paintImage方法
+'      一个使用[PaintingContext]并介绍新layers的[RenderBox]应覆盖[alwaysNeedsCompositing] getter并将其设置为true，
+'      如果对象有时覆盖有时不覆盖该方法，在那种情况下，无论何时返回值会改变，调用[markNeedsCompositingBitsUpdate]
+'      如果[alwaysNeedsCompositing] getter仅基于孩子的存在与否更改值，这个在添加或删除子项时自动完成，因此您不必显式调用它
+'      任何时候对象的任何变化都会导致[paint]方法绘制不同的东西（但不会导致布局改变），对象应该调用[markNeedsPaint]
+'   13 Painting children
+'      调用PaintingContext.paintChild来绘制child
+'      如果[paint]方法在paint child 之前将变换应用于绘制上下文（通常应用额外的偏移量），那么[applyPaintTransform]方法也应该被覆盖
+'      该方法必须调整它的矩阵以与转换绘画上下文和绘制给定孩子之前的偏移量相同的方式给出。这由[globalToLocal]和[localToGlobal]方法使用
+'   14 Hit Tests
+'      覆盖hitTest或hitTestSelf和hitTestChildren
+'      [hitTest]方法本身被赋予[Offset]，如果是，则必须返回true，对象或其中一个孩子已经吸收了命中（防止下面的物体来自被击中的这个），
+'      如果命中可以继续到低于这个其他对象，则为false
+'      对于每个子节点[RenderBox]，子节点上的[hitTest]方法应该是使用相同的[HitTestResult]参数调用并转换点进入孩子的坐标空间（以同样的方式
+'      [applyPaintTransform]方法会）
+'      [RenderBoxContainerDefaultsMixin]提供[RenderBoxContainerDefaultsMixin.defaultHitTestChildren]方法这样做假设孩子是轴对齐的，
+'      没有变换，并根据[BoxParentData.offset]字段定位[parentData];更精心制作的盒子可以覆盖[hitTestChildren]
+'      如果对象被击中，那么它也应该将自己添加到[HitTestResult]作为[hitTest]方法的参数给出的对象，使用[HitTestResult.add]。默认实现
+'      遵循[hitTestSelf]确定框是否被击中。
+'
+'      命中测试不能依赖于已经发生的绘画
+'   15 Semantics
+'      对于一个render box可以实现describeApproximatePaintClip，visitChildrenForSemantics，semanticsAnnotator getter
+'      默认实现对于表示仅影响布局的对象就足够了，但表示交互的节点组件或信息（图表，文本，图像等）应该提供更多完整实现
+'
+'   16 内在和基线 Intrinsics and Baselines
+'      [RenderBox]对象必须实现两个附加协议：内在尺寸和基线测量
+'      有四种方法可以实现内在大小，计算框的最小和最大固有宽度和高度。文档这些方法详细讨论了协议：
+'       [computeMinIntrinsicWidth]，[computeMaxIntrinsicWidth]，[computeMinIntrinsicHeight]，[computeMaxIntrinsicHeight]
+'      此外，如果盒子有任何孩子，它必须实施[computeDistanceToActualBaseline]。 [RenderProxyBox]提供了一个简单的转发给孩子的实施;
+'      [RenderShiftedBox]提供了一个通过位置抵消相对于父母的孩子基线信息的实现
+'      。如果你没有继承任何一个这些类，您必须自己实现算法
+'
+'  hitTest命中测试  一个对象是否可以响应事件，取决于其对命中测试的返回，当发生用户事件时，会从根节点（RenderView）开始进行命中测试
+'    hitTest 方法用来判断该 RenderObject 是否在被点击的范围内，同时负责将被点击的 RenderBox 添加到 HitTestResult 列表中，
+'    参数 position 为事件触发的坐标（如果有的话），返回 true 则表示有 RenderBox 通过了命中测试，需要响应事件，反之则认为当前RenderBox没有命中
+'    在继承RenderBox时，可以直接重写hitTest()方法，也可以重写 hitTestSelf() 或 hitTestChildren(),
+'    唯一不同的是 hitTest()中需要将通过命中测试的节点信息添加到命中测试结果列表中，而 hitTestSelf() 和 hitTestChildren()则只需要简单的返回true或false。
+'}
+
+
+class BuildOwner {
+
+   void scheduleBuildFor()
+   void lockState(void callback())
+   void buildScope(Element context, [ VoidCallback callback ])
+   void finalizeTree()
+   void reassemble(Element root)
+}
+
+'note bottom of BuildOwner{
+'   widgets框架的Manager类
+'   该类跟踪哪些widget需要重建，并处理其他任务适用于整个widget树，例如管理非活动元素列表树，并在必要时触发“reassemble”命令在调试或热重载期间
+'   主BuildOwner通常g归[WidgetsBinding]拥有，而且是从操作系统驱动，以及其余部分build/layout/paint pipeline
+'   另外BuildOwner可以管理屏幕外widget树
+'   要将构建所有者分配给树，请使用[RootRenderObjectElement.assignOwner]方法在根元素widget树上
+'   scheduleBuildFor  将一个元素添加到dirty元素列表中，以便在[WidgetsBinding.drawFrame]调用[buildScope]时重建它
+'   lockState  建立一个禁止调用[State.setState]的范围，调用callback函数，机制用来保证State.dispose不会调用State.setState
+'   buildScope 建立更新widget树的范围，并调用给定的`callback`，然后，如果有的话,按照深度顺序使用[scheduleBuildFor]构建标记为dirty的所有元素
+'     此机制可防止构建方法传递性地要求运行其他构建方法，从而可能导致无限循环
+'     要在不执行任何其他工作的情况下刷新当前脏列表，可以调用此函数而不进行回调。这是框架在[WidgetsBinding.drawFrame]中每个frame执行的操作
+'     一次只能激活一个[buildScope]
+'     [buildScope]也意味着[lockState]范围
+'     要在每次调用此方法时打印控制台消息，请将[debugPrintBuildScope]设置为true。这在调试小部件没有被标记为脏，或者经常被标记为脏的问题时非常有用
+'   finalizeTree  通过卸载任何不在active状态的元素来完成构建过程，被WidgetsBinding.drawFrame调用
+'   reassemble在应用程序代码更改或者热重新加载时使用
+'}
+
+class PipelineOwner {
+  void flushLayout()
+  void flushCompositingBits()
+  void flushPaint()
+  void flushSemantics()
+}
+
+'note right of PipelineOwner{
+'  PipelineOwner管理渲染管道
+'  PipelineOwner提供用于驱动渲染管道的接口并存储渲染对象请求访问在管道的每个阶段的状态。要刷新管道，请按顺序运行以下命令
+'
+'  1 flushLayout  更新需要计算布局的任何渲染对象，在此阶段，每个渲染对象的大小和位置被计算
+'        渲染对象在此阶段可能会dirty他们的painting或合成状态
+'  2 flushCompositingBits  更新任何合成位脏的渲染对象,在此阶段，每个渲染对象都会学习是否child需要合成
+'     此信息在选择如何实现视觉效果如clip的绘画阶段使用。如果渲染对象具有合成子对象，它需要使用一个[Layer]创建clip以便clip应用于composited child（将被绘制成自己的[Layer]）
+'  3 flushPaint 访问需要绘制的任何渲染对象。在这阶段，渲染对象有机会记录绘画命令进入[PictureLayer]并构建其他合成的[Layer]
+'  4 flushSemantics  如果启用了semantics，此方法将编译渲染对象的语义，这个语义信息被使用辅助技术，以改善渲染树的可访问性
+'
+'  [RendererBinding]保存在屏幕上可见的渲染对象的PipelineOwner。您可以创建其他PipelineOwner管理屏幕外对象，它们可以flush pipeline
+'     独立于屏幕内的render object
+'}
+
+abstract class RenderObjectWidgets{
+  RenderObjectElement createElement()
+  RenderObject createRenderObject(BuildContext context)
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject)
+  void didUnmountRenderObject(covariant RenderObject renderObject)
+}
+'note right of RenderObjectWidgets{
+'   RenderObjectWidgets提供[RenderObjectElement]的配置，包装[RenderObject]，它提供了实际的渲染应用程序
+'   void updateRenderObject(BuildContext context, covariant RenderObject renderObject)
+'   void didUnmountRenderObject(covariant RenderObject renderObject)
+'}
+
+abstract class LeafRenderObjectWidget{
+    LeafRenderObjectElement createElement()
+}
+'note left of LeafRenderObjectWidget {
+'   定义：用于配置RenderObject子类的RenderObjectWidgets的没有孩子的超类
+'   重写createElement方法返回 LeafRenderObjectElement
+'   Widget树的叶子节点，用于没有子节点的widget，通常基础widget都属于这一类，如RichText、Image
+'}
+
+abstract class SingleChildRenderObjectWidget{
+  final Widget child
+  SingleChildRenderObjectElement createElement()
+}
+
+'note right of SingleChildRenderObjectWidget{
+'  用于配置RenderObject子类的RenderObjectWidgets的有一个子槽的超类
+'   包含一个子Widget，如：ConstrainedBox、DecoratedBox等
+'   对于那个孩子，这个超类只提供存储空间，它实际上并没有提供更新逻辑
+'}
+
+abstract class MultiChildRenderObjectWidget{
+   final List<Widget> children
+   MultiChildRenderObjectElement createElement()
+}
+
+'note right of MultiChildRenderObjectWidget{
+'  用于配置RenderObject子类的RenderObjectWidgets的只有一个孩子列表的超类
+'  这个超类只提供了该子列表的存储，它实际上不提供更新逻辑
+'   对于child列表，如果要对此列表进行变异，通常明智的做法是将[Key]放在小部件上，以便框架可以将旧配置与新的配置匹配并维护底层的渲染对象
+'}
+
+abstract class ProxyWidget{
+   final Widget child
+}
+
+'note right of ProxyWidget{
+'  提供了子widget的widget，而不是构建新widget
+'  可用作其他小部件的基类，例如[InheritedWidget]和
+'  [ParentDataWidget]
+'}
+abstract class ParentDataWidget{
+  ParentDataElement<T> createElement()
+  void applyParentData(RenderObject renderObject)
+}
+
+'note right of ParentDataWidget{
+'  将[ParentData]信息挂钩到 [RenderObjectWidget]s的子节点的小部件的基类
+'  这可用于为有多个孩子的[RenderObjectWidget]的每个子提供配置，例如，[Stack]使用[Positioned]这个ParentDataWidget来定位每个孩子
+'  [ParentDataWidget]特定于[RenderObject]的特定类型，因此也是一个特定的[RenderObjectWidget]类，那个类是`T`，是[ParentDataWidget]类型参数
+'}
+
+abstract class InheritedWidget{
+   InheritedElement createElement()
+   bool updateShouldNotify(covariant InheritedWidget oldWidget)
+}
+
+'note right of InheritedElement{
+'  小部件的基类，可以有效地在树中传播信息
+'  从构建上下文中获取特定类型的InheritedWidget的最近实例，使用[BuildContext.inheritFromWidgetOfExactType]
+'  以这种方式引用时，InheritedWidget将导致使用者在InheritedWidget本身更改状态时重建
+'  有时，继承的小部件是另一个类的实现细节，因此是私有的.在这种情况下，`of`方法通常是改为加入公共类
+'  例如，[主题]实现为[StatelessWidget]构建私有继承的小部件; [Theme.of]看起来使用[BuildContext.inheritFromWidgetOfExactType]继承的小部件
+'  然后返回[ThemeData]
+'}
+Widget <|-- StatelessWidget
+Widget <|-- StatefulWidget
+Widget <|-- RenderObjectWidgets
+Widget <|-- ProxyWidget
+Widget <..  Element
+StatelessWidget <.. BuildContext
+StatelessWidget <.. StatelessElement
+StatefulWidget  <.. State
+StatefulWidget  <.. StatefulElement
+State           <.. BuildContext
+State           <-- Widget
+BuildContext    <|.. Element
+BuildContext    <.. RenderObject
+Element         <-- RenderObject
+Element         <|-- ComponentElement
+Element         <-- BuildOwner
+ComponentElement  <|-- StatelessElement
+ComponentElement  <|-- StatefulElement
+AbstractNode      <|-- RenderObject
+RenderObject      <|-- RenderBox
+RenderObject      <--  PipelineOwner
+
+RenderObjectWidgets <|-- LeafRenderObjectWidget
+RenderObjectWidgets <|-- SingleChildRenderObjectWidget
+RenderObjectWidgets <|-- MultiChildRenderObjectWidget
+ProxyWidget         <|-- ParentDataWidget
+ProxyWidget         <|-- InheritedWidget
+
+
+@enduml

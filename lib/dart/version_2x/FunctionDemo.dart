@@ -186,3 +186,30 @@ say(String from, String msg, [String device]) {
     print(" device " + device);
   }
 }
+
+//协变参数covariant   子类可以用更严格的所需类型覆盖此参数    Dart强模式不允许非静态安全的，去掉covariant报错
+class Widget {
+  void addChild(covariant Widget widget) {}
+}
+
+class RadioButton extends Widget {
+  void select() {}
+}
+
+class RadioGroup extends Widget {
+  void addChild(RadioButton button) {}
+}
+
+//协变修饰符也可用于可变字段。这样做对应于将隐式生成的该字段的setter中的参数
+class Widget1 {
+  covariant Widget child;
+}
+
+//这是语法糖
+class Widget2 {
+  Widget _child;
+  Widget get child => _child;
+  set child(covariant Widget value) {
+    _child = value;
+  }
+}

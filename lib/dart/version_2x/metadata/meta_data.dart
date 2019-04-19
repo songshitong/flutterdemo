@@ -10,10 +10,16 @@ class Todo {
   const Todo(this.who, this.what);
 }
 
+@Todo("TestTodo", "this is TestTodo")
 @deprecated
 class TestTodo {
-  @Todo("pritTest", "this is printTest")
+  @Todo("TestTodo", "this is printTest")
   void printTest() {
     print("this is printTest");
   }
+}
+
+@Todo("顶层函数", "this is 顶层函数 printTest")
+void printTopTest() {
+  print("this is printTest");
 }
