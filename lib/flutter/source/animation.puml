@@ -1,0 +1,290 @@
+@startuml
+
+abstract class Listenable{
+   void addListener(VoidCallback listener)
+   void removeListener(VoidCallback listener)
+}
+'note left of Listenable{
+'  定义：维护一个listener列表的对象
+'  侦听器通常用于通知客户端该对象已经更新
+'  该接口有两种变体：
+'    ValueListenable：一个带有_current value_的增强Listenable接口
+'    Animation：增加添加方向概念（正向或反向）的增强[ValueListenable]接口
+'  以下子类与这些接口有关
+'      ChangeNotifier
+'      ValueNotifier
+'}
+
+abstract class Animation<T>{
+   void addStatusListener(AnimationStatusListener listener)
+   void removeStatusListener(AnimationStatusListener listener)
+   Animation<U> drive<U>(Animatable<U> child)
+}
+
+'note right of Animation{
+'  值为“T”的动画
+'  动画由一个值（类型为“T`”）和一个状态组成.该status表示动画是否在概念上从开始到结束或从结束回到开头运行,虽然实际动画的值可能不会单调变化
+'     （例如，如果动画使用反弹曲线)
+'  动画还允许其他对象监听其或他们的状态或值的变化,这些回调在“动画”pipeline阶段被调用，就在重建小部件之前
+'  要创建可以向前和向后运行的新动画，请考虑使用[AnimationController]
+'  add/removeStatusListener  添加或移除void Function(AnimationStatus status)的监听
+'  drive  将[Tween]（或[CurveTween]）链接到此[动画]，调用Animatable的animate方法
+'     此方法仅对`Animation <double>`实例有效（即当'T`为`double`时），这意味着，例如，可以在[AnimationController]对象上调用它，
+'       以及[CurvedAnimation] s，[ProxyAnimation] s，[ReverseAnimation] s，[TrainHoppingAnimation] s
+'     和Animatable.animate一样的效果
+'}
+
+abstract class Animatable<T> {
+  T transform(double t)
+  T evaluate(Animation<double> animation)
+  Animation<T> animate(Animation<double> parent)
+  Animatable<T> chain(Animatable<double> parent)
+}
+'note right of Animatable{
+'  定义： 给定[Animation <double>]作为输入可以生成类型为“T”的值的对象
+'  通常，输入动画的值名义上在0.0到1.0范围内。但是，原则上可以提供任何价值
+'  [Animatable]的主要子类是[Tween]
+'  transform 返回“t”点处对象的值,`t`的值名义上是0.0到1.0范围内的一个分数，但实际上它可能超出这个范围
+'  evaluate 给定[Animation]的此对象的当前值,该函数通过推迟到[transform]来实现。想要提供自定义行为的子类应覆盖[transform]，而不是[evaluate]
+'  animate 返回由给定动画驱动的新[Animation]，但接受由此对象确定的值.本质上，这会返回一个[Animation]，它会自动将[evaluate]方法应用于父级的值
+'  chain 返回一个新的[Animatable]，其值通过首先评估给定父级然后评估此对象来确定
+'     这允许在获取[Animation]之前链接[Tween]s
+'}
+
+class AnimationController {
+  Simulation _simulation
+  Ticker _ticker = TickerProvider.createTicker
+  TickerFuture forward({ double from })
+  TickerFuture reverse({ double from })
+  TickerFuture fling({ double velocity = 1.0, AnimationBehavior animationBehavior })
+}
+'note right of AnimationController{
+'  定义：动画控制器
+'  此类允许您执行诸如此类的任务：
+'    1播放动画[forward]或[reverse]或[stop]动画
+'    2将动画设置为特定的[value]
+'    3定义动画的[upperBound]和[lowerBound]值
+'    4使用物理模拟创建[fling]动画效果
+'  默认情况下，[AnimationController]在给定的持续时间内线性生成从0.0到1.0范围值,动画控制器在运行应用程序的设备准备好显示新的frame时生成新的值，
+'    （通常，此速率约为每秒60个值）
+'
+'  Ticker providers
+'    widget测试框架[WidgetTester]对象可用作ticker代码提供者在测试环境中
+'    [AnimationController]需要一个[TickerProvider]，它是使用的构造函数配置的的`vsync`参数
+'    [TickerProvider]interface描述了[Ticker]对象的工厂
+'    一个[Ticker]是一个知道如何用[SchedulerBinding]注册自己的对象并每帧触发一次回调
+'  life cycle
+'    AnimationController在state的中initState中初始化，在dispose中销毁
+'
+'  在[AnimationController]中使用[Future]
+'    启动动画的方法返回一个[TickerFuture]对象在动画成功完成时完成，并且永远不会抛出错误，如果动画被取消，future永远不会完成。
+'    这个对象还有一个[TickerFuture.orCancel]属性，它返回一个[Future]在动画成功完成时完成，并以动画中止时出错completeError
+'    监听取消代码：
+'    Future<void> fadeOutAndUpdateState() async {
+'    ///   try {
+'    ///     await fadeAnimationController.forward().orCancel;
+'    ///   } on TickerCanceled {
+'    ///     // the animation got canceled, probably because we were disposed
+'    ///   }
+'
+'    //AnimationBehavior
+'   配置动画禁用时[AnimationController]的行为方式
+'   当[AccessibilityFeatures.disableAnimations]为true时，设备会询问flutter以尽可能减少或禁用动画。为了纪念这一点，
+'      我们减少了动画的持续时间和相应的帧数。这个枚举用于允许某些[AnimationController]选择退出此行为。
+'      例如，例如，控制物理模拟的[AnimationController]对于可滚动列表将具有[AnimationBehavior.preserve]，所以那时候
+'      用户尝试滚动，它不会跳到结尾/开始太快。此时应用了动画
+'   normal   当[AccessibilityFeatures.disableAnimations]为真时，[AnimationController]将减少其持续时间
+'   preserve [AnimationController]将保留其行为。如果widget未考虑[AccessibilityFeatures.disableAnimations]标记，
+'            则这是重复动画的默认设置，以防止它们在屏幕上快速闪烁，没有动画就闪烁了。
+
+'
+'}
+abstract class TickerProvider{
+  Ticker createTicker(TickerCallback onTick)
+  void dispose()
+}
+
+'mixin     plantuml不支持mixin
+class SingleTickerProviderStateMixin{
+  Ticker _ticker
+  Ticker createTicker(TickerCallback onTick)
+}
+'note right of SingleTickerProviderStateMixin{
+'   提供单个[Ticker]，配置为仅在当前时间内树被启用时触发tick，由[TickerMode]定义
+'  createTicker方法  _ticker = Ticker(onTick, debugLabel: 'created by $this')
+'
+'}
+
+'mixin     plantuml不支持mixin
+class TickerProviderStateMixin{
+  Set<Ticker> _tickers
+  Ticker createTicker(TickerCallback onTick)
+}
+
+class Ticker {
+   TickerFuture start()
+   void stop({ bool canceled = false }
+   void scheduleTick({ bool rescheduling = false })
+}
+
+'note right of Ticker{
+'  定义：每个动画帧调用一次回调
+'  创建时，最初会禁用ticker。调用[start]启用ticker
+'  通过将[muted]设置为true可以使[Ticker]静音,虽然沉默，时间仍然过去，仍然可以调用[start]和[stop]，但是没有回调
+'  按照惯例，[start]和[stop]方法由ticker的消费者使用，并且[muted]属性由[TickerProvider]控制,并创建了ticker
+'  ticker由[SchedulerBinding]驱动。看[SchedulerBinding.scheduleFrameCallback]
+'
+'  scheduleTick 安排下一帧的ticker ,只有在[shouldScheduleTick]为真时才应该调用他
+'}
+
+'note right of TickerProviderStateMixin{
+'  定义： 提供多个[Ticker]对象，这些对象配置为仅在当前时间内树被启用时触发tick，由[TickerMode]定义
+'  createTicker方法 创建一个_WidgetTicker(onTick, this, debugLabel: 'created by $this')，并将其添加入_tickers以及作为方法返回
+'}
+
+class Tween<T extends dynamic>{
+  T begin
+  T end
+  T lerp(double t)
+  T transform(double t)
+}
+'note left of Tween{
+'  定义 开始值和结束值之间的线性插值
+'  如果要在范围内插值，[Tween]非常有用
+'  性能优化
+'    Tween是可变的，具体来说，它们的[begin]和[end]值可以在运行时更改。使用[Animation.drive]创建的对象使用[Tween]，将立即兑现对
+'    底层[Tween]的更改（尽管如此）侦听器只有在[动画]正在动画时才会被触发。这可以用来动态地改变动画而不必重新创建从[AnimationController]
+'    到final [Tween]链中的所有对象，
+'    但是，如果永远不会更改[Tween]的值，则可以进一步优化应用：对象可以存储在`static final`变量中，以便只要需要[Tween]，就会使用完全相同的实例
+'    这比在State.build中创建相同的tween更好
+'  有特殊考虑的类型
+'    具有[lerp]静态方法的类通常具有相应的专用[Tween]子类调用该方法。例如，[ColorTween]使用[Color.lerp]实现[ColorTween.lerp]方法
+'    这不会扩展到带有`+`，`-`和`*`运算符的任何类型。在特别是，[int]不满足这个精确的契约（`int * double`实际返回[num]，而不是[int]）
+'    因此有两个特定的类，可用于插值整数
+'      [IntTween]，它是线性插值的近似值（使用[double.round]）
+'      [StepTween]，它使用[double.floor]来确保结果永远不会比使用`Tween <double>`时更大
+'    [Size]上的相关运营商也不履行此合同[SizeTween]使用[Size.lerp]
+'
+'  lerp  返回此变量在给定动画时钟值处具有的值,此方法的默认实现使用`T`上的[+]，[ - ]和[*] 运算符。因此，在调用此方法时，[begin]和[end]属性必须为非null
+'  transform 返回给定动画的当前值的插值  该功能通过推迟到[lerp]来实现。想要提供自定义行为的子类应该覆盖[lerp]，而不是[transform]（也不是[evaluate])
+'}
+
+class ColorTween{
+ Color lerp(double t) => Color.lerp(begin, end, t)
+}
+
+'note right of ColorTween{
+'  定义：两种颜色之间的插值
+'  该类专门用于[Tween <Color>]的插值，实现方式[Color.lerp]
+'}
+
+class RectTween{
+  Rect lerp(double t) => Rect.lerp(begin, end, t)
+}
+'note right of RectTween{
+'  定义：两个矩形之间的插值
+'    该类专门用于[Tween <Rect>]的插值，实现方式[Rect.lerp]
+'}
+
+class CurveTween{
+  Curve curve
+  double transform(double t)
+}
+'note bottom of ColorTween{
+'  定义：通过给定曲线转换给定动画的值
+'}
+class ConstantTween<T>{
+  T lerp(double t) => begin
+}
+'note right of ConstantTween{
+'  定义：具有常量值的补间
+'}
+
+class RelativeRectTween{
+    RelativeRect lerp(double t) => RelativeRect.lerp(begin, end, t)
+}
+'note right of RelativeRectTween{
+'  定义：两个相对rects之间的插值
+'  该类使用[RelativeRect.lerp]专门用于[Tween <RelativeRect>]的插值
+'}
+class CurvedAnimation{
+  final Animation<double> parent
+  Curve curve
+  Curve reverseCurve
+  AnimationStatus _curveDirection
+}
+'note right of CurvedAnimation{
+'  定义：将曲线应用于另一个Animation的Animation
+'  当您想要应用非线性[曲线]时到一个动画对象，[CurvedAnimation]非常有用，特别是当动画正在前进与后退时相比需要不同的曲线时
+'  根据给定的曲线，[CurvedAnimation]的输出可能有比输入范围更广。例如，弹性曲线如[Curves.elasticIn]将显着超调或低于范围为0.0到1.0的默认值
+'  如果要将[Curve]应用于[Tween]，请考虑使用[CurveTween]
+'  /// final Animation<double> animation = CurvedAnimation(
+'  ///   parent: controller,
+'  ///   curve: Curves.easeIn,
+'  ///   reverseCurve: Curves.easeOut,
+'  /// );
+'
+'}
+class AlwaysStoppedAnimation<T>{
+   AnimationStatus get status => AnimationStatus.forward
+}
+'note right of AlwaysStoppedAnimation{
+'  定义：始终以给定值停止的动画
+'  [status]始终是[AnimationStatus.forward]
+'  由于[AlwaysStoppedAnimation]的[value]和[status]永远不会更改，因此永远不会调用侦听器。因此，在多个地方重用[AlwaysStoppedAnimation]实例是安全的
+'  如果在编译时已知使用的值[value]，则应将构造函数调用为`const`构造函数
+'}
+
+class ProxyAnimation{
+  AnimationStatus _status
+  double _value
+  Animation<double> _parent
+}
+'
+'note right of ProxyAnimation{
+'  定义：作为另一个动画的代理的动画
+'  代理动画很有用，因为父动画可以变异。例如，一个对象可以创建代理动画，将代理交给另一个object，然后更改代理接收的动画的值
+'}
+
+class ReverseAnimation{
+   double get value
+   AnimationStatus get status
+}
+'note right of ReverseAnimation{
+'  定义： 与另一个动画相反的动画
+'  如果父动画从0.0到1.0向前运行，则此动画从1.0到0.0反向运行
+'  使用[ReverseAnimation]不同于简单地使用开始为1.0，结束为0.0的[Tween]，因为补间不会更改状态或动画的方向
+'}
+
+class TweenSequence<T>{
+   final List<TweenSequenceItem<T>> _items
+   final List<_Interval> _intervals
+   T transform(double t)
+}
+'note left of TweenSequence{
+'  定义：允许创建其值由[Tween]s的序列定义的[Animation]
+'  每个[TweenSequenceItem]都有一个定义其动画的持续时间百分比的权重.每个tween定义动画在其权重指示的间隔期间的值
+'}
+Listenable <|-- Animation
+Animation  <.. Animatable
+Animation  <|--         AnimationController
+Animation  <|--         CurvedAnimation
+Animation  <|--         AlwaysStoppedAnimation
+Animation  <|--         ProxyAnimation
+Animation  <|--         ReverseAnimation
+
+AnimationController <-- Ticker
+AnimationController <.. TickerProvider
+TickerProvider      <|.. SingleTickerProviderStateMixin
+TickerProvider      <|.. TickerProviderStateMixin
+Animatable          <|-- Tween
+Animatable          <|-- CurveTween
+Animatable          <|-- TweenSequence
+
+
+Tween          <|-- ColorTween
+Tween          <|-- RectTween
+Tween          <|-- ConstantTween
+Tween          <|-- RelativeRectTween
+
+@enduml

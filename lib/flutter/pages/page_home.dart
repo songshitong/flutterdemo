@@ -3,13 +3,16 @@ import 'package:flutterdemo/flutter/common/Style.dart';
 import 'package:flutterdemo/flutter/packages/annotationroute/annotation_route.dart';
 import 'package:flutterdemo/flutter/packages/fish_redux/fish_redux_page.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/bottom_appbar.dart';
+import 'package:flutterdemo/flutter/pages/beautiful/fold_cell.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/test_one_line_layout.dart';
 import 'package:flutterdemo/flutter/pages/nativ/native_chat.dart';
 import 'package:flutterdemo/flutter/pages/nativ/native_view_to_widget.dart';
 import 'package:flutterdemo/flutter/widget/CheckBox.dart';
 import 'package:flutterdemo/flutter/widget/Image.dart';
+import 'package:flutterdemo/flutter/widget/animation/custom_curve.dart';
 import 'package:flutterdemo/flutter/widget/animation/hero.dart';
 import 'package:flutterdemo/flutter/widget/animation/jiaocuo.dart';
+import 'package:flutterdemo/flutter/widget/animation/physics_animation.dart';
 import 'package:flutterdemo/flutter/widget/animation/route_animation.dart';
 import 'package:flutterdemo/flutter/widget/button.dart';
 import 'package:flutterdemo/flutter/widget/container/box.dart';
@@ -19,9 +22,11 @@ import 'package:flutterdemo/flutter/widget/container/padding.dart';
 import 'package:flutterdemo/flutter/widget/container/transformation_widget.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/CanvasWidget.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/buttom_btn.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/clip_widget.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/dismissible.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/futurebuilder.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/inherited_widget.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/safe_area.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/will_pop_scope.dart';
 import 'package:flutterdemo/flutter/widget/layout/flex.dart';
 import 'package:flutterdemo/flutter/widget/layout/indexed_stack.dart';
@@ -285,6 +290,20 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("DismissiblePage")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return ClipWidget();
+                  }));
+                },
+                child: Text("Clip Widget")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return SafeAreaPage();
+                  }));
+                },
+                child: Text("SafeArea Page")),
             Text("动画animation ----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -307,6 +326,20 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("路由动画")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return CustomCurvePage();
+                  }));
+                },
+                child: Text("Custom Curve")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return Physics_Animation();
+                  }));
+                },
+                child: Text("Physics Animation")),
             Text("Canvas ----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -352,6 +385,13 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("BottomBtn 适配底部")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return FoldCellPage();
+                  }));
+                },
+                child: Text("FoldCell 折叠")),
             Text("测试第三方包 ----------------------- "),
             FlatButton(
                 onPressed: () {

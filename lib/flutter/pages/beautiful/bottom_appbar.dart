@@ -50,11 +50,13 @@ class BottomAppBarPageState extends State<BottomAppBarPage> {
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         shape: CustomsNotched(),
+        // BeveledRectangleBorder() 角为斜角或扁平角
         // 底部导航栏打一个圆形的洞 CircularNotchedRectangle
         // 打个圆角矩形 AutomaticNotchedShape(RoundedRectangleBorder(), RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)))
         child: Row(
           children: [
-            IconButton(icon: Icon(Icons.home)), SizedBox(), //中间位置空出 用来存放凹陷的按钮
+            IconButton(icon: Icon(Icons.home)),
+            SizedBox(), //中间位置空出 用来存放凹陷的按钮
             IconButton(icon: Icon(Icons.business)),
           ],
           mainAxisAlignment: MainAxisAlignment.spaceAround, //均分底部导航栏横向空间

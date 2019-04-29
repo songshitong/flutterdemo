@@ -28,7 +28,7 @@ class BottomBtn extends StatelessWidget {
     print("bootom $bottom");
     return Padding(
       padding: EdgeInsets.only(bottom: bottom),
-      //这块没有内容？？
+      //这块没有内容 可以使用SafeArea 替代MediaQuery.of(context).padding.bottom，padding，MediaQuery这三个
       child: MediaQuery.removePadding(
         context: context,
         removeBottom: true,

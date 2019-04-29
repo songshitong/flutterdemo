@@ -180,7 +180,7 @@ Function makeAdder(num addBy) {
 //闭包能够访问外部方法内的局部变量，并持有其状态
 
 void main(List<String> args) {
-  var func = a();
+  var func = funA();
   for (var i = 0; i < 5; i++) {
     func();
   }
@@ -191,7 +191,7 @@ void main(List<String> args) {
   }
 }
 
-a() {
+Function funA() {
   int count = 0;
   printCount() {
     print(count++);
@@ -200,21 +200,21 @@ a() {
   return printCount;
 }
 
-b() {
+Function b() {
   int count = 10;
   return () {
     print(--count);
   };
 }
 
-main() {
-  // Create a function that adds 2.
-  var add2 = makeAdder(2);
-  // Create a function that adds 4.
-  var add4 = makeAdder(4);
-  assert(add2(3) == 5);
-  assert(add4(3) == 7);
-}
+//main() {
+//  // Create a function that adds 2.
+//  var add2 = makeAdder(2);
+//  // Create a function that adds 4.
+//  var add4 = makeAdder(4);
+//  assert(add2(3) == 5);
+//  assert(add4(3) == 7);
+//}
 
 //Testing functions for equality（测试函数是否相等）  ==
 
@@ -633,8 +633,8 @@ abstract class AbstractContainer {
   void updateChildren(); // Abstract method.
 }
 
-//下面的类不是抽象的，但是定义了一个抽象函数，这样 的类是可以被实例化的：
-class SpecializedContainer extends AbstractContainer {
+//下面的类不是抽象的，但是定义了一个抽象函数，这样 的类是可以被实例化的： -----> dart2中抽象方法只能定义在抽象类中
+abstract class SpecializedContainer extends AbstractContainer {
   // ...Define more constructors, fields, methods...
 
   void updateChildren() {

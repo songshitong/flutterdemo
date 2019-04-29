@@ -80,19 +80,48 @@ class Scrollable{
   ScrollableState createState()
 }
 
-note left of Scrollable{
-  定义：滚动的的widget
-  excludeFromSemantics  此[Scrollable]引入的滚动操作是否在语义树中公开,带溢出的文本字段通常是可滚动的，以确保用户可以到达输入文本的开头结尾.
-     但是，这些滚动操作通常不会暴露给语义层
-}
+'note left of Scrollable{
+'  定义：滚动的的widget
+'  excludeFromSemantics  此[Scrollable]引入的滚动操作是否在语义树中公开,带溢出的文本字段通常是可滚动的，以确保用户可以到达输入文本的开头结尾.
+'     但是，这些滚动操作通常不会暴露给语义层
+'}
 
 class ScrollableState{
    Widget build(BuildContext context)
 }
-note left of ScrollableState{
-   build 重写方法，excludeFromSemantics为false，创建_ScrollSemantics，为true,创建_ScrollableScope。最后将结果通过ScrollBehavior的
-      buildViewportChrome创建widget
+'note left of ScrollableState{
+'   build 重写方法，excludeFromSemantics为false，创建_ScrollSemantics，为true,创建_ScrollableScope。最后将结果通过ScrollBehavior的
+'      buildViewportChrome创建widget
+'}
+
+class Viewport{
+   final double anchor
+   final ViewportOffset offset
+   final Key center
+   final double cacheExtent
+   RenderViewport createRenderObject(BuildContext context)
 }
+
+'note right of Viewport{
+'  定义： 内部更大的widget
+'  [Viewport]是滚动机械的视觉主力。它根据其自身的维度和给定的[offset]显示一个children的子集。随着偏移量的变化，可以通过视口看到不同的孩子
+'  [Viewport]主持一个双向的条子列表，锚定在位于零滚动偏移处的[center]sliver,中心小部件是根据[anchor]属性显示在视口中
+'  子列表中早于[center]的sliver以反向[axisDirection]从[center]开始的逆序显示，例如，如果[axisDirection]是[AxisDirection.down]，
+'   那么在center之前的第一个sliver位于[center]上方。子列表比[center]后来的条子,按顺序放在[axisDirection]中。例如，在前面的场景中，
+'   [center]之后的第一个条子是位于[中心]下方
+'  [视口]不能直接包含盒子类型的child。相反，使用[SliverList]，[SliverFixedExtentList]，[SliverGrid]或者 [SliverToBoxAdapter]
+'
+'  anchor 零滚动偏移的相对位置,例如，如果[anchor]为0.5且[axisDirection]为[AxisDirection.down]或[AxisDirection.up]，
+'      则零滚动偏移量在视口中垂直居中.如果[anchor]为1.0，并且[axisDirection]为[AxisDirection.right]，则零滚动偏移为视口左边缘
+'  offset 视口内的哪部分内容应该是可见的.[ViewportOffset.pixels]值确定视口用于选择要显示其内容的哪个部分的滚动偏移量.当用户滚动视口时，
+'     此值会更改，这会更改显示的内容.通常是[ScrollPosition]
+'  center [GrowthDirection.forward]增长方向的第一个孩子.[center]必须是ViewPort的child的key
+'  cacheExtent 在RenderViewportBase中有解释，视口在可见区域之前和之后有一个区域，用于缓存在用户滚动时即将变为可见的项目。落在此缓存区域中
+'     的项目即使它们在屏幕上不是（还）可见，也会被布局。[cacheExtent]描述缓存区域在视口前端之前和后端之后延伸的像素数。
+'     视口将尝试覆盖children的总范围是 前端前的[cacheExtent]+主轴的范围+后端后的[cacheExtent]
+'     缓存区域还用于在iOS上实现隐式可访问性滚动，当辅助功能焦点从可见的视口中的项移动到缓存区中的不可见项时，框架将使用（隐式）滚动操作
+'        将该项目带入视图
+'}
 StatelessWidget <|-- ScrollView
 ScrollView      <|-- BoxScrollView
 ScrollView      <|-- CustomScrollView
@@ -104,5 +133,6 @@ BoxScrollView   <|-- GridView
 
 StatefulWidget  <|-- Scrollable
 Scrollable      <.. ScrollableState
+MultiChildRenderObjectWidget <|-- Viewport
 
 @enduml

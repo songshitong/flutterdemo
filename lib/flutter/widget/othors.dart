@@ -26,6 +26,13 @@ import 'package:flutter/material.dart';
 //    overlayState.insert(overlayEntry);
 //  }
 
+//todo Visibility 替代，动画，原理
+
+//StadiumBorder    BeveledRectangleBorder todo 各种border的使用
+//RelativeRect
+//AnimatedSize
+//ScopedModelDescendant
+
 ///获取大小
 ///globle.currentcontext.size
 ///widgetKey.currentContext.findRenderObject().semanticBounds.size

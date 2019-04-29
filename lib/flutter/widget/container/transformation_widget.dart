@@ -8,6 +8,7 @@ class TransformationPage extends StatelessWidget {
 
 //    Transform的变换是应用在绘制阶段，而并不是应用在布局(layout)阶段，
 //        所以无论对子widget应用何种变化，其占用空间的大小和在屏幕上的位置都是固定不变的，因为这些是在布局阶段就确定的
+    //  多个widget,一个变化会覆盖，而不会重新布局
 
 //    由于矩阵变化只会作用在绘制阶段，所以在某些场景下，在UI需要变化时，可以直接通过矩阵变化来达到视觉上的UI改变，
 //    而不需要去重新触发build流程，这样会节省layout的开销，所以性能会比较好。
@@ -66,6 +67,9 @@ class TransformationPage extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: DecoratedBox(
               decoration: BoxDecoration(color: Colors.red),
+              //绕x,y轴旋转时，角度90，view垂直屏幕时不限时，没有厚度？？？
+
+              //绕z轴旋转
               child: Transform.rotate(
                 //旋转90度
                 angle: math.pi / 2,
@@ -141,6 +145,8 @@ class TransformationPage extends StatelessWidget {
               child: Text("test"),
             ),
           ),
+
+          //todo 变换嵌套， 第二个坐标系是否发生变化，第二个角度是相对于第一个还是第二个， rotationx ,totationx
         ],
       ),
     );

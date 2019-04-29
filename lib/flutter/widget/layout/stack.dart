@@ -16,6 +16,12 @@ class StackPageState extends State<StackPage> {
   Widget build(BuildContext context) {
 //    层叠布局，子widget可以根据到父容器四个角的位置来确定本身的位置。绝对定位允许子widget堆叠（按照代码中声明的顺序）。
 //    Flutter中使用Stack和Positioned来实现绝对定位，Stack允许子widget堆叠，而Positioned可以给子widget定位（根据Stack的四个角）
+    //根据源码得知  宽高是根据非Positioned的child的最大值确定的,如果全是positioned的child，会根据fit设置大小，默认是父约束的最大
+    // 如果positioned的child在非position child下面，两个child一样大，则只显示非position的高度即只显示一个大小，
+    // 设置Overflow.visible后超出部分可以绘制，但默认的点击事件没有处理
+
+    //有四个child，上面两个重叠，下面两个重叠，如果子的child会发生变化，最好将上下分为两个stack,便于控制整体大小，将相同的归为一类
+
     return Scaffold(
       appBar: AppBar(
         title: Text("stack"),

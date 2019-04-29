@@ -52,6 +52,7 @@ class MyPainter extends CustomPainter {
     canvas.drawCircle(Offset(50, 50), 50, myPaint);
     canvas.drawColor(Colors.black26, BlendMode.colorBurn);
     canvas.drawArc(Rect.fromLTRB(0, 0, 50, 50), 0, 2 * pi * 15 / 18, false, myPaint); //使用 2pi角度
+
     //正方向是顺时针，     90度会出现精度问题，绘制出现错乱，使用pi
 
     //写字
