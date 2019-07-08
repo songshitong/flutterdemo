@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutterdemo/flutter/common/MyImgs.dart';
 import 'dart:math' as math;
 
@@ -109,7 +110,7 @@ class _SPHD extends SliverPersistentHeaderDelegate {
   double get maxExtent => math.max(maxHeight, minHeight);
 
   @override
-  double get minExtent => minHeight;
+  double get minExtent => math.min(maxHeight, minHeight);
 
   @override
   bool shouldRebuild(_SPHD oldDelegate) {

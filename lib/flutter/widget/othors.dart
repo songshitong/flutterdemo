@@ -55,6 +55,39 @@ import 'package:flutter/material.dart';
 /// todo 线性插值
 ///
 ///todo Dismissible
+///todo layoutbuilder  实现根据constrains动态子布局，父固定-》constarins固定/充满屏-》类似gallery的多个产品
+///Draggable
+///
+/// final MediaQueryData mediaQueryData = MediaQuery.of(context);
+//    final double statusBarHeight = mediaQueryData.padding.top;
+//    final double screenHeight = mediaQueryData.size.height;
+//    final double appBarMaxHeight = screenHeight - statusBarHeight;
+
+//各种theme
+
+// function 是const吗  一个const构造器，接受一个function     class外面的是function，里面的是method???
+//NestedScrollView
+//pageview  快速回弹效果 PageScrollPhysics
+//ValueNotifier 各种listener
+//WidgetsBinding.instance.window.devicePixelRatio
+
+//SynchronousFuture
+//Completer
+//Opacity
+//AspectRatio
+//Texture
+
+//Zone 类使用  ImageProvider.resolve 方法，根据image配置读取image
+//rootBundle    ByteData   Uint8List   ByteData.buffer.asUint8List()   String.fromCharCode(e.codeUnitAt(0) & 0xff)
+//ByteData.buffer.asUint8List(value.offsetInBytes, value.lengthInBytes).cast<int>()
+//Uint8List.view
+
+//TextTheme 字体主题之类的系统资源
+//查看foundation  import 'package:flutter/foundation.dart' as foundation;     foundation.defaultTargetPlatform
+
+//BackdropFilter(filter: ImageFilter.blur()) 模糊插件
+
+//Table table cell
 void main() {
   Visibility(
     child: LayoutBuilder(builder: null),

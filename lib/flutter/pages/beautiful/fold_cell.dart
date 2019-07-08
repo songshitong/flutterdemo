@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'dart:math' as math;
 
 import 'package:flutterdemo/flutter/common/MyImgs.dart';
 import 'package:flutterdemo/flutter/common/transform.dart';
+import 'package:flutterdemo/flutter/widget/animation/physics_animation.dart';
 
 //todo 矩阵变换https://zh.wikipedia.org/wiki/%E5%8F%98%E6%8D%A2%E7%9F%A9%E9%98%B5
 //https://en.wikipedia.org/wiki/Transformation_matrix
@@ -17,7 +19,6 @@ import 'package:flutterdemo/flutter/common/transform.dart';
 
 class FoldCellPage extends StatelessWidget {
   GlobalKey<FoldCellState> _key = GlobalKey<FoldCellState>();
-  GlobalKey<FoldCellState> _keyNum = GlobalKey<FoldCellState>();
 
   @override
   Widget build(BuildContext context) {
@@ -62,10 +63,16 @@ class FoldCell extends StatefulWidget {
 class FoldCellState extends State<FoldCell> with SingleTickerProviderStateMixin {
   AnimationController _animationController;
   CellState state = CellState.close;
-
+  Simulation simulation;
   @override
   void initState() {
-    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 800));
+    _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    simulation = SpringSimulation(
+      SpringDescription.withDampingRatio(mass: 1, stiffness: Stiffness.STIFFNESS_MEDIUM_LOW, ratio: 0.25),
+      50,
+      150,
+      _animationController.velocity,
+    );
     _animationController.addStatusListener((status) {
       print("111 AnimationStatus  status $status");
 

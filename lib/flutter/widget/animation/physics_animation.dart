@@ -17,6 +17,9 @@ class _Physics_AnimationState extends State<Physics_Animation> with SingleTicker
       });
 
     print("_controller velocity ${_controller.velocity}");
+    _controller.addStatusListener((status) {
+      print("status $status");
+    });
     super.initState();
   }
 
@@ -52,7 +55,8 @@ class _Physics_AnimationState extends State<Physics_Animation> with SingleTicker
           RaisedButton(
             onPressed: () {
               simulation = SpringSimulation(
-                SpringDescription.withDampingRatio(mass: 1, stiffness: Stiffness.STIFFNESS_MEDIUM_LOW, ratio: 0.25),
+                SpringDescription.withDampingRatio(
+                    mass: 1, stiffness: Stiffness.STIFFNESS_MEDIUM_LOW, ratio: DampingRatio.DAMPING_RATIO_HIGH_BOUNCY),
                 50,
                 150,
                 _controller.velocity,

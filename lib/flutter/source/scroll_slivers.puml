@@ -122,6 +122,195 @@ class Viewport{
 '     缓存区域还用于在iOS上实现隐式可访问性滚动，当辅助功能焦点从可见的视口中的项移动到缓存区中的不可见项时，框架将使用（隐式）滚动操作
 '        将该项目带入视图
 '}
+
+class RenderViewport{
+
+}
+'note right of RenderViewport{
+' 内部较大的渲染对象
+' [RenderViewport]是滚动机械的视觉主力,它根据自己的维度和给出的[偏移]显示一个子项的子集，随着偏移量的变化，可以在视口中看到不同的孩子
+' [RenderViewport]托管一个双向的条子列表，锚定在一个[center] sliver，位于零滚动偏移处。中心widget根据[anchor]属性显示在视口中
+' 显示子列表中早于[中心]的条带从[center]开始反向[axisDirection]的逆序展示
+' [RenderViewport]不能直接包含[RenderBox]子项。相反，使用 [RenderSliv​​erList]，[RenderSliv​​erFixedExtentList]，[RenderSliv​​erGrid]或
+' [RenderSliv​​erToBoxAdapter]
+'}
+
+abstract class RenderViewportBase{
+}
+'note right of RenderViewportBase{
+'  内部较大的渲染对象的基类
+'  此render object为的[RenderBox]中持有[RenderSliv​​er]的render对象提供共享代码
+'  视口建立一个[axisDirection]，它定位了条子的坐标系，即基于滚动偏移而不是笛卡尔坐标
+'  视口还会侦听[offset]，它决定了[SliverConstraints.scrollOffset]输入到条子布局协议
+'  子类通常覆盖[performLayout]并调用[layoutChildSequence]，也许多次
+'}
+
+abstract class RenderSliver{
+}
+
+'note right of RenderSliver{
+'   在视口中实现滚动效果的渲染对象的基类
+'   [RenderViewport]有一个子条的列表。每个条子 - 字面上一个视口内容的切片 - 依次布局，在这个过程中覆盖视口（每次都会布置每条条子，
+'      包括那些范围为零的因为它们“滚动”或超出范围视口的结尾。）
+'   Slivers参与_sliver protocol_，其中在[layout]期间各自 sliver接收[SliverConstraints]对象并计算相应的描述它在视口中的位置[SliverGeometry]对象
+'    这是类似于[RenderBox]使用的盒子协议，它得到一个 [BoxConstraints]作为输入并计算[Size]
+'   Slivers有一个前沿，这是[SliverConstraints.scrollOffset]所描述的sliver开始的位置。条子有几个维度，其主要部分是[SliverGeometry.paintExtent]，
+'     描述沿主轴的条子范围，从前沿开始到达视口的末端或结束sliver，以先到者为准
+'   Slivers可以根据非线性时尚中不断变化的约束来改变尺寸，实现各种滚动效果
+'   例如，各种[RenderSliv​​erPersistentHeader]子类，[SliverAppBar]基于此，尽管滚动偏移，仍能保持可见效果，或根据用户的滚动方向
+'      [SliverConstraints.userScrollDirection]重新出现在不同的偏移处
+'
+'   编写RenderSliv​​er子类
+'      Slivers可以有sliver孩子，或者来自另一个坐标系统的孩子，通常是盒子.有关盒子协议的详细信息，请参阅[RenderBox]。）
+'      Slivers也可以有不同的子模型，通常有一个孩子或一个孩子的列表
+'
+'   条子的例子
+'    一个单一孩子的条子的一个很好的例子，它本身也是一个条子，是[RenderSliv​​erPadding]，缩进其子项。条子到条子的render object
+'    这样的对象必须为它孩子构造一个[SliverConstraints]对象，然后必须拿它的孩子的[SliverGeometry]并用它来形成它的[geometry]
+'    另一种常见的独生子条是一条拥有单一[RenderBox]孩子的条子。一个例子是[RenderSliv​​erToBoxAdapter]，它放置一个盒子并在盒子周围自行调整大小
+'      这样的条子必须使用其[SliverConstraints]为child创建[BoxConstraints]，将孩子布局（使用孩子的[layout]方法），
+'       然后使用孩子的[RenderBox.size]生成条子的[SliverGeometry]。
+'    最常见的条子是有多个孩子的条子。该最直接的例子是[RenderSliv​​erList]，它在主轴方向上一个接一个排列着它的children.和one-box-child sliver例子一样
+'      它使用它的[constraints]来为孩子们创建一个[BoxConstraints]，然后它使用聚合来自其所有孩子的信息以生成其[geometry].不像一个孩子的案例，
+'      然而，它处理实际上放置的孩子(和后面的 paints)是明智的。如果滚动偏移是1000像素，那么先前确定前三个孩子每个都是400像素高，
+'      然后它将跳过前两个并以第三个孩子开始布局
+'
+'    Layout
+'
+'      当它们被布置时，条子决定它们的[geometry]，包括它们size（[SliverGeometry.paintExtent]）和下一个条子的位置（[SliverGeometry.layoutExtent]），
+'      以及每个children的位置，基于视口的输入[constraints]，例如滚动偏移量（[SliverConstraints.scrollOffset]
+'      例如，只是画一个100像素高的盒子的条子会说,当滚动偏移为零时，它[SliverGeometry.paintExtent]为100像素，
+'      但是当滚动偏移量为75像素时它的[SliverGeometry.paintExtent]是25像素，并且当滚动偏移量为100像素或更多时，它会为零(这是假设
+'      [SliverConstraints.remainingPaintExtent]超过100像素)
+'      作为该系统的输入提供的各种尺寸在[constraints],它们在文档中有详细描述[SliverConstraints]类.[performLayout]函数必须采用这些[constraints]
+'       并创建一个SliverGeometry]对象，它必须分配给[geometry]属性.可配置的几何体的不同尺寸是[SliverGeometry]类的文档中详细描述
+'
+'    Painting
+'      除了实现布局外，条子还必须实现绘画。这是通过覆盖[paint]方法实现的
+'      调用[paint]方法 使用[Canvas]带有以条子的左上角原点，_无论轴方向_的[Offset]
+'      子类也应该覆盖[applyPaintTransform]来提供[Matrix4]描述每个孩子相对于条子的位置（除了其他方面，这由可访问性层使用，以确定孩子的界限。）
+'
+'    Hit testing
+'      要实现命中测试，请覆盖[hitTestSelf]和[hitTestChildren]方法，或者，对于更复杂的情况，改为直接覆盖[hitTest]方法
+'      要实际对指针事件做出反应，[handleEvent]方法可能是实现，默认情况下它什么都不做。 （通常手势由框协议中的widgets处理而不是直接的条子)
+'
+'    Helper methods
+'      sliver应该实施的方法有很多种,这些使其他方法更容易实现。下面列出的每种方法文档都有详细说。此外，[RenderSliv​​erHelpers]类可用于
+'      混合一些有用的方法
+'
+'    childScrollOffset
+'      如果子类将子项定位在滚动偏移零以外的任何位置，它应该覆盖[childScrollOffset]。例如，[RenderSliv​​erList]和[RenderSliv​​erGrid]重写此方法，
+'      但是[RenderSliv​​erToBoxAdapter]没有
+'      除其他外，[Scrollable.ensureVisible]使用它
+'
+'    childMainAxisPosition
+'      子类应该实现[childMainAxisPosition]来描述它们孩子们被定位的位置
+'    childCrossAxisPosition
+'      如果子类将子children放在横轴的另一个非0位置，然后它应该覆盖[childCrossAxisPosition]。例如 [RenderSliv​​erGrid]会覆盖此方法
+'
+'}
+
+abstract class RenderSliverMultiBoxAdaptor{
+   final RenderSliverBoxChildManager _childManager
+   final Map<int, RenderBox> _keepAliveBucket
+}
+'note right of RenderSliverMultiBoxAdaptor{
+'  有多个box children的sliver
+'  [RenderSliv​​erMultiBoxAdaptor]是具有多个box children的条子的基类.子项由[RenderSliv​​erBoxChildManager]管理，允许子类在布局期间懒惰地创建子​​项
+'  通常子类只会创建实际需要填充[SliverConstraints.remainingPaintExtent]的子项
+'  从渲染对象添加和删除子项的合同是比普通渲染对象更严格
+'     如果他们已经在布局过程中布局，除布局过程，儿童可以被移除
+'     除了在[childManager]的调用期间，不能添加子项，然后仅当没有与该索引（或子项）对应的子项时（首先删除了与该索引对应的子项）
+'}
+
+class RenderSliverFixedExtentBoxAdaptor{
+
+}
+class RenderSliverList{
+
+}
+
+class RenderSliverGrid{
+
+}
+
+
+
+class RenderSliverFixedExtentList{
+}
+
+class SliverFixedExtentList{
+}
+
+class RenderSliverFillViewport{
+
+}
+abstract class SliverMultiBoxAdaptorWidget {
+   final SliverChildDelegate delegate
+   SliverMultiBoxAdaptorElement createElement() => SliverMultiBoxAdaptorElement(this)
+}
+
+'note right of SliverMultiBoxAdaptorWidget{
+'  定义：有多个盒子的条子的基类
+'  使用[SliverChildDelegate]帮助子类懒惰地构建他们的孩子
+'}
+class SliverList{
+  RenderSliverList createRenderObject(BuildContext context)
+}
+
+class SliverGrid{
+   final SliverGridDelegate gridDelegate
+   RenderSliverGrid createRenderObject(BuildContext context)
+   void updateRenderObject(BuildContext context, RenderSliverGrid renderObject)
+}
+class SliverFixedExtentList{
+  final double itemExtent
+  RenderSliverFixedExtentList createRenderObject(BuildContext context)
+  void updateRenderObject(BuildContext context, RenderSliverFixedExtentList renderObject)
+}
+
+class SliverFillViewport{
+  final double viewportFraction
+  RenderSliverFillViewport createRenderObject(BuildContext context)
+  void updateRenderObject(BuildContext context, RenderSliverFillViewport renderObject)
+}
+'note right of SliverFillViewport{
+'  包含多个子框的子条，每个子框填充视口
+'  [SliverFillViewport]将其子项放在主轴的线性数组中
+'  每个孩子的大小都可以填充视口，包括主视图和cross轴
+'  viewportFraction 每个子项应填充主轴的视口部分,如果此分数小于1.0，则在一次可以看到多个子项,如果此分数大于1.0，则每个子项将大于主轴中的视口
+' }
+
+class SliverToBoxAdapter{
+   RenderSliverToBoxAdapter createRenderObject(BuildContext context) => RenderSliverToBoxAdapter()
+}
+'note right of SliverToBoxAdapter{
+'  包含单个box widget的sliver
+'  Slivers是特殊用途的小部件，可以使用 [CustomScrollView]组合创建自定义滚动效果
+'  一个[SliverToBoxAdapter]是一个基本的条子，它创建了返回一个基于通常盒子的桥梁
+'  使用多个[SliverToBoxAdapter]小部件来显示多个[CustomScrollView]中的框小部件，考虑使用[SliverList]，[SliverFixedExtentList]，
+'   [SliverPrototypeExtentList]或[SliverGrid]，那些更有效，因为它们只实例化那些实际上是通过滚动视图的视口可见的孩子
+'}
+class RenderSliverToBoxAdapter{
+   void performLayout()
+}
+'note right of RenderSliverToBoxAdapter{
+'  包含单个[RenderBox]的[RenderSliv​​er]
+'  如果不可见，孩子将不会被布置。它的大小根据对主轴中孩子的偏好，并有严格的约束,将其强制为横轴的视口尺寸
+'}
+
+class SliverFillRemaining{
+  RenderSliverFillRemaining createRenderObject(BuildContext context)
+}
+note right of SliverFillRemaining{
+  包含单个盒子的条子，填充剩余的视口空间
+  [SliverFillRemaining]调整其子项的大小以填充cross轴中的视口并填充主轴视口中的剩余空间
+  通常，这将是视口中的最后一个条子，因为（根据定义）除了这条条子之外，什么都没有空间
+}
+
+class RenderSliverFillRemaining{
+  void performLayout()
+}
 StatelessWidget <|-- ScrollView
 ScrollView      <|-- BoxScrollView
 ScrollView      <|-- CustomScrollView
@@ -134,5 +323,40 @@ BoxScrollView   <|-- GridView
 StatefulWidget  <|-- Scrollable
 Scrollable      <.. ScrollableState
 MultiChildRenderObjectWidget <|-- Viewport
+Viewport <.. RenderViewport
+RenderViewportBase <|-- RenderViewport
+RenderViewportBase <.. RenderSliver
 
+RenderViewport <.. RenderSliver
+
+RenderObject <|-- RenderSliver
+
+RenderSliver <|-- RenderSliverMultiBoxAdaptor
+RenderSliver <|-- RenderSliverSingleBoxAdapter
+
+RenderSliverMultiBoxAdaptor <|-- RenderSliverList
+RenderSliverMultiBoxAdaptor <|-- RenderSliverGrid
+RenderSliverMultiBoxAdaptor <|-- RenderSliverFixedExtentBoxAdaptor
+RenderSliverFixedExtentBoxAdaptor <|-- RenderSliverFixedExtentList
+RenderSliverFixedExtentBoxAdaptor <|-- RenderSliverFillViewport
+RenderObjectWidget          <|-- SliverWithKeepAliveWidget
+SliverWithKeepAliveWidget   <|-- SliverMultiBoxAdaptorWidget
+SliverMultiBoxAdaptorWidget <|-- SliverList
+SliverMultiBoxAdaptorWidget <|-- SliverGrid
+SliverMultiBoxAdaptorWidget <|-- SliverFixedExtentList
+SliverMultiBoxAdaptorWidget <|-- SliverFillViewport
+
+SliverList                  <..  RenderSliverList
+SliverFixedExtentList       <..  RenderSliverFixedExtentList
+SliverGrid                  <..  RenderSliverGrid
+SliverFillViewport          <..  RenderSliverFillViewport
+
+RenderObjectWidget            <|-- SingleChildRenderObjectWidget
+SingleChildRenderObjectWidget <|-- SliverToBoxAdapter
+SingleChildRenderObjectWidget <|-- SliverFillRemaining
+
+RenderSliverSingleBoxAdapter  <|-- RenderSliverToBoxAdapter
+RenderSliverSingleBoxAdapter  <|-- RenderSliverFillRemaining
+SliverToBoxAdapter          <..  RenderSliverToBoxAdapter
+SliverFillRemaining         <..  RenderSliverFillRemaining
 @enduml

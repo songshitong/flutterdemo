@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdemo/flutter/common/Style.dart';
+import 'package:flutterdemo/flutter/native_plugin/video/video_player.dart';
+import 'package:flutterdemo/flutter/native_plugin/webview_page.dart';
 import 'package:flutterdemo/flutter/packages/annotationroute/annotation_route.dart';
 import 'package:flutterdemo/flutter/packages/fish_redux/fish_redux_page.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/bottom_appbar.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/fold_cell.dart';
+import 'package:flutterdemo/flutter/pages/beautiful/gallery/sliver_section.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/test_one_line_layout.dart';
 import 'package:flutterdemo/flutter/pages/nativ/native_chat.dart';
 import 'package:flutterdemo/flutter/pages/nativ/native_view_to_widget.dart';
@@ -21,12 +24,15 @@ import 'package:flutterdemo/flutter/widget/container/decorated_box.dart';
 import 'package:flutterdemo/flutter/widget/container/padding.dart';
 import 'package:flutterdemo/flutter/widget/container/transformation_widget.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/CanvasWidget.dart';
+import 'package:flutterdemo/flutter/widget/customwidget/GifFileImg.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/buttom_btn.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/clip_widget.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/dismissible.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/futurebuilder.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/inherited_widget.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/international/intl_page.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/safe_area.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/theme_demo.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/will_pop_scope.dart';
 import 'package:flutterdemo/flutter/widget/layout/flex.dart';
 import 'package:flutterdemo/flutter/widget/layout/indexed_stack.dart';
@@ -42,19 +48,38 @@ import 'package:flutterdemo/flutter/widget/sliver/sliver_app_bar.dart';
 import 'package:flutterdemo/flutter/widget/switch.dart';
 import 'package:flutterdemo/flutter/widget/text.dart';
 import 'package:flutterdemo/flutter/widget/textfield.dart';
+import 'package:flutter/cupertino.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+Color color = Colors.amber;
+
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "flutter",
-      color: MyColor.primarySwatch,
-      home: Home(),
+      theme: ThemeData(primaryColor: color),
+      home: Home(() {
+        color = Colors.green;
+        setState(() {});
+      }, () {
+        color = Colors.amber;
+        setState(() {});
+      }),
     );
   }
 }
 
 class Home extends StatefulWidget {
+  VoidCallback change;
+  VoidCallback reset;
+
+  Home(this.change, this.reset);
+
   @override
   _HomeState createState() => _HomeState();
 }
@@ -76,8 +101,21 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: MyColor.PRIMARYCOLOR,
         title: Text("flutter"),
+        actions: <Widget>[
+          FlatButton(
+            onPressed: () {
+              widget.change();
+            },
+            child: Text("换色"),
+          ),
+          FlatButton(
+            onPressed: () {
+              widget.reset();
+            },
+            child: Text("颜色reset"),
+          )
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Colors.deepPurple,
@@ -304,6 +342,27 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("SafeArea Page")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return ThemePage();
+                  }));
+                },
+                child: Text("theme Page")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return IntlPage();
+                  }));
+                },
+                child: Text("国际化")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return GifTestPage();
+                  }));
+                },
+                child: Text("gif test ")),
             Text("动画animation ----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -363,6 +422,21 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("原生 view转为flutter flutter.widget")),
+            Text("原生插件 native plugin----------------------- "),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return WebviewPage();
+                  }));
+                },
+                child: Text("网页 webview")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return VideoPlayerPage();
+                  }));
+                },
+                child: Text("VideoPlayer播放视频")),
             Text("酷炫效果和自定义----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -392,6 +466,13 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("FoldCell 折叠")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return SliverSectionOrganizer();
+                  }));
+                },
+                child: Text("官方Gallery Sliver SectionOrganizer Animation")),
             Text("测试第三方包 ----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -400,14 +481,14 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("咸鱼 annotation route")),
-            FlatButton(
-                key: Key("list_last"),
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return FishReduxPageWidget();
-                  }));
-                },
-                child: Text("咸鱼 fish_redux", key: Key("list_last_text"))),
+//            FlatButton(
+//                key: Key("list_last"),
+//                onPressed: () {
+//                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+//                    return FishReduxPageWidget();
+//                  }));
+//                },
+//                child: Text("咸鱼 fish_redux", key: Key("list_last_text"))),
           ],
         ),
       ),

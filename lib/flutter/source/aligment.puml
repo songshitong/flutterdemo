@@ -1,0 +1,68 @@
+@startuml
+abstract class AlignmentGeometry{
+  double get _x
+  double get _start
+  double get _y
+  Alignment resolve(TextDirection direction)
+}
+/'note right of AlignmentGeometry{
+  [Alignment]的基类，允许文本方向感知解析度
+  将不确定类型的[AlignmentGeometry]对象转换为[Alignment]对象，调用[resolve]方法
+  resolve 将此实例转换为[Alignment]，它使用文字坐标（`x`坐标明显与左边的距离）
+}'/
+
+class Alignment{
+  final double x
+  final double y
+  double get _start => 0.0
+}
+
+'note left of Alignment{
+'  矩形内的一个点
+'  `Alignment（0.0,0.0）`表示矩形的中心。从-1.0到+1.0的距离是从矩形的一边到矩形的另一面的边距
+'  因此，水平2.0单位（或垂直）等效于矩形的宽度（或高度）
+'  `Alignment（-1.0，-1.0）`表示矩形的左上角
+'  `Alignment（1.0,1.0）`表示矩形的右下角。
+'  `高度h和宽度w的矩形中的Alignment（x，y）`描述长方形坐标系中的点（x * w / 2 + w / 2，y * h / 2 + h / 2）
+'  [Alignment]使用视觉坐标，这意味着增加[x]，从左到右移动point
+'  要支持从右到左的布局[TextDirection]，考虑使用[AlignmentDirectional]，其中当增加水平值时，点移动的方向取决于[TextDirection]
+'  大多数小部件在其配置中使用[Alignment]
+'      ：[Align]根据[Alignment]对孩子进行定位
+'}
+
+class FractionalOffset{
+  double get dx => (x + 1.0) / 2.0
+  double get dy => (y + 1.0) / 2.0
+}
+'note right of FractionalOffset{
+'  偏移量表示为[Size]的一小部分
+'  `FractionalOffset（1.0,0.0）`代表[Size]的右上角
+'   FractionalOffset（0.0,1.0）`代表[Size]的左下角
+'   [FractionalOffset]类以左上角为准，根据距离指定偏移量，无论[TextDirection]如何
+'  设计讨论
+'    [FractionalOffset]和[Alignment]是相同的信息下两种不同的表示形式：相对于矩形大小的矩形内的位置
+'    两个类之间的区别在于他们用来表示位置的坐标系统
+'    [FractionalOffset]使用原点位于左上角的坐标系而[Alignment]使用原点位于矩形的中心的坐标系
+'  从历史上看，[FractionalOffset]早于[Alignment]。当我们试图制作适合[TextDirection]的[FractionalOffset]版本，我们
+'    遇到困难，因为将原点放在左上角引入了难以消除的从左到右的偏见
+'  通过将原点放在中心，[Alignment]和[AlignmentDirectional]能够使用相同的原点，这意味着我们可以使用线性函数将[AlignmentDirectional]解析为
+'  [TextDirection.rtl]和[TextDirection.ltr]两者中的[Alignment]
+'  对于大多数目的，[Alignment]比[FractionalOffset]更好，应该用其代替[FractionalOffset]
+'  我们继续实施[FractionalOffset]支持早于[Alignment]的代码
+'  dx  水平方向上的距离分数  值0.0对应于最左边,值1.0对应于最右边.值不限于该范围.负值表示左边缘左侧的位置，大于1.0的值表示右侧边缘右侧的位置
+'
+'}
+
+class AlignmentDirectional{
+  final double start
+  double get _x => 0.0
+  final double y
+}
+'note right of AlignmentDirectional{
+'  偏移量，表示为[Size]的一小部分，但其水平组件取决于书写方向
+'  这可用于指示[TextDirection.ltr]中左侧的偏移量文本和[TextDirection.rtl]文本中右边的偏移量而没有要注意当前的文本方向
+'}
+AlignmentGeometry <|-- Alignment
+AlignmentGeometry <|-- AlignmentDirectional
+Alignment         <|-- FractionalOffset
+@enduml

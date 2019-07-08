@@ -45,7 +45,7 @@
 //有特殊考虑的类型
 //ColorTween  SizeTween  FractionalOffsetTween   AlignmentTween   MaterialPointArcTween
 
-//flutter 提供FadeTransition、ScaleTransition、SizeTransition、FractionalTranslation
+//flutter 提供FadeTransition、ScaleTransition、SizeTransition、FractionalTranslation 在paint之前使用transform
 //todo PositionedTransition实现
 //通过AnimatedBuilder和AnimatedWidget实现的复用
 //todo AnimatedBuilder child 参数，可方便将state的widget.child设为child

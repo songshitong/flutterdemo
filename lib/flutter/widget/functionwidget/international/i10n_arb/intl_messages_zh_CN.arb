@@ -1,0 +1,10 @@
+{
+  "@@last_modified": "2019-05-06T18:06:00.126989",
+  "@@locale":"zh_CN",
+  "title": "Flutter 应用",
+  "@title": {
+    "description": "demo应用的title",
+    "type": "text",
+    "placeholders": {}
+  }
+}

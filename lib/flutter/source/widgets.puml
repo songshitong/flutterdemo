@@ -509,12 +509,21 @@ abstract class MultiChildRenderObjectWidget{
    final List<Widget> children
    MultiChildRenderObjectElement createElement()
 }
-
 'note right of MultiChildRenderObjectWidget{
 '  用于配置RenderObject子类的RenderObjectWidgets的只有一个孩子列表的超类
 '  这个超类只提供了该子列表的存储，它实际上不提供更新逻辑
 '   对于child列表，如果要对此列表进行变异，通常明智的做法是将[Key]放在小部件上，以便框架可以将旧配置与新的配置匹配并维护底层的渲染对象
 '}
+abstract class SliverWithKeepAliveWidget{
+  RenderSliverWithKeepAliveMixin createRenderObject(BuildContext context)
+}
+
+'note right of SliverWithKeepAliveWidget{
+'  定义：有[KeepAlive]子项的条子的基类
+'}
+
+
+
 
 abstract class ProxyWidget{
    final Widget child
@@ -574,6 +583,8 @@ RenderObject      <--  PipelineOwner
 RenderObjectWidgets <|-- LeafRenderObjectWidget
 RenderObjectWidgets <|-- SingleChildRenderObjectWidget
 RenderObjectWidgets <|-- MultiChildRenderObjectWidget
+RenderObjectWidgets <|-- SliverWithKeepAliveWidget
+
 ProxyWidget         <|-- ParentDataWidget
 ProxyWidget         <|-- InheritedWidget
 

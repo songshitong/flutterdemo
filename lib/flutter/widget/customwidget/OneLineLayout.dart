@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-///自定义CustomMultiChildLayout  多子layout
+///自定义CustomMultiChildLayout  多子layout  布局标记有LayoutID的widget
 class OneLineLayout extends StatelessWidget {
   List<Widget> _childs = <Widget>[
     LayoutId(id: "onelinelayout1", child: Text("a")),
@@ -28,6 +28,9 @@ class _MyDelegate extends MultiChildLayoutDelegate {
 
   @override
   void performLayout(Size size) {
+    //该方法必须调用layoutChild 和 positionChild
+    //hasChild  判断子ID是否存在
+    //
     print("onlinelayout" + size.toString());
     double allWidth = 0;
     for (int i = 0; i < _childs.length; i++) {

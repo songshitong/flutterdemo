@@ -1,0 +1,99 @@
+@startuml
+
+class Navigator{
+  final String initialRoute
+  final RouteFactory onGenerateRoute
+  static NavigatorState of(BuildContext context, {bool rootNavigator = false,bool nullOk = false,})
+  NavigatorState createState() => NavigatorState()
+}
+note right of Navigator{
+ 定义：一个小部件，用于管理具有堆栈规则的一组子小部件
+ Popup routes
+   routes不必遮挡整个屏幕，[PopupRoute]用[ModalRoute.barrierColor]覆盖屏幕，该屏幕只能部分不透明以允许当前屏幕显示,
+   弹出路由是“模态modal”的，因为他们阻止输入到下面的小部件
+   有一些功能可以创建和显示弹出路径。示例：[showDialog]，[showMenu]和[showModalBottomSheet].这些函数返回推送路径的Future，如上所述
+     调用者可以等待弹出路由返回的值来执行操作，或者发现路由的值
+   还有一些小部件可以创建弹出路由，例如[PopupMenuButton]和[DropdownButton],这些小部件创建PopupRoute的内部子类并使用Navigator的push
+      和pop方法来显示和消除它们
+ Custom routes
+   您可以创建自己的一个窗口小部件库路由类的子类,像[PopupRoute]，[ModalRoute]或[PageRoute]来控制转换动画用于显示route，route的颜色和行为
+    模态障碍，以及路线的其他方面
+   [PageRouteBuilder]类可以在回调方面定义自定义路由,可查看注释例子
+ Nesting Navigators
+   一个应用程序可以使用多个导航器。在下面嵌套一个导航器，另一个导航器可用于创建“内部旅程”，例如选项卡式导航，用户注册，商店结账或其他独立旅程
+     代表整个应用程序的子部分
+
+}
+class NavigatorState{
+   final List<Route<dynamic>> _history
+   final Set<Route<dynamic>> _poppedRoutes
+   final List<OverlayEntry> _initialOverlayEntries
+
+   Route<T> _routeNamed<T>(String name, { @required Object arguments, bool allowNull = false })
+   Future<T> push<T extends Object>(Route<T> route)
+}
+note right of NavigatorState{
+   _routeNamed 根据name生成route
+   push  将给定route推到navigator上
+}
+
+abstract class Route<T> {
+  NavigatorState _navigator
+  final RouteSettings settings
+  void install(OverlayEntry insertionPoint)
+  TickerFuture didPush()
+  void didReplace(Route<dynamic> oldRoute)
+  bool didPop(T result)
+  void didComplete(T result)
+  void didPopNext(Route<dynamic> nextRoute)
+  void didChangeNext(Route<dynamic> nextRoute)
+  void didChangePrevious(Route<dynamic> previousRoute)
+  void changedInternalState()
+  void changedExternalState()
+  void dispose()
+}
+note right of Route{
+  定义：由[Navigator]管理的条目的抽象
+  该类定义了导航器和被推入并从导航器中弹出的“路由”之间的抽象接口。大多数路线都有
+  视觉可供性，它们使用一个或更多[OverlayEntry]对象放置在导航器[Overlay]中
+
+   install 将route插入navigator时调用,使用它来填充[overlayEntries]并将它们添加到overlay（可以[Navigator.overlay]访问）
+     （[Route]负责这个而不是[Navigator]的原因是[Route]将负责_removing_条目，这样它对称。）
+      如果这是插入的第一个路由，`insertionPoint`参数将为null。否则，它指示立即放置在该route的第一个overlay下方的overlay entry
+
+}
+
+class OverlayEntry {
+   final WidgetBuilder builder
+   bool _opaque
+   bool _maintainState
+   OverlayState _overlay
+   void remove()
+}
+note right of OverlayEntry{
+  定义：[Overlay]中可以包含小部件的位置
+  使[OverlayState.insert]或[OverlayState.insertAll]函数将overlay插入[Overlay],为找到给定[BuildContext]的最近封闭叠加层，
+   使用[Overlay.of]功能
+  overlay entry 一次最多只能在一个overlay里面,从其overlay删除条目调用overlay entry上的[remove]函数
+  因为[Overlay]使用[Stack]布局，所以overlay entry可以使用[Positioned]和[AnimatedPositioned]将自己定位在overlay
+
+  例如，[Draggable]使用[OverlayEntry]来显示拖动头像,拖动开始后跟随用户的手指穿过屏幕.使用overlay显示拖动头像让头像浮动到
+    应用程序中的其他小部件上面。当用户的手指移动时，Draggable的调用[markNeedsBuild]在overlay entry上使其重建.它的构建，
+     该条目包括一个[Positioned]，其顶部和左侧属性设置为将拖动化身放在用户手指附近.阻力结束时， [Draggable]从overlay中删除条目以删除
+     来自视图拖动头像
+  默认情况下，如果有一个完全[不透明opaque]条目，那么这个将不会包含在窗口小部件树中（特别是overlay entry中的有状态窗口小部件不会被实例化
+    确保你的覆盖条目仍然构建，即使它不可见，设置[maintainState]为真。这是更昂贵的，所以应该小心。特别是，如果覆盖条目中的小部件
+    [maintainState]重复设置为true调用[State.setState]，用户的电池将被不必要地耗尽
+
+    _opaque 此条目是否会遮盖整个overlay.如果条目声称是不透明的，那么，为了提高效率，叠加将跳过该条目下面的构建条目，
+      除非它们具有[maintainState]设置
+    _maintainState 即使在其上方有完整的[opaque]条目，此条目是否必须包含在树中.[Navigator]和[Route]对象使用它来确保即使在后台也保持路径，
+    以便后续路径中承诺的[Future]将在完成后正确处理. 一部分注释在上面的包括了
+
+}
+
+StatefulWidget <|-- Navigator
+State          <|-- NavigatorState
+Navigator      <.. NavigatorState
+NavigatorState <.. Route
+@enduml

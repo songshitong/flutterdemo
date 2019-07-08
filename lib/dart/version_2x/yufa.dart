@@ -924,7 +924,7 @@ T first<T>(List<T> ts) {
 //延时
 //new Future.delayed(Duration(seconds: 3), (){});
 
-//Comments（注释）
+//Comments（注释）   注释中[Food]类的引用要倒入类才能点过去
 //Dart 支持单行注释、多行注释和 文档注释
 //Single-line comments
 //单行注释以 // 开始。 // 后面的一行内容 为 Dart 代码注释
