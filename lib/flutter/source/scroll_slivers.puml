@@ -39,6 +39,9 @@ class CustomScrollView{
 '  定义：使用slivers创建自定义滚动效果的[ScrollView]
 '  [CustomScrollView]允许您直接提供[slivers]以创建各种滚动效果，例如列表，网格和扩展标题.例如，创建一个滚动视图，其中包含一个展开的app bar，
 '  后跟一个列表和网格，使用三个slivers列表：[SliverAppBar]，[SliverList]，和[SliverGrid]
+'
+'
+'   CustomScrollView必须接受       viewport 在CustomScrollView的父类ScrollView中
 '  [Widget]中的[slivers]必须生成[RenderSliv​​er]对象，Viewport的createRenderObject为RenderViewport，而RenderViewport的父类RenderViewportBase
 '      接受一个RenderSliver范型
 
