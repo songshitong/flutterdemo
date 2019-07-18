@@ -36,7 +36,16 @@ dependencies:
   #使用URL拉起
   url_launcher: ^5.0.2
   gif_ani: ^0.0.2
+  #image解析
   image: ^2.1.4
+  # ffmpeg
+  flutter_ffmpeg:
+    git:
+      url: git://github.com/tanersener/flutter-ffmpeg.git
+      ref: v0.2.5
+      path: packages/flutter_ffmpeg_https_lts
+  #image picker
+  image_picker: ^0.6.0+17
 
 
 

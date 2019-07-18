@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdemo/flutter/common/Style.dart';
+import 'package:flutterdemo/flutter/native_plugin/ffmpeg/ffmpeg_page.dart';
 import 'package:flutterdemo/flutter/native_plugin/video/video_player.dart';
 import 'package:flutterdemo/flutter/native_plugin/webview_page.dart';
 import 'package:flutterdemo/flutter/packages/annotationroute/annotation_route.dart';
@@ -26,6 +27,8 @@ import 'package:flutterdemo/flutter/widget/container/transformation_widget.dart'
 import 'package:flutterdemo/flutter/widget/customwidget/CanvasWidget.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/GifFileImg.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/buttom_btn.dart';
+import 'package:flutterdemo/flutter/widget/customwidget/path.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/blur.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/clip_widget.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/dismissible.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/futurebuilder.dart';
@@ -363,6 +366,13 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("gif test ")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return BlurPage();
+                  }));
+                },
+                child: Text("blur ")),
             Text("动画animation ----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -407,6 +417,13 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("Canvas")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return PathPage();
+                  }));
+                },
+                child: Text("path page")),
             Text("与原生通信 MethodChannel----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -437,6 +454,13 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("VideoPlayer播放视频")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return FFmpegPage();
+                  }));
+                },
+                child: Text("测试FFmpeg")),
             Text("酷炫效果和自定义----------------------- "),
             FlatButton(
                 onPressed: () {

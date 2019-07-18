@@ -1,0 +1,69 @@
+//详情查看官网
+https://dart.dev/tools/pub/pubspec
+
+//内容来自https://zhuanlan.zhihu.com/p/55398976
+
+SDK constraints  sdk限制
+   '>=0.1.2 <0.2.0' 可以指定一个区间
+
+ environment:
+   sdk: '>=1.19.0 <3.0.0'     dart 版本在1.19.0和3.0.0之间
+   flutter: ^0.1.2             flutter版本 0.1.2
+
+本地依赖
+   dependencies:
+     icepy:
+       path: ~/icepy
+Git依赖
+   dependencies:
+     icepy:
+       git:
+         url: git://github.com/icepy/plugin1.git
+  如果你的包不在 git 仓库的根目录，你也可以指定它的 path
+     dependencies:
+       icepy:
+         git:
+           url: git://github.com/icepy/plugin1.git
+           path: packages/url
+
+
+开发一个自己的包
+   root directory
+     - lib
+       - main.dart
+     - pubspec.yaml
+在 pubspec.yaml 文件中我们可以写一下包名，描述等等之类的
+  name: icepyfetch  # 包名
+  description: my fetch # 包的描述
+  version: 0.0.1 # 包的版本
+  author: icepy # 包的作者
+  homepage: https://github.com/icepy # 包的网页地址
+
+  environment: # 指定环境
+    sdk: ">=2.0.0-dev.68.0 <3.0.0"
+
+  dependencies: # 指定包的依赖
+    flutter:
+      sdk: flutter
+
+  flutter:
+    plugin:
+      androidPackage: com.example.icepy.fetch # 指定 andorind 的包名
+      pluginClass: IcepyFetchPlugin # 指定 plugin的类名
+
+  理想情况下一个包应该还要有它的测试用例，我们应该遵循官方给出的设计目录结构
+    root directory
+      - example
+      - lib
+        - src
+          - ...
+        - shelf.dart
+        - shelf_io.dart
+      - test
+        - a variety of tests
+      - tool
+        travis.sh
+  当我们的包有多个文件时，你应该在 main.dart 中指定 library 然后导出这些文件
+     library icepy;
+     export 'src/utils.dart'
+  如果你的包是应用在 Flutter 中，那么可以运行 flutter packages pub publish 来发布

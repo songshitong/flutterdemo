@@ -8,14 +8,26 @@ class SliverAppBarPage extends StatefulWidget {
   _SliverAppBarPageState createState() => _SliverAppBarPageState();
 }
 
-class _SliverAppBarPageState extends State<SliverAppBarPage> {
+class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerProviderStateMixin {
 //  介绍Sliver布局，必须得先介绍Viewport组件，因为Sliver相关组件需要在Viewport组件下使用，而Viewport组件的主要作用就是提供滚动机制，可以根据传入的offset参数来显示特定的内容
   // todo https://segmentfault.com/a/1190000015086603 viewport
   List<int> datas = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  List<String> longDatas = List<String>.generate(100, (index) {
+    return "$index";
+  });
+  GlobalKey centerKey = GlobalKey();
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
+        //设置某个child成为scrollview的主要滚动，测试只展示一个
+//        primary: true,
+//        center: centerKey,
         slivers: <Widget>[
           SliverAppBar(
             title: Text('SliverAppBar'),
@@ -26,7 +38,7 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> {
             //只有在floating为true时才能设置snap为true    用户只要向下滚动appbar立即展开，而不用滑动一定距离
             snap: true,
             //appbar 是否保持显示，appear不会消失
-            pinned: true,
+            pinned: false,
             //通常为FlexibleSpaceBar，位置在状态栏，可根据child最大占据appbar,根据内容展开或缩小
             flexibleSpace: FlexibleSpaceBar(
               background: Image.asset(
@@ -39,20 +51,15 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> {
               delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
             //不设置childcount 默认无限个
             return Text("SliverList $index");
-          }, childCount: 10)),
+          }, childCount: 40)),
           SliverGrid(
-              delegate: SliverChildListDelegate(<Widget>[
-                //使用数量较少的情况
-                Text("SliverGrid 1"),
-                Text("SliverGrid 1"),
-                Text("SliverGrid 1"),
-                Text("SliverGrid 1"),
-                Text("SliverGrid 1"),
-                Text("SliverGrid 1"),
-                Text("SliverGrid 1"),
-                Text("SliverGrid 1"),
-                Text("SliverGrid 1"),
-              ]),
+              //使用数量较少的情况
+              delegate: SliverChildListDelegate(List<Widget>.generate(datas.length, (index) {
+                return Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Text("SliverGrid ${datas[index]}"),
+                );
+              })),
               //决定grid 的横竖布局    crossAxisCount 一行几个
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4)),
           //与appbar 类似，任意位置，随内容滚动收缩，展开   appbar的内部实现就是SliverPersistentHeader
@@ -82,6 +89,27 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> {
               return Text("SliverFixedExtentList item $index");
             })),
           ),
+          SliverFillRemaining(
+            key: centerKey,
+            child: TabBarView(controller: new TabController(vsync: this, length: 2), children: [
+              ListView(
+                children: List<Widget>.generate(longDatas.length, (index) {
+                  return Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Text("SliverFillRemaining TabBarView1 ${longDatas[index]}"),
+                  );
+                }),
+              ),
+              ListView(
+                children: List<Widget>.generate(longDatas.length, (index) {
+                  return Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Text("SliverFillRemaining TabBarView2 ${longDatas[index]}"),
+                  );
+                }),
+              )
+            ]),
+          )
         ],
       ),
     );

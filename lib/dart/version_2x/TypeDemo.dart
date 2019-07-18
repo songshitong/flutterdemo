@@ -42,4 +42,12 @@ void main() {
   String strA = "a";
   String strB = "b";
   print("strA strB compare  ${strB.compareTo(strA)}");
+
+  //string multiply number
+  //string重写了*操作符  "0"*5 = "00000"
+  String a5 = "a" * 5;
+  print("a5 is $a5");
+  //string 重写了[]操作符，可以直接取
+  String a5str = a5[4];
+  print("a5str is $a5str");
 }

@@ -85,8 +85,6 @@ import 'package:flutter/material.dart';
 //TextTheme 字体主题之类的系统资源
 //查看foundation  import 'package:flutter/foundation.dart' as foundation;     foundation.defaultTargetPlatform
 
-//BackdropFilter(filter: ImageFilter.blur()) 模糊插件
-
 //Table table cell
 void main() {
   Visibility(
