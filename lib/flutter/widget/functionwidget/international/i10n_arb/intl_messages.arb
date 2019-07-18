@@ -1,0 +1,10 @@
+{
+  "@@last_modified": "2019-05-07T10:40:42.347431",
+  "title": "Flutter APP",
+
+  "@title": {
+    "description": "Title for the Demo application",
+    "type": "text",
+    "placeholders": {}
+  }
+}
