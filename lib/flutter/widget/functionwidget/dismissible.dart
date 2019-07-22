@@ -17,15 +17,15 @@ class _DismissablePageState extends State<DismissiblePage> {
         children: <Widget>[
           Dismissible(
             key: Key("Dismissible"),
-            child: Text("this is Dismissible"),
+            child: Container(
+              child: Text("this is Dismissible"),
+              width: 100,
+              height: 150,
+            ),
             //右滑背景
-            background: Container(
-              decoration: BoxDecoration(color: Colors.grey),
-            ),
+            background: Container(decoration: BoxDecoration(color: Colors.grey), width: 100, height: 150),
             //左滑背景 只有在background设置后才能设置
-            secondaryBackground: Container(
-              decoration: BoxDecoration(color: Colors.green),
-            ),
+            secondaryBackground: Container(decoration: BoxDecoration(color: Colors.green), width: 100, height: 150),
           )
         ],
       ),

@@ -3,6 +3,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutterdemo/flutter/common/MyImgs.dart';
 import 'dart:math' as math;
 
+import 'CourseCenter.dart';
+
 class SliverAppBarPage extends StatefulWidget {
   @override
   _SliverAppBarPageState createState() => _SliverAppBarPageState();
@@ -31,6 +33,16 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerPr
         slivers: <Widget>[
           SliverAppBar(
             title: Text('SliverAppBar'),
+            actions: <Widget>[
+              RaisedButton(
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (contxt) {
+                    return CourseCenter();
+                  }));
+                },
+                child: Text("CourseCenter "),
+              )
+            ],
             //展开高度
             expandedHeight: 200,
             //true appbar随着用户向下滑动而展开，false 用户向下滚动，等到列表滚动到顶部时才展开appbar
@@ -47,11 +59,15 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerPr
               ),
             ),
           ),
-          SliverList(
-              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-            //不设置childcount 默认无限个
-            return Text("SliverList $index");
-          }, childCount: 40)),
+          //给其他sliver设置padding的sliver
+          SliverPadding(
+            padding: new EdgeInsets.all(8),
+            sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              //不设置childcount 默认无限个
+              return Text("SliverList $index");
+            }, childCount: 40)),
+          ),
           SliverGrid(
               //使用数量较少的情况
               delegate: SliverChildListDelegate(List<Widget>.generate(datas.length, (index) {
@@ -65,7 +81,7 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerPr
           //与appbar 类似，任意位置，随内容滚动收缩，展开   appbar的内部实现就是SliverPersistentHeader
           SliverPersistentHeader(
             //保持最小高度
-            pinned: true,
+            pinned: false,
             delegate: _SPHD(
                 maxHeight: 300,
                 minHeight: 150,
@@ -91,6 +107,8 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerPr
           ),
           SliverFillRemaining(
             key: centerKey,
+            //false child只占用剩余的长度  true child可以超出viewport并滚动
+            hasScrollBody: true,
             child: TabBarView(controller: new TabController(vsync: this, length: 2), children: [
               ListView(
                 children: List<Widget>.generate(longDatas.length, (index) {

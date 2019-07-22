@@ -8,15 +8,18 @@ class VideoPlayerPage extends StatefulWidget {
 
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
   VideoPlayerController _controller;
+  //获取时光网地址 http:/api.m.mtime.cn/PageSubArea/TrailerList.api
+  String url1 = "http://vfx.mtime.cn/Video/2017/03/31/mp4/170331093811717750.mp4";
+  String url3 = "http://vfx.mtime.cn/Video/2019/06/29/mp4/190629004821240734.mp4";
+  String url2 = "http://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_20mb.mp4";
   @override
   void initState() {
     super.initState();
-    _controller =
-        VideoPlayerController.network('http://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_20mb.mp4')
-          ..initialize().then((_) {
-            // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-            setState(() {});
-          });
+    _controller = VideoPlayerController.network(url1)
+      ..initialize().then((_) {
+        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        setState(() {});
+      });
     _controller.addListener(() {
       print(
           "listener total ${_controller.value.duration} current ${_controller.value.position} ${_controller.value.isPlaying}");

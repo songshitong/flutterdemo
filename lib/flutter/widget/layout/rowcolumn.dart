@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+///row
+///column
+///嵌套超出屏幕(两个无限大的发生嵌套)，可以限制layout大小，也可以使用expanded让子child充满(在row,column,flex中使用)，而不是无限扩大
 class RowAndColumnPage extends StatefulWidget {
   @override
   RowAndColumnPageState createState() {

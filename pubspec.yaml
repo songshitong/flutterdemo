@@ -46,6 +46,8 @@ dependencies:
       path: packages/flutter_ffmpeg_https_lts
   #image picker
   image_picker: ^0.6.0+17
+  # 音频录制，播放
+  flutter_sound: ^1.4.2
 
 
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdemo/flutter/common/Style.dart';
 import 'package:flutterdemo/flutter/native_plugin/ffmpeg/ffmpeg_page.dart';
+import 'package:flutterdemo/flutter/native_plugin/ffmpeg/movie_audio_replace.dart';
 import 'package:flutterdemo/flutter/native_plugin/video/video_player.dart';
 import 'package:flutterdemo/flutter/native_plugin/webview_page.dart';
 import 'package:flutterdemo/flutter/packages/annotationroute/annotation_route.dart';
@@ -31,6 +32,10 @@ import 'package:flutterdemo/flutter/widget/customwidget/path.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/blur.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/clip_widget.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/dismissible.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/draggable_page.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/event_dispatch/gesure_detector_listener.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/event_dispatch/notification.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/event_dispatch/pointer_listener.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/futurebuilder.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/inherited_widget.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/international/intl_page.dart';
@@ -47,6 +52,7 @@ import 'package:flutterdemo/flutter/widget/scrollwidget/grid_view.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/list_view.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/scroll_notification.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/single_childs_croll_view.dart';
+import 'package:flutterdemo/flutter/widget/sliver/nested_scroll_view_page.dart';
 import 'package:flutterdemo/flutter/widget/sliver/sliver_app_bar.dart';
 import 'package:flutterdemo/flutter/widget/switch.dart';
 import 'package:flutterdemo/flutter/widget/text.dart';
@@ -262,6 +268,13 @@ class _HomeState extends State<Home> {
             FlatButton(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return NestedPage();
+                  }));
+                },
+                child: Text("NestedPage")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return ScrollNotificationPage();
                   }));
                 },
@@ -334,6 +347,13 @@ class _HomeState extends State<Home> {
             FlatButton(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return DraggablePage();
+                  }));
+                },
+                child: Text("Draggable 拖动到目标widget")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return ClipWidget();
                   }));
                 },
@@ -373,6 +393,28 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("blur ")),
+            Text("事件处理---------------"),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return PointerListener();
+                  }));
+                },
+                child: Text("pointer listener")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return GesureDetectorPage();
+                  }));
+                },
+                child: Text("Gesure Detector")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return NotificationPage();
+                  }));
+                },
+                child: Text("Notification Page")),
             Text("动画animation ----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -461,6 +503,13 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("测试FFmpeg")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return MovieAudioReplace();
+                  }));
+                },
+                child: Text("电影音频替换")),
             Text("酷炫效果和自定义----------------------- "),
             FlatButton(
                 onPressed: () {

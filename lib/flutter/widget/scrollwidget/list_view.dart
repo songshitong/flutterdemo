@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+///SingleChildScrollView 嵌套 ListView 或listView嵌套ListView 不滚动的问题，禁用内部listview的滚动/内部primary设为false(发生滚动的是外部，使用NotificationListener监听)
 class ListViewPage extends StatefulWidget {
   @override
   ListViewPageState createState() {
@@ -64,7 +65,8 @@ class ListViewPageState extends State<ListViewPage> {
               addAutomaticKeepAlives: true,
               primary: false,
 
-              ///true list没有足够的item也可以滚动  父里面主要可滚动view ScrollView -- primary
+              ///primary true list没有足够的item也可以滚动  父里面主要可滚动view ScrollView -- primary
+              ///
               ///多个listview，其他不能展开
               children: <Widget>[
                 Container(color: Colors.black12, child: Text("aaaa")),

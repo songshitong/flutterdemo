@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 //todo StatefulBuilder  Builder
 //todo align
 //todo  Material  制作material风格控件，使用主题，查看RaisedBtn
-//todo SafeArea
 //buildcontext可从key获得     buildcontext 不能是pop的会报unsafe,
 
 //Navigator operation requested with a context that does not include a Navigator
@@ -43,7 +42,6 @@ import 'package:flutter/material.dart';
 //    Offset offset = box.localToGlobal(Offset.zero);
 //    Size size = box.size;
 
-///控件Dismissible
 ///
 ///     WidgetsBinding.instance.addPostFrameCallback(_afterLayout);   WidgetsBinding  widget和flutter engine之间的胶水
 ///
@@ -54,10 +52,8 @@ import 'package:flutter/material.dart';
 ///
 /// todo 线性插值
 ///
-///todo Dismissible
 ///todo layoutbuilder  实现根据constrains动态子布局，父固定-》constarins固定/充满屏-》类似gallery的多个产品
-///Draggable
-///
+///todo PreferredSize
 /// final MediaQueryData mediaQueryData = MediaQuery.of(context);
 //    final double statusBarHeight = mediaQueryData.padding.top;
 //    final double screenHeight = mediaQueryData.size.height;
@@ -66,7 +62,6 @@ import 'package:flutter/material.dart';
 //各种theme
 
 // function 是const吗  一个const构造器，接受一个function     class外面的是function，里面的是method???
-//NestedScrollView
 //pageview  快速回弹效果 PageScrollPhysics
 //ValueNotifier 各种listener
 //WidgetsBinding.instance.window.devicePixelRatio
