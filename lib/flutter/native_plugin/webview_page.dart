@@ -47,12 +47,28 @@ class _WebviewPageState extends State<WebviewPage> {
   void initState() {
     super.initState();
     final String contentBase64 = base64Encode(const Utf8Encoder().convert(kNavigationExamplePage));
+    DefaultAssetBundle.of(context).loadString("lib/game/flappybird/index.html").then((result) {
+      print("flappybird/index.html $result");
+      var flappyBase64 = "data:text/html;base64,${base64Encode(const Utf8Encoder().convert(result))}";
+      var flappyUri =
+          Uri.dataFromString(result, mimeType: 'text/html', encoding: Encoding.getByName('utf-8')).toString();
+      setState(() {
+        _controller.future.then((controller) {
+          controller.loadUrl(flappyUri);
+        });
+      });
+    });
     urlSources = {
       "baidu": "https://www.baidu.com",
       "flutter": "https://flutter.dev",
       "weibo": "https://www.weibo.com",
       "huya": "https://www.huya.com/",
-      "AndroidDemo": "data:text/html;base64,$contentBase64"
+      "AndroidDemo": "data:text/html;base64,$contentBase64",
+      "hilo--flappybird": "file:///android_asset/flutter_assets/lib/game/flappybird/index.html",
+      "hilo--水果忍者": "http://g.alicdn.com/tmapp/hilodemos/3.0.7/fruit-ninja/index.html",
+      "白鹭--守卫我的塔": "http://dev.egret.com//cn/article/index/id/1074",
+      "白鹭--密室逃脱": "http://dev.egret.com//cn/article/index/id/891",
+      "cocos star-catcher": "http://fbdemos.leanapp.cn/star-catcher/"
     };
     url = urlSources["baidu"];
   }
@@ -66,12 +82,12 @@ class _WebviewPageState extends State<WebviewPage> {
         actions: <Widget>[
           PopupMenuButton(
             itemBuilder: (BuildContext context) => List<PopupMenuItem<String>>.generate(urlSources.length, (index) {
-                  var key = urlSources.keys.elementAt(index);
-                  return PopupMenuItem(
-                    child: Text(key),
-                    value: key,
-                  );
-                }),
+              var key = urlSources.keys.elementAt(index);
+              return PopupMenuItem(
+                child: Text(key),
+                value: key,
+              );
+            }),
             onSelected: (key) {
               url = urlSources[key];
               _controller.future.then((controller) {
@@ -93,7 +109,7 @@ class _WebviewPageState extends State<WebviewPage> {
               _controller.complete(viewController);
             },
             onPageFinished: (url) {
-              print("page  load finish ========= url is $url");
+              print("page  load finish ========= url is $url  initialUrl ${this.url}");
               setState(() {
                 progressVisible = false;
               });

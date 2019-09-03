@@ -17,6 +17,9 @@ class _HeroPageState extends State<HeroPage> {
 //    Hero(
 //         child:widget
 //        tag: "avatar"） //唯一标记，前后两个路由页Hero的tag必须相同
+
+    //todo hero 原理
+    //HeroController中做了判断动画只对PageRoute生效
     return Scaffold(
       appBar: AppBar(
         title: Text("HeroPage"),
@@ -25,6 +28,32 @@ class _HeroPageState extends State<HeroPage> {
         children: <Widget>[
           Hero(
             tag: "hero",
+
+            //手势触发page transition时，是否进行hero动画，例如iOS，右滑动返回上一页
+            transitionOnUserGestures: false,
+            //hero动画中，代替child留在原地的widget
+            placeholderBuilder: (
+              BuildContext context,
+              Size heroSize,
+              Widget child,
+            ) {
+              return Text("placeholder");
+            },
+            //hero动画，飞行中的widget，到达目的后变为目标widget
+            //该widget不能拥有global key，动画内部使用其在前后widget tree共享widget
+            flightShuttleBuilder: (
+              BuildContext flightContext,
+              Animation<double> animation,
+              HeroFlightDirection flightDirection,
+              BuildContext fromHeroContext,
+              BuildContext toHeroContext,
+            ) {
+              return Material(child: Text("flightShuttle"));
+            },
+            //定义目标hero的界限在从起始route飞向目的地route时如何变化,MaterialApp默认使用MaterialRectArcTween
+            createRectTween: (Rect begin, Rect end) {
+              return MaterialRectArcTween(begin: begin, end: end);
+            },
             child: RaisedButton(
               onPressed: () {
                 Navigator.push(context, PageRouteBuilder(

@@ -8,6 +8,7 @@ abstract class Widget {
 '   createElement方法将配置解析为具体的实例
 '   canUpdate方法是否可以使用`newWidget`来更新当前具有`oldWidget`作为其配置的[Element]
 '      通过runtimeType和key进行判断
+'  createElement 在element的updatechild inflateWidget调用，第一次在WidgetsBinding的attachToRenderTree，也是runApp时调用
 'end note
 
 abstract class StatelessWidget{
@@ -68,6 +69,7 @@ abstract class State{
    void dispose()
 }
 'note right of State
+' TODO 完善
 ' 定义：[StatefulWidget]的逻辑和内部状态
 ' state的生命周期
 ' ...
@@ -152,15 +154,19 @@ class StatelessElement{
 
 'note right of StatelessElement{
 '  定义：使用[StatelessWidget]作为其配置的[Element]
+'   build调用widget.build(this)
 '}
 
 class StatefulElement{
+   State<StatefulWidget> _state
    Widget build()
    void update(StatefulWidget newWidget)
 }
 
 'note left of StatefulElement{
 ' 定义：使用[StatefulWidget]作为其配置的[Element]
+'  StatefulElement构造器初始化时将widget的state初始化，_state = widget.createState()
+'  build方法调用 state.build
 '}
 
 abstract class AbstractNode{
@@ -425,7 +431,7 @@ abstract class RenderBox{
 
 
 class BuildOwner {
-
+   FocusManager get focusManager
    void scheduleBuildFor()
    void lockState(void callback())
    void buildScope(Element context, [ VoidCallback callback ])
@@ -558,6 +564,22 @@ abstract class InheritedWidget{
 '  例如，[主题]实现为[StatelessWidget]构建私有继承的小部件; [Theme.of]看起来使用[BuildContext.inheritFromWidgetOfExactType]继承的小部件
 '  然后返回[ThemeData]
 '}
+
+class RenderView{
+   Size get size
+   ViewConfiguration get configuration
+   final ui.Window _window
+   Rect get paintBounds
+   Rect get semanticBounds
+   bool automaticSystemUiAdjustment
+   void scheduleInitialFrame()
+   void compositeFrame()
+}
+'note right of RenderView{
+' 渲染树的根
+'
+' compositeFrame()  将合成的图层树上载到引擎  实际上导致渲染管道的输出出现在屏幕上  _layer是OffsetLayer
+'}
 Widget <|-- StatelessWidget
 Widget <|-- StatefulWidget
 Widget <|-- RenderObjectWidgets
@@ -579,6 +601,7 @@ ComponentElement  <|-- StatefulElement
 AbstractNode      <|-- RenderObject
 RenderObject      <|-- RenderBox
 RenderObject      <--  PipelineOwner
+RenderObject      <|-- RenderView
 
 RenderObjectWidgets <|-- LeafRenderObjectWidget
 RenderObjectWidgets <|-- SingleChildRenderObjectWidget

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 //一个AnimationController控制所有动画。
 //每个动画对象在间隔(Interval)期间指定动画。
 //对于要执行动画的每个属性都要创建一个Tween
+//todo Tween.evaluate(animationController) 通过controller控制多个tween
 class StaggerAnimation extends StatelessWidget {
   StaggerAnimation({Key key, this.controller}) : super(key: key) {
     //高度动画

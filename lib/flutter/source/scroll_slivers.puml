@@ -119,7 +119,7 @@ class Viewport{
 '  offset 视口内的哪部分内容应该是可见的.[ViewportOffset.pixels]值确定视口用于选择要显示其内容的哪个部分的滚动偏移量.当用户滚动视口时，
 '     此值会更改，这会更改显示的内容.通常是[ScrollPosition]
 '  center [GrowthDirection.forward]增长方向的第一个孩子.[center]必须是ViewPort的child的key
-'  cacheExtent 在RenderViewportBase中有解释，视口在可见区域之前和之后有一个区域，用于缓存在用户滚动时即将变为可见的项目。落在此缓存区域中
+'  cacheExtent 预加载？？ 在RenderViewportBase中有解释，视口在可见区域之前和之后有一个区域，用于缓存在用户滚动时即将变为可见的项目。落在此缓存区域中
 '     的项目即使它们在屏幕上不是（还）可见，也会被布局。[cacheExtent]描述缓存区域在视口前端之前和后端之后延伸的像素数。
 '     视口将尝试覆盖children的总范围是 前端前的[cacheExtent]+主轴的范围+后端后的[cacheExtent]
 '     缓存区域还用于在iOS上实现隐式可访问性滚动，当辅助功能焦点从可见的视口中的项移动到缓存区中的不可见项时，框架将使用（隐式）滚动操作
@@ -305,11 +305,11 @@ class RenderSliverToBoxAdapter{
 class SliverFillRemaining{
   RenderSliverFillRemaining createRenderObject(BuildContext context)
 }
-note right of SliverFillRemaining{
-  包含单个盒子的条子，填充剩余的视口空间
-  [SliverFillRemaining]调整其子项的大小以填充cross轴中的视口并填充主轴视口中的剩余空间
-  通常，这将是视口中的最后一个条子，因为（根据定义）除了这条条子之外，什么都没有空间
-}
+'note right of SliverFillRemaining{
+'  包含单个盒子的条子，填充剩余的视口空间
+'  [SliverFillRemaining]调整其子项的大小以填充cross轴中的视口并填充主轴视口中的剩余空间
+'  通常，这将是视口中的最后一个条子，因为（根据定义）除了这条条子之外，什么都没有空间
+'}
 
 class RenderSliverFillRemaining{
   void performLayout()

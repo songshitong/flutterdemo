@@ -21,6 +21,7 @@ class _MovieAudioReplaceState extends State<MovieAudioReplace> {
   StreamSubscription _playerSubscription;
 
   FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
+  bool showProgressBar = false;
 
   String url1 = "http://vfx.mtime.cn/Video/2017/03/31/mp4/170331093811717750.mp4";
   String playUrl;
@@ -147,11 +148,33 @@ class _MovieAudioReplaceState extends State<MovieAudioReplace> {
                 if (_file.existsSync()) {
                   _file.deleteSync();
                 }
+                String replaceCmd = "-i $url1 -i $audioPath -c copy -map 0:v:0 -map 1:a:0 $outPath";
+                setState(() {
+                  showProgressBar = true;
+                });
+                String cmd =
+                    "-i $url1 -i $audioPath -filter_complex [0:a]aformat=sample_fmts=fltp:channel_layouts=stereo,volume=0.1[a0];[1:a]aformat=sample_fmts=fltp:channel_layouts=stereo,volume=1,adelay='0000|0000|0000'[a1];[a0][a1]amix=inputs=2:duration=first[aout] -map [aout] -ac 2 -c:v copy -map 0:v:0 $outPath";
                 _flutterFFmpeg
-                    .execute("-i $url1 -i $audioPath -c copy -map 0:v:0 -map 1:a:0 $outPath")
-                    .then((rc) => print("FFmpeg process exited with rc $rc"));
+                  ..execute(cmd).then((rc) {
+                    print("FFmpeg process exited with rc $rc");
+                    setState(() {
+                      showProgressBar = false;
+                    });
+                  });
               },
-              child: Text("替换电影音频"),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text("替换电影音频"),
+                  Visibility(
+                    visible: showProgressBar,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                ],
+              ),
             ),
             RaisedButton(
               onPressed: () async {
@@ -172,10 +195,10 @@ class _MovieAudioReplaceState extends State<MovieAudioReplace> {
             ),
             RaisedButton(
               onPressed: () {
-                setState(() {
+                setState(() async {
                   playUrl = "$outPath";
                   initVideoController("file");
-                  _controller.play();
+                  await _controller.play();
                 });
               },
               child: Text("播放替换后的电影"),

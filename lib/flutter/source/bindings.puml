@@ -1,0 +1,339 @@
+@startuml
+
+class BindingBase{
+   ui.Window get window
+
+   Future<void> lockEvents(Future<void> callback())
+   void registerSignalServiceExtension({@required String name,@required AsyncCallback callback,})
+   void registerServiceExtension({@required String name,@required ServiceExtensionCallback callback,})
+   void registerBoolServiceExtension({@required String name,@required AsyncValueGetter<bool> getter,@required AsyncValueSetter<bool> setter,})
+   void registerNumericServiceExtension({@required String name,@required AsyncValueGetter<double> getter,@required AsyncValueSetter<double> setter,})
+   void registerStringServiceExtension({@required String name,@required AsyncValueGetter<String> getter,@required AsyncValueSetter<String> setter,})
+
+   Future<void> reassembleApplication()
+   Future<void> performReassemble()
+}
+'note right of BindingBase{
+'  lockEvents  锁定异步事件和回调的调度，直到回调的future完成.这会导致输入滞后，因此应尽可能避免
+'     它是主要用于非用户交互时间，例如允许[reassembleApplication]阻止输入，当它走到树时（它部分地异步） reassemble重新安装
+'
+'  registerSignalServiceExtension 注册具有给定名称的服务扩展方法（完整名称“ext.flutter.name”），该方法不带参数并返回无值.
+'     调用服务扩展时调用`callback`回调
+'
+'  registerBoolServiceExtension 使用给定名称（完整名称“ext.flutter.name”）注册服务扩展方法，该方法采用单个参数“enabled”，
+'     其值可以为“true”或值为“false” 或者可以省略来读取当前值。 （其他不是true任何值”被认为等同于“false”。其他参数/将被忽略。）
+'     当响应被调用的服务扩展方法时，调用`getter`回调来获取值。当使用新值调用服务扩展方法时，使用新值调用`setter`回调
+'  registerServiceExtension  注册具有给定名称的服务扩展方法（全名“ext.flutter.name”）。调用扩展方法时会调用给定的回调。
+'     回调必须返回一个[Future]，它最终以名称/值映射的形式完返回值，其中值可以全部/用`json.encode（）转换为JSON `（参见[JsonEncoder]），或者失败
+'     在失败的情况下，将故障报告给远程调用者并且被转储到日志中。只有在构建中包含vm-service 时才能激活已注册的服务扩展，这仅在调试和配置文件模式下发生
+'     虽然服务扩展不能在发布模式下使用，但它的代码可能仍然包含在Dart快照中并且如果没有包装在允许树振动器移除它的防护中，则会炸掉二进制大小（参见下面的示例代码
+'     assert()和if(!kReleaseMode)两个警卫都确保Dart的树振动器可以在发布版本中删除服务扩展的代码
+'   reassembleApplication  导致整个应用程序重绘，例如经过hot reload后   hot restart不会触发
+'     当应用程序代码发生变化时，开发工具会使用它，使应用程序获取任何更改的代码.它可以通过发送`ext.flutter.reassemble`服务扩展信号手动触发
+'     此方法计算量非常大，不应在生产代码中使用。永远不会有正当理由导致整个应用程序在生产中重新绘制。Flutter框架的所有方面知道如何在必要时重绘。
+'     只有在开发时才需要当代码在运行中实际改变时（例如在热重新加载中）或者调试标志被切换时
+'     当此方法运行时，事件被锁定（例如，不调度指针事件）
+'     子类（绑定类）应覆盖[performReassemble]以对被调用的此方法做出反应。不应该覆盖此方法本身
+'}
+
+class WidgetsFlutterBinding{
+   static WidgetsBinding ensureInitialized()
+}
+'note right of WidgetsFlutterBinding{
+'  基于Widgets框架的应用程序的具体绑定
+'  这是将框架绑定到Flutter引擎的粘合剂
+'
+'  WidgetsFlutterBinding 继承BindingBase，混入GestureBinding，ServicesBinding，SchedulerBinding，PaintingBinding，SemanticsBinding，
+'     RendererBinding，WidgetsBinding的功能
+'  WidgetsFlutterBinding的ensureInitialized会调用BindingBase()，然后调用BindingBase自己和各个binding的initInstances()和initServiceExtensions()方法
+'      返回[WidgetsBinding]的实例，创建并在必要时初始化它。如果创建了一个，它将是[WidgetsFlutterBinding]。如果之前已初始化，那么它至少会实现[WidgetsBinding]
+'}
+
+class WidgetsBinding{
+   BuildOwner get buildOwner
+   FocusManager get focusManager
+   Element get renderViewElement
+   void initInstances()
+   void initServiceExtensions()
+
+   final List<WidgetsBindingObserver> _observers = <WidgetsBindingObserver>[]
+   void addObserver(WidgetsBindingObserver observer)
+   bool removeObserver(WidgetsBindingObserver observer)
+
+   void handleMetricsChanged()
+   void handleTextScaleFactorChanged()
+   void handlePlatformBrightnessChanged()
+   void dispatchLocalesChanged(List<Locale> locales)
+   void handleAppLifecycleStateChanged(AppLifecycleState state)
+   void handleMemoryPressure()
+
+   void drawFrame()
+   void attachRootWidget(Widget rootWidget)
+   Future<void> performReassemble()
+}
+
+'note right of WidgetsBinding{
+'   addObserver 将给定对象注册为绑定观察者.绑定观察者会在发生各种应用程序事件时收到通知，例如系统区域设置发生更改时。
+'   通常，窗口小部件树中的一个窗口小部件将自身注册为绑定观察者，并将系统状态转换为inherited widgets。
+'   例如，[WidgetsApp]小部件注册为绑定观察者，并在每次构建时将屏幕大小传递给[MediaQuery]小部件，这使得其他小部件可以使用[MediaQuery.of]静态方法和（隐式）
+'      [InheritedWidget]机制，当屏幕大小改变时（例如，每当屏幕旋转时）通知
+'   多个handle和dispatch方法将事件分发给_observers的WidgetsBindingObserver
+'   renderViewElement  位于层次结构根目录的[Element]（将[RenderView]对象包装在渲染层次结构的根目录中）,这是在第一次调用[runApp]时初始化的
+'   attachRootWidget 获取一个widget并将其附加到[renderViewElement]，如果需要，则创建它。这由[runApp]调用以配置widget树。
+'      renderViewElement初始化和填充这个widget并实际设置生成的[RenderObject]作为子节点的[container]
+'
+'   performReassemble  导致整个应用程序重绘，例如经过hot reload后
+'   drawFrame  抽取构建和渲染管道以生成frame,这个方法由[handleDrawFrame]调用，当它需要布局并绘制框架时，引擎自动调用
+'     最主要三行代码 建立重绘范围，调用super的drawFrame,卸载unactive的element
+'      if (renderViewElement != null)
+'              buildOwner.buildScope(renderViewElement);
+'            super.drawFrame();
+'            buildOwner.finalizeTree();
+'   每个frame由以下阶段组成
+'     1. The animation phase
+'     2. Microtasks
+'     3. The build phase
+'     4. The layout phase
+'     5. The compositing bits phase
+'     6. The paint phase
+'     7. The compositing phase
+'     8. The semantics phase
+'     9. The finalization phase in the widgets layer
+'}
+
+abstract class WidgetsBindingObserver{
+   void didChangeMetrics()
+   void didChangeAppLifecycleState(AppLifecycleState state)
+   void didHaveMemoryPressure()
+   void didChangeTextScaleFactor()
+}
+'note right of WidgetsBindingObserver{
+'  didChangeMetrics 在应用程序的维度发生变化时调用。例如,旋转电话时.此方法公开来自[Window.onMetricsChanged]的通知
+'    通常，这是不必要的，因为布局系统负责在应用程序大小更改时自动重新计算应用程序几何
+'  didChangeAppLifecycleState  当系统将应用程序置于后台或将应用程序返回到前台时调用.在[WidgetsBindingObserver]类的类级文档中提供了实现此方法的示例
+'     此方法公开来自[SystemChannels.lifecycle]的通知
+'  didHaveMemoryPressure()    当系统内存不足时调用,此方法从[SystemChannels.system]公开`memoryPressure`通知
+'  didChangeTextScaleFactor   当平台的文本比例因子发生变化时调用，这通常是由于用户更改系统首选项而导致的，它应该影响应用程序中的所有文本大小
+'     此方法公开来自[Window.onTextScaleFactorChanged]的通知
+'}
+
+
+class PaintingBinding {
+   static ShaderWarmUp shaderWarmUp = const DefaultShaderWarmUp()
+   ImageCache get imageCache
+   void initInstances()
+}
+'note right of PaintingBinding{
+'  实现Flutter框架图像缓存的单例
+'  缓存由[ImageProvider]在内部使用，通常不应直接访问
+'  图像缓存在启动期间(initInstances)由[createImageCache]方法创建。
+'  shaderWarmUp 如果应用程序具有需要编译[DefaultShaderWarmUp]未涵盖的复杂着色器的场景,
+'     它可能会导致jank(android团队把滞缓，不流畅的动画定义为jank)在动画或交互过程中
+'}
+
+abstract class ShaderWarmUp{
+  ui.Size get size
+  Future<void> warmUpOnCanvas(ui.Canvas canvas)
+  Future<void> execute()
+}
+'note right of ShaderWarmUp{
+'  用于绘制图像以加热Skia着色器编辑的界面  具体看注释
+'  execute 调用warmUpOnCanvas
+'}
+
+class DefaultShaderWarmUp{
+   ui.Size get size
+   Future<void> warmUpOnCanvas(ui.Canvas canvas)
+}
+
+class ServicesBinding{
+   void initInstances()
+   void initLicenses()
+   void initServiceExtensions()
+   void evict(String asset)
+   BinaryMessenger createBinaryMessenger()
+   BinaryMessenger get defaultBinaryMessenger
+
+}
+
+'note right of ServicesBinding{
+'   ServicesBinding是一个mixin
+'   侦听平台消息并将其定向到[defaultBinaryMessenger]
+'   [ServicesBinding]还注册了一个公开在存储在资产根目录的`LICENSE`文件中找到的许可证的[LicenseEntryCollector]
+'     并实现`ext.flutter.evict`服务扩展
+'   initLicenses 向[LicenseRegistry]添加相关许可证.默认情况下，[ServicesBinding]的[initLicenses]实现添加编译期间`flutter`工具收集的所有许可证
+'   initInstances  实现实例化,实现监听window来的message window..onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage
+'}
+
+abstract class BinaryMessenger{
+  Future<void> handlePlatformMessage(String channel, ByteData data, ui.PlatformMessageResponseCallback callback)
+  Future<ByteData> send(String channel, ByteData message)
+  void setMessageHandler(String channel, Future<ByteData> handler(ByteData message))
+  void setMockMessageHandler(String channel, Future<ByteData> handler(ByteData message))
+}
+
+'note right of BinaryMessenger{
+'   一个信使，它通过Flutter平台屏障发送二进制数据
+'   该类还为传入消息注册处理程序
+'   handlePlatformMessage 调用为给定通道注册的处理程序
+'}
+
+
+class _DefaultBinaryMessenger{
+
+}
+
+class RendererBinding{
+    MouseTracker get mouseTracker
+    PipelineOwner get pipelineOwner
+    void initInstances()
+    void initRenderView()
+    void initServiceExtensions()
+    RenderView get renderView
+    void handleMetricsChanged()
+    void handleTextScaleFactorChanged()
+    void handlePlatformBrightnessChanged()
+    ViewConfiguration createViewConfiguration()
+    void setSemanticsEnabled()
+    void drawFrame()
+    Future<void> performReassemble()
+    void hitTest()
+
+}
+'
+'note right of RendererBinding{
+'  RendererBinding 一个mixin
+'
+'  mouseTracker  管理当前连接鼠标状态的对象，用于悬停通知
+'  pipelineOwner  渲染树的所有者，它维护布局，复合，绘制和可访问性语义的脏状态
+'  initInstances() 初始化RendererBinding，初始化_pipelineOwner，监听window的各种事件handleMetricsChanged等，初始化initRenderView()
+'  handleMetricsChanged() 在系统指标发生变化时调用
+'  drawFrame()
+'  performReassemble 调用renderView.reassemble()和scheduleWarmUpFrame()
+'}
+
+class RenderView{
+  ViewConfiguration get configuration
+  final ui.Window _window
+  bool automaticSystemUiAdjustment = true
+  void scheduleInitialFrame()
+  void performLayout()
+  bool hitTest(HitTestResult result, { Offset position })
+  bool get isRepaintBoundary
+  void paint(PaintingContext context, Offset offset)
+  void applyPaintTransform(RenderBox child, Matrix4 transform)
+  void compositeFrame()
+  Rect get paintBounds
+  Rect get semanticBounds
+}
+
+'note right of RenderView{
+'   渲染树的根
+'   视图表示渲染树的总输出表面，并处理引导渲染管道.该视图有一个独特的孩子[RenderBox]，这是填充整个输出表面所必需的
+'   scheduleInitialFrame()  通过调度第一帧来引导渲染管道.这应该只调用一次，并且必须在更改[configuration]之前调用。
+'     通常在调用构造函数后立即调用它。
+'   compositeFrame()  将合成的图层树上载到引擎,实际上导致渲染管道的输出出现在屏幕上.这会将位发送到GPU
+'}
+
+class GestureBinding{
+  final PointerRouter pointerRouter
+  final GestureArenaManager gestureArena
+  final PointerSignalResolver pointerSignalResolver
+  final Queue<PointerEvent> _pendingPointerEvents
+  void initInstances()
+  void dispatchEvent(PointerEvent event, HitTestResult hitTestResult)
+  void handleEvent(PointerEvent event, HitTestEntry entry)
+}
+'note right of GestureBinding{
+'   gestureArena 手势竞争
+'   initInstances 监听来自window的指针数据window.onPointerDataPacket = _handlePointerDataPacket
+'   然后_flushPointerEventQueue， _handlePointerEvent(PointerEvent event)，进入dispatchEvent
+'}
+
+class  SchedulerBinding{
+  AppLifecycleState get lifecycleState
+  SchedulerPhase get schedulerPhase
+  SchedulingStrategy schedulingStrategy
+  final List<FrameCallback> _postFrameCallbacks
+  final List<FrameCallback> _persistentCallbacks
+  Map<int, _FrameCallbackEntry> _transientCallbacks
+  void initInstances()
+  void handleAppLifecycleStateChanged(AppLifecycleState state)
+  void ensureVisualUpdate()
+  void scheduleFrame()
+  void handleDrawFrame()
+  int scheduleFrameCallback(FrameCallback callback, { bool rescheduling = false })
+}
+note right of SchedulerBinding{
+  调度程序用于运行以下内容
+  _Transient callback短暂回调_，由系统的[Window.onBeginFrame]触发回调，用于将应用程序的行为同步到系统显示
+     例如，[Ticker]和[AnimationController]的触发器来自这些
+  _Persistent callbacks持续回调_，由系统的[Window.onDrawFrame]触发回调，用于在瞬态回调执行后更新系统的显示
+     例如，渲染层使用它来驱动它渲染管道
+  _Post-frame callbacks_，仅在持久回调之后运行从[Window.onDrawFrame]回调返回之前
+  要在帧之间运行的非渲染任务。这些优先级根据[schedulingStrategy]按优先级顺序执行
+
+  scheduleFrameCallback 调用scheduleFrame(),往_transientCallbacks新添加
+
+}
+enum SchedulerPhase {
+  idle
+  transientCallbacks
+  midFrameMicrotasks
+  persistentCallbacks
+  postFrameCallbacks
+}
+'note right of SchedulerPhase{
+'   idle 没有正在处理的帧.任务（由[WidgetsBinding.scheduleTask]安排），微任务（由[scheduleMicrotask]调度），[Timer]回调，
+'       事件处理程序（例如来自使用输入）和其他回调（例如来自[Future] s，[Stream] s，等等可能正在执行.
+'   transientCallbacks 瞬态回调（由[WidgetsBinding.scheduleFrameCallback]调度）当前正在执行.通常，这些回调处理将对象更新为新动画状态
+'       See [SchedulerBinding.handleBeginFrame]
+'   midFrameMicrotasks 在处理瞬态回调期间安排的微任务是当前正在执行的。这可能包括，例如，在[transientCallbacks]阶段期间解决的期货回调.
+'   persistentCallbacks 持久回调（由[WidgetsBinding.addPersistentFrameCallback]调度）当前正在执行  通常，这是构建/布局/绘制管道
+'       See [WidgetsBinding.drawFrame] and [SchedulerBinding.handleDrawFrame]
+'   postFrameCallbacks  后帧回调（由[WidgetsBinding.addPostFrameCallback]调度）当前正在执行通常，这些回调处理下一帧的工作清理和调度
+'       See [SchedulerBinding.handleDrawFrame]
+'}
+
+enum AppLifecycleState {
+  resumed
+  inactive
+  paused
+  suspending
+}
+' note right of AppLifecycleState{
+'   application处在的状态。以下值描述了来自操作系统的通知。应用程序不应期望始终接收所有可能的通知。例如，如果用户从设备中取出电池，
+'      则在应用程序突然终止之前不会发送任何通知，以及操作系统的其余部分
+'
+'   resumed 应用程序可见并响应用户输入
+'   inactive 应用程序处于非活动状态，并且未接收用户输入.
+'      在iOS上，此状态对应于在前台不活动状态下运行的应用程序或Flutter主机视图。当进入电话呼叫，响应TouchID请求，进入应用程序切换器或控制中心时，
+'         或托管Flutter应用程序的UIViewController正在转换时，应用程序将转换为此状态。
+'      在Android上，这对应于在前台非活动状态下运行的应用程序或Flutter主机视图。当其他活动聚焦时，应用程序会转换到此状态，
+'         例如分屏应用，电话，画中画应用，系统对话框或其他窗口.处于此状态的应用程序应假设它们可能随时[paused]
+'   paused  该应用程序当前对用户不可见，不响应用户输入，并在后台运行。当应用程序处于此状态时，
+'       引擎将不会调用[Window.onBeginFrame]和[Window.onDrawFrame]回调.处于此状态的Android应用程序应假设他们可以随时进入[suspending]状态。
+'   suspending application将暂停 当应用程序处于此状态时，引擎将不会调用[Window.onBeginFrame]和[Window.onDrawFrame]回调。
+'       在iOS上，此状态目前尚未使用。
+' }
+BindingBase <|-- WidgetsFlutterBinding
+BindingBase <|-- WidgetsBinding
+BindingBase <|-- RendererBinding
+BindingBase <|-- GestureBinding
+BindingBase <|-- SchedulerBinding
+WidgetsBinding <-- WidgetsFlutterBinding
+WidgetsBinding <.. WidgetsBindingObserver
+RendererBinding <-- WidgetsBinding
+
+ServicesBinding  <|-- PaintingBinding
+PaintingBinding  <-- WidgetsFlutterBinding
+ShaderWarmUp     <|-- DefaultShaderWarmUp
+PaintingBinding  <..  DefaultShaderWarmUp
+BinaryMessenger  <|-- _DefaultBinaryMessenger
+
+ServicesBinding  <..  _DefaultBinaryMessenger
+RendererBinding  <..  RenderView
+RenderObject     <|-- RenderView
+SchedulerBinding <..  SchedulerPhase
+SchedulerBinding <..  AppLifecycleState
+@enduml

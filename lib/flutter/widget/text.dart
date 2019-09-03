@@ -1,7 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class TextPage extends StatelessWidget {
   static const routeName = "TextPage";
+  TapGestureRecognizer _recognizer = TapGestureRecognizer()..onTap = () => print('TapGestureRecognizer onTap');
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +112,11 @@ class TextPage extends StatelessWidget {
               style: DefaultTextStyle.of(context).style,
               children: <TextSpan>[
                 TextSpan(text: 'bold', style: TextStyle(fontWeight: FontWeight.w500)),
-                TextSpan(text: ' world!'),
+                TextSpan(
+                    text: ' world!',
+                    //事件由RichText的RenderParagraph的handleEvent分发事件,直接使用canvas没有事件分发，recognizer不会响应事件
+                    //InlineSpan也不管理recognizer的声明周期，InlineSpan不使用后必须调用GestureRecognizer.dispose
+                    recognizer: _recognizer),
               ],
             ),
           ),

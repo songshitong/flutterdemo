@@ -58,8 +58,8 @@ void main() {
   Men men = Men();
   men.log();
 
-//  mixins的类型
-  print("women is A ${women is A}");
+//  mixins的类型  women is A true        women is B true
+  print("women is A ${women is A}  women is B ${women is B}");
 
   ///如果一个对象是不会改变的，你可以讲这些对象创建为编译时常量。定义cost构造函数，而且要确保所有的常量都是final的
   var robot1 = const ImmutablePoint(1, 1);
@@ -143,7 +143,7 @@ mixin Musical {
 }
 
 //mixins X on A  声明只有特定的类型可以使用mixin , 要mixins X的话，得先接口实现或者继承A。这里A可以是类，也可以是接口
-//mixin 使用实现和继承在前，with在后
+//mixin 使用实现和继承在前，with在后     mixin X 也可以实现接口AA的方法？？
 class AA {
   void a() {
     print("a");
@@ -154,9 +154,16 @@ mixin X on AA {
   void x() {
     print("x");
   }
+
+  void a() {}
 }
 
-class mixinsX extends AA with X {}
+class mixinsX extends AA with X {
+  @override
+  void x() {}
+  @override
+  void a() {}
+}
 
 class implA implements AA {
   @override

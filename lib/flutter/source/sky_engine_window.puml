@@ -1,0 +1,93 @@
+@startuml
+
+class window {
+   double get devicePixelRatio
+   Size get physicalSize
+   double get physicalDepth
+   WindowPadding get viewInsets
+   WindowPadding get viewPadding
+   WindowPadding get padding
+   VoidCallback get onMetricsChanged
+   Locale get locale
+   VoidCallback get onLocaleChanged
+   double get textScaleFactor
+   VoidCallback get onTextScaleFactorChanged
+   bool get alwaysUse24HourFormat
+   Brightness get platformBrightness
+   VoidCallback get onPlatformBrightnessChanged
+
+   FrameCallback get onBeginFrame
+   VoidCallback get onDrawFrame
+   TimingsCallback get onReportTimings
+   void scheduleFrame()
+   void render(Scene scene)
+   void updateSemantics(SemanticsUpdate update)
+   PlatformMessageCallback get onPlatformMessage
+   void sendPlatformMessage(String name,ByteData data,PlatformMessageResponseCallback callback)
+}
+
+note right of window{
+  final Window window = Window._();
+  window 是一个单例,使用WidgetsBinding.instance.window而不是直接引用winddow
+
+  Insets and Padding  (iphoneX底部有导航，上部有刘海)查看视频https://flutter.github.io/assets-for-api-docs/assets/widgets/window_padding.mp4
+  [Window.viewInsets]是操作的物理像素系统UI的系统保留，例如键盘，完全可以隐藏在该区域中绘制的任何内容，(系统UI如键盘的展示区域）
+  [Window.viewPadding]是显示器每侧的物理像素可能被系统UI或物理入侵部分遮挡显示，例如电视上的过扫描区域或者电话上的“缺口”
+    与Insets不同，这些区域可能具有向用户显示的部分应用程序绘制像素而不会被遮挡，例如仅覆盖该区域子集的手机顶部凹槽处
+    Insets，另一方面，部分或完全遮挡窗口，例如不透明键盘或部分transluscent状态栏，覆盖没有的区域差距
+  [Window.padding]属性是从[Window.viewInsets]和[Window.viewPadding]计算。它将允许视图插入消耗视图填充
+      适当时，例如手机键盘覆盖底部时查看填充，因此“吸收”它
+  想要相对于视图填充定位元素的客户端，无论view insets应该使用[Window.viewPadding]属性，例如如果你想尊重地在屏幕中心绘制一个小部件
+      到iPhone“安全区域”，无论键盘是否显示
+  [Window.padding]对于想要了解填充量的客户端非常有用,应该考虑而不考虑当前的插入状态.例如确定是否应考虑手势以进行滚动。
+    此值根据插入的当前状态而变化.例如，一个可见键盘将消耗底部的所有手势[Window.viewPadding]无论多少值，所以没有必要考虑到
+    [Window.padding]，这种计算总是安全的
+
+
+  viewInsets  显示矩形每侧的物理像素数量应用程序可以呈现，但操作系统可能会放置系统UI，例如键盘，完全模糊任何内容
+     当此属性更改时，将调用[onMetricsChanged]
+  viewPadding  显示矩形每边的物理像素数量应用程序可以渲染，但可能被系统UI（例如系统通知区域）
+      或物理入侵部分遮挡在显示器中（例如电视屏幕上的过扫描区域或电话传感器外壳）
+      与[Window.padding]不同，此值相对于[Window.viewInsets]不会更改
+      例如，在iPhone X上，它不会改变对软键盘的可见或隐藏响应，而 [Window.padding]会
+  padding  显示矩形每边的物理像素数量应用程序可以呈现，但可能被系统UI（例如系统通知区域）
+       或物理入侵部分遮挡在显示器中（例如电视屏幕上的过扫描区域或电话传感器外壳）
+       该值的计算方法是`max(0.0,Windows.viewPadding-Windows.viewInsets）
+       这会将系统IME视为消耗大部分底部填充而增加底部插入
+       例如，在iPhone X上，当没有绘制软键盘时，[Window.padding.bottom] 与[Window.viewPadding.bottom]相同
+       （为了考虑底部软按钮区域），但当软键盘可见时，它将为“0.0”
+  onMetricsChanged the [devicePixelRatio], [physicalSize], [padding], or [viewInsets] 改变时会回调，
+     框架注册此回调并适当地更新布局
+  onBeginFrame  调用的回调函数通知应用程序是适当的时间使用[SceneBuilder]提供场景 API和[render]方法。
+    如果可能，这是由硬件VSync信号驱动的。只有在上次调用此回调以来调用[scheduleFrame]时才会调用此方法。
+    在[onBeginFrame]之后立即调用[onDrawFrame]回调，在[onBeginFrame]处理程序排出任何微任务（例如任何[Future]s的完成）后排队
+    框架在设置回调的同一区域中调用此回调
+
+  onDrawFrame  在[onBeginFrame]完成之后和微任务队列排空之后为每个帧调用的回调。这可以用于实现在[onBeginFrame]阶段排队的任何延迟工作之后
+      发生的第二阶段帧渲染。框架在设置回调的同一区域中调用此回调
+
+  onReportTimings  调用的回调报告最近栅格化帧的[FrameTiming].这可用于查看应用程序是否丢失帧
+    （通过[FrameTiming.buildDuration]和[FrameTiming.rasterDuration]），或高延迟（通过[FrameTiming.totalSpan]）
+    与[时间轴]不同，此处的时序信息可在release模式下使用（额外profile和debug模式）.因此可以用于监视应用程序在野外的性能。
+    如果为null，则不会执行任何其他工作.如果这不是null，Flutter每1秒花费少于0.1ms来报告时间在iPhone6S上测量）.
+    0.1ms约为16ms的0.6％（60fps的帧预算），或每秒0.01％的CPU使用率
+  scheduleFrame   请求在下一个适当的机会调用[onBeginFrame]和[onDrawFrame]回调
+
+  render   使用新提供的[Scene]更新应用程序在GPU上的渲染.必须在[onBeginFrame]或[onDrawFrame]回调调用范围内调用此函数.如果在单个[onBeginFrame] / [onDrawFrame]
+      回调序列中第二次调用此函数，或者在这些回调范围之外调用此函数，则将忽略调用。
+      要记录图形操作，首先创建一个[PictureRecorder]，然后构造一个[Canvas]，将[PictureRecorder]传递给它的构造函数.在发出所有图形操作后，
+      调用[PictureRecorder]上的[PictureRecorder.endRecording]函数以获得表示已发布图形操作的最终[Picture].
+      接下来，创建一个[SceneBuilder]，并使用/// [SceneBuilder.addPicture]将[Picture]添加到它.使用[SceneBuilder.build]方法，
+       您可以然后获取[Scene]对象，您可以通过此[render]函数向用户显示该对象
+  updateSemantics  更改有关此窗口的保留语义数据  如果[semanticsEnabled]为true，则只要此窗口的语义内容发生更改，用户就会请求调用此函数
+     在任何一种情况下，此函数都会处理给定的更新，这意味着无法进一步使用语义更新
+  sendPlatformMessage  将消息发送到特定于平台的插件
+  onPlatformMessage  每当此窗口从特定于平台的插件接收消息时调用
+}
+
+
+package sky_engine_ui {
+  Object <|-- window
+}
+
+@enduml

@@ -1,4 +1,10 @@
+import 'dart:io';
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutterdemo/flutter/common/Style.dart';
 import 'package:flutterdemo/flutter/native_plugin/ffmpeg/ffmpeg_page.dart';
 import 'package:flutterdemo/flutter/native_plugin/ffmpeg/movie_audio_replace.dart';
@@ -9,9 +15,9 @@ import 'package:flutterdemo/flutter/packages/fish_redux/fish_redux_page.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/bottom_appbar.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/fold_cell.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/gallery/sliver_section.dart';
+import 'package:flutterdemo/flutter/pages/beautiful/pageview_page.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/test_one_line_layout.dart';
-import 'package:flutterdemo/flutter/pages/nativ/native_chat.dart';
-import 'package:flutterdemo/flutter/pages/nativ/native_view_to_widget.dart';
+import 'package:flutterdemo/flutter/services/system_chrome.dart';
 import 'package:flutterdemo/flutter/widget/CheckBox.dart';
 import 'package:flutterdemo/flutter/widget/Image.dart';
 import 'package:flutterdemo/flutter/widget/animation/custom_curve.dart';
@@ -28,11 +34,14 @@ import 'package:flutterdemo/flutter/widget/container/transformation_widget.dart'
 import 'package:flutterdemo/flutter/widget/customwidget/CanvasWidget.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/GifFileImg.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/buttom_btn.dart';
+import 'package:flutterdemo/flutter/widget/customwidget/capture_screen.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/path.dart';
+import 'package:flutterdemo/flutter/widget/customwidget/scroll_physics.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/blur.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/clip_widget.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/dismissible.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/draggable_page.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/drawer_page.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/event_dispatch/gesure_detector_listener.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/event_dispatch/notification.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/event_dispatch/pointer_listener.dart';
@@ -47,6 +56,8 @@ import 'package:flutterdemo/flutter/widget/layout/indexed_stack.dart';
 import 'package:flutterdemo/flutter/widget/layout/rowcolumn.dart';
 import 'package:flutterdemo/flutter/widget/layout/stack.dart';
 import 'package:flutterdemo/flutter/widget/layout/wrap_flow.dart';
+import 'package:flutterdemo/flutter/widget/nativ/native_chat.dart';
+import 'package:flutterdemo/flutter/widget/nativ/native_view_to_widget.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/customscrollview.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/grid_view.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/list_view.dart';
@@ -58,47 +69,288 @@ import 'package:flutterdemo/flutter/widget/switch.dart';
 import 'package:flutterdemo/flutter/widget/text.dart';
 import 'package:flutterdemo/flutter/widget/textfield.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:grpc/service_api.dart';
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
+import 'beautiful/circle_to_rectangle.dart';
+import 'beautiful/image_preview.dart';
+import 'beautiful/reorder_list.dart';
+import 'beautiful/shimmer_wiget.dart';
+import 'custom_popup_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-Color color = Colors.amber;
-
 class _HomePageState extends State<HomePage> {
+  ///切换主题
+  bool isDark = false;
+
+  ///切换颜色
+  Color color = Colors.amber;
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "flutter",
-      theme: ThemeData(primaryColor: color),
-      home: Home(() {
-        color = Colors.green;
-        setState(() {});
-      }, () {
-        color = Colors.amber;
-        setState(() {});
-      }),
+    var defaultPlatform = defaultTargetPlatform;
+    var androidTheme = ThemeData.light();
+
+    ///Android变色
+    if (defaultPlatform == TargetPlatform.android) {
+      androidTheme = ThemeData(primaryColor: color, brightness: isDark ? Brightness.dark : Brightness.light);
+    }
+    return RawGestureDetector(
+      gestures: <Type, GestureRecognizerFactory>{
+        TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+          () => TapGestureRecognizer(),
+          (TapGestureRecognizer instance) {
+            instance
+              ..onTapDown = (TapDownDetails details) {}
+              ..onTapUp = (TapUpDetails details) {}
+              ..onTap = () {
+                ///监听不到，
+                print("全局点击事件=======  onTap");
+              }
+              ..onTapCancel = () {};
+          },
+        ),
+      },
+      child: Listener(
+        onPointerMove: (e) {
+//          setState(() {});
+        },
+        onPointerDown: (PointerDownEvent e) {
+          print("全局点击事件============  down position ${e.position}");
+        },
+        onPointerUp: (PointerUpEvent e) {
+          print("全局点击事件============  up position ${e.position}");
+        },
+        child: MaterialApp(
+            title: "flutter",
+            theme: androidTheme,
+            darkTheme: androidTheme,
+            themeMode: ThemeMode.dark,
+            navigatorObservers: [MNavigatorObserber()],
+            home: RepaintBoundary(
+              child: Home(() {
+                color = Colors.green;
+                setState(() {});
+              }, () {
+                color = Colors.amber;
+                setState(() {});
+              }, () {
+                setState(() {
+                  isDark = !isDark;
+                });
+              }),
+            )),
+      ),
     );
+  }
+}
+
+///监听页面进入，离开
+class MNavigatorObserber extends NavigatorObserver {
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    print("MNavigatorObserber   route.overlayEntries ${route.overlayEntries.toString()}");
+
+    ///只监听页面route
+    if (route is PageRoute && previousRoute is PageRoute) {
+      print(
+          "HomePage MNavigatorObserber  didPush current ${route?.settings}  previousRoute ${previousRoute?.settings}");
+    }
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
+//    ModalRoute.of().isCurrent; 最上层的route
+
+    ///只监听页面route
+    if (route is PageRoute && previousRoute is PageRoute) {
+      print("HomePage MNavigatorObserber  didPop current ${route?.settings}  previousRoute ${previousRoute?.settings}");
+    }
   }
 }
 
 class Home extends StatefulWidget {
   VoidCallback change;
   VoidCallback reset;
-
-  Home(this.change, this.reset);
+  VoidCallback themeChange;
+  Home(this.change, this.reset, this.themeChange);
 
   @override
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
+  CustomPopup customPopup;
   int _current;
-
+  double popupX = 100.0;
+  double popupY = 100.0;
+  double preX;
+  double preY;
+  double cancelPartWidth = 300;
+  double cancelPartHeight = 300;
+  var radius = 25;
+  AnimationController _controller;
+  Animation<double> clampAnimation;
+//  int count = 0;
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    clampAnimation = CurveTween(curve: Curves.linear).animate(_controller)
+      ..addListener(() {
+        overlayState.setState(() {
+          print("clampAnimation.value ${clampAnimation.value}");
+          popupX = MediaQuery.of(context).size.width * clampAnimation.value - radius;
+          //贴边 而不是进入屏幕一部分
+          popupX = popupX.clamp(0.0, MediaQuery.of(context).size.width - radius * 2);
+        });
+      });
+
+    customPopup = CustomPopup();
+  }
+
+  OverlayEntry overlayEntry;
+
+  var overlayState;
+  bool showCancelPart = false;
+  void createApplicationPopup() {
+    if (null != overlayEntry) {
+      overlayEntry.remove();
+      overlayEntry = null;
+    }
+    overlayState = Overlay.of(context);
+    overlayEntry = new OverlayEntry(
+        builder: (context) {
+          return buildApplicationPopup();
+        },
+        opaque: false,
+        maintainState: true);
+    overlayState.insert(overlayEntry);
+  }
+
+  Widget buildApplicationPopup() {
+    return Stack(
+      children: <Widget>[
+        Positioned(
+            right: -150,
+            bottom: -150,
+            width: cancelPartWidth,
+            height: cancelPartHeight,
+            child: Visibility(
+              visible: showCancelPart,
+              child: ClipOval(
+                child: Material(
+                  child: Container(alignment: Alignment(-0.5, -0.5), decoration: BoxDecoration(color: Colors.red)),
+                ),
+              ),
+            )),
+        Positioned(
+          right: 20,
+          bottom: 40,
+          child: Visibility(
+            visible: showCancelPart,
+            child: Material(
+              child: Container(
+                decoration: BoxDecoration(color: Colors.red),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[Icon(Icons.cancel), Text("取消悬浮窗")],
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: popupX,
+          top: popupY,
+          width: 50,
+          height: 50,
+          child: GestureDetector(
+            onTap: () {
+              print("application on tap");
+            },
+            onPanStart: (dragStartDetails) {
+              print(
+                  "ApplicationPopup onPanStart ${dragStartDetails.globalPosition.dx} ${dragStartDetails.globalPosition.dy}");
+              preX = dragStartDetails.globalPosition.dx;
+              preY = dragStartDetails.globalPosition.dy;
+            },
+            onPanUpdate: (dragUpdateDetails) {
+              showCancelPart = true;
+              print("ApplicationPopup onPanUpdate $dragUpdateDetails");
+              var currentX = dragUpdateDetails.globalPosition.dx;
+              var currentY = dragUpdateDetails.globalPosition.dy;
+              popupX = popupX + currentX - preX;
+              popupY = popupY + currentY - preY;
+              popupX = popupX.clamp(0.0, MediaQuery.of(context).size.width - radius * 2);
+              popupY = popupY.clamp(0.0, MediaQuery.of(context).size.height - radius * 2);
+              preX = currentX;
+              preY = currentY;
+              print("popupX $popupX  popupY $popupY ");
+              //TODO 判断一点是否在园内  移动球的圆心进入取消区域园
+              double dis = math.sqrt(math.pow(MediaQuery.of(context).size.width - (popupX + radius), 2) +
+                  math.pow(MediaQuery.of(context).size.height - (popupY + radius), 2));
+              print("dis $dis");
+              if (dis <= 150) {
+                //相交时 取消区域增大
+                cancelPartWidth = 300.0 + 20;
+                cancelPartHeight = 300.0 + 20;
+              } else {
+                cancelPartWidth = 300.0;
+                cancelPartHeight = 300.0;
+              }
+              overlayState.setState(() {});
+            },
+            onPanEnd: (dragEndDetails) {
+              showCancelPart = false;
+              if (cancelPartWidth > 300) {
+                cancelPartWidth = 300;
+                cancelPartHeight = 300;
+                //取消全局浮窗
+                overlayEntry.remove();
+                overlayEntry = null;
+                //重置位置
+                popupX = 100.0;
+                popupY = 100.0;
+                overlayState.setState(() {});
+
+                //退出该事件
+                return;
+              }
+              //移动结束时，悬浮窗靠边
+              print(
+                  "popupX $popupX popupY $popupY radius $radius MediaQuery.of(context).size.width ${MediaQuery.of(context).size.width}  ${(popupX + radius) / MediaQuery.of(context).size.width}");
+              if (popupX + radius >= MediaQuery.of(context).size.width / 2) {
+//                popupX = MediaQuery.of(context).size.width - radius * 2;
+                _controller.forward(from: (popupX + radius) / MediaQuery.of(context).size.width);
+              } else {
+//                popupX = 0;
+                _controller.reverse(from: (popupX + radius) / MediaQuery.of(context).size.width);
+              }
+            },
+            child: ClipOval(
+              child: Material(
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(color: Colors.purple),
+                  child: Text("悬浮窗"),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -123,7 +375,51 @@ class _HomeState extends State<Home> {
               widget.reset();
             },
             child: Text("颜色reset"),
-          )
+          ),
+          FlatButton(
+            onPressed: widget.themeChange,
+            child: Text("主题切换"),
+          ),
+          FlatButton(
+              onPressed: () {
+                showMenu(context: context, position: RelativeRect.fill, items: [
+                  PopupMenuItem(
+                    value: "androidpopup",
+                    child: Text("androidpopup 仿微信"),
+                  ),
+                  PopupMenuItem(
+                    value: "custompopup",
+                    child: Text("custompopup"),
+                  )
+                ]).then((result) {
+                  if (result == "androidpopup") {
+                    createApplicationPopup();
+                  } else if (result == "custompopup") {
+//                    count++;
+//                    if (count > 5) {
+//                      showDialog(
+//                          context: context,
+//                          builder: (context) {
+//                            return SimpleDialog(
+//                              title: Text("最多支持5个"),
+//                              children: <Widget>[
+//                                SimpleDialogOption(
+//                                  onPressed: () {
+//                                    Navigator.of(context).pop();
+//                                  },
+//                                  child: Text("确定"),
+//                                )
+//                              ],
+//                            );
+//                          });
+//                      return;
+//                    }
+                    customPopup.countAdd();
+                    customPopup.popup(context);
+                  }
+                });
+              },
+              child: Text("全局浮窗"))
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -261,6 +557,13 @@ class _HomeState extends State<Home> {
             FlatButton(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return CustomScrollPhysicsPage();
+                  }));
+                },
+                child: Text("Custom  ScrollPhysics ")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return SliverAppBarPage();
                   }));
                 },
@@ -393,6 +696,13 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("blur ")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return DrawerPage();
+                  }));
+                },
+                child: Text("Drawer 侧边栏 ")),
             Text("事件处理---------------"),
             FlatButton(
                 onPressed: () {
@@ -451,6 +761,14 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("Physics Animation")),
+            Text("Services ----------------------- "),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return SystemChromePage();
+                  }));
+                },
+                child: Text("System Chrome page")),
             Text("Canvas ----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -546,6 +864,48 @@ class _HomeState extends State<Home> {
                   }));
                 },
                 child: Text("官方Gallery Sliver SectionOrganizer Animation")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return ImagePreviewPage();
+                  }));
+                },
+                child: Text("图片预览 imgage preview")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return CaptureScreenPage();
+                  }));
+                },
+                child: Text("截图和涂鸦 RepaintBoundary")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return PageViewPage();
+                  }));
+                },
+                child: Text("PageView")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return ShimmerWidget();
+                  }));
+                },
+                child: Text("Shimmer Widget")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return Circle2Rectangle();
+                  }));
+                },
+                child: Text("Circle2Rectangle 圆变为方")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return ReorderListPage();
+                  }));
+                },
+                child: Text("reorderList 重排序列表")),
             Text("测试第三方包 ----------------------- "),
             FlatButton(
                 onPressed: () {

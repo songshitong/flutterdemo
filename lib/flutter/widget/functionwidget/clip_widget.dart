@@ -3,7 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutterdemo/flutter/common/transform.dart';
 
-//将widget裁剪，将widget分成几份
+//将widget裁剪，将widget分成几份   自定义canvas超出绘制可以使使用clip进行限制
 //ClipRect        使用矩形剪辑其子项的widget .默认情况下，[ClipRect]会阻止其子项在其外部绘制
 //   bounds，但是可以使用custom [clipper]自定义剪辑rect的大小和位置,如果[clipper]为null，则剪辑将匹配子项的布局大小和位置
 //ClipRRect       使用圆角矩形剪裁其子项的widget

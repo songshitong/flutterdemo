@@ -36,6 +36,7 @@
 //默认情况下，AnimationController对象值的范围是0.0到1.0。如果我们需要不同的范围或不同的数据类型，则可以使用Tween来配置动画以生成不同的范围或数据类型的值
 //Tween对象不存储任何状态，相反，它提供了evaluate(Animation<double> animation)方法，它可以获取动画当前值
 //要使用Tween对象，需要调用其animate()方法，然后传入一个控制器对象
+
 //性能优化
 //Tweens是可变的;具体来说，它们的[begin]和[end]值可以在运行时更改。使用[Animation.drive]创建的对象使用[Tween]将立即兑现对底层[Tween]的更改（尽管如此）
 //侦听器只有在[动画]正在动画时才会被触发。这可以用来动态地改变动画而不必重新创建链中的所有对象，从[AnimationController]到final [Tween]
@@ -48,6 +49,13 @@
 //flutter 提供FadeTransition、ScaleTransition、SizeTransition、FractionalTranslation 在paint之前使用transform
 //todo PositionedTransition实现
 //通过AnimatedBuilder和AnimatedWidget实现的复用
-//todo AnimatedBuilder child 参数，可方便将state的widget.child设为child
+//todo AnimatedBuilder child 参数，可方便将state的widget.child设为child,builder中可以给child增加Translation
 
 /// 例子查看custom_curve.dart
+///
+///
+/// controller的dispose必须在widget的dispose中调用，防止内存泄漏，并且调用在super.dispose之前。这样先dispose controller后dispose tikerMixin
+///  在super.dispose之后调用，先dispose Tiker，但此时controller持有Tiker的引用，无法完成Tiker的dispose
+///
+///
+/// 对一个listview 的item做change动画

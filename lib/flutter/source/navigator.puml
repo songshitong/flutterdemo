@@ -7,6 +7,16 @@ class Navigator{
   NavigatorState createState() => NavigatorState()
 }
 'note right of Navigator{
+'  WidgetApp的build方法使用了Navigator，所以以后的widget树可以直接使用Navigator.of(context)获取NavigatorState
+'    从而控制路由stack的状态
+
+'  Navigator.of(context).push 与overlayState.insert(overlayEntry) 区别
+'   insert不指定位置，默认在最上面，使用的是_entries.insert
+'   push 使用的是_history中的overlayEntries.last，overlayState中insert的不在navigator的_history中
+'   会出现先overlayState.insert，后Navigator push,但是navigator push的页面在下面，因为push不是在最新页面上面插入页面
+'    改变图层上下位置   1 先把overlayEntries.remove 然后重新插入
+'    2 NavigatorObserver 兼容拿到当前route，拿到所有图层route.overlayEntries，调用OverlayState.rearrange 或改变顺序insertall
+
 ' 定义：一个小部件，用于管理具有堆栈规则的一组子小部件
 ' Popup routes
 '   routes不必遮挡整个屏幕，[PopupRoute]用[ModalRoute.barrierColor]覆盖屏幕，该屏幕只能部分不透明以允许当前屏幕显示,
@@ -31,11 +41,15 @@ class NavigatorState{
 
    Route<T> _routeNamed<T>(String name, { @required Object arguments, bool allowNull = false })
    Future<T> push<T extends Object>(Route<T> route)
+   Widget build(BuildContext context)
 }
-note right of NavigatorState{
-   _routeNamed 根据name生成route
-   push  将给定route推到navigator上
-}
+'note right of NavigatorState{
+'   _routeNamed 根据name生成route
+'   push  将给定route推到navigator上
+'
+'   build 方法Listener--AbsorbPointer--FocusScope--Overlay
+'   监听--指针事件--focus--overlay
+'}
 
 abstract class Route<T> {
   NavigatorState _navigator
@@ -92,8 +106,145 @@ class OverlayEntry {
 '
 '}
 
+class Overlay {
+  List<OverlayEntry> initialEntries
+  OverlayState of(BuildContext context, { Widget debugRequiredFor })
+  OverlayState createState() => OverlayState()
+}
+'note right of Overlay{
+'  可以独立管理的[堆栈]条目
+'  Overlay让独立的子窗口小部件“浮动”视觉元素,通过将其插入到叠加层[Stack]中展示在其他小部件之上。Overlay使用[OverlayEntry]对象让
+'  这些小部件中的每一个都管理它们在叠加层中的参与
+'
+'  虽然您可以直接创建[Overlay]，但最常见的是使用[WidgetsApp]或[MaterialApp]中[Navigator]创建的叠加层。
+'  Navigator使用其overlay来管理其路线的视觉外观。
+'}
+
+class OverlayState{
+ final List<OverlayEntry> _entries
+ void insert(OverlayEntry entry, { OverlayEntry below, OverlayEntry above })
+ void rearrange(Iterable<OverlayEntry> newEntries, { OverlayEntry below, OverlayEntry above })
+ Widget build(BuildContext context)
+}
+
+'note right of OverlayState{
+'   insert 将给的entry插入进overlay，below和above在哪个Entry的上面或下面，默认在最上面
+'   rearrange 删除给定iterable中列出的所有entry，然后按给定顺序将它们重新插入到Overlay
+'   build 返回stack包裹的多个_OverlayEntry  _OverlayEntry的build方法最终调用OverlayEntry的builder构建widget
+'}
+
+abstract class OverlayRoute<T>{
+  bool  finishedWhenPopped
+  List<OverlayEntry> _overlayEntries
+  Iterable<OverlayEntry> createOverlayEntries()
+}
+'note right of OverlayRoute{
+'  在[Navigator]的[Overlay]中展示widgets的route
+'  finishedWhenPopped  控制[didPop]是否调用[NavigatorState.finalizeRoute]
+'    true  此route在[didPop]期间删除其overlay entry
+'    false 延时移除，比如页面动画结束
+'}
+
+abstract class TransitionRoute<T>{
+   bool  opaque
+   bool canTransitionTo(TransitionRoute<dynamic> nextRoute)
+    bool canTransitionFrom(TransitionRoute<dynamic> previousRoute)
+}
+
+
+'note right of TransitionRoute{
+'  带入口和出口过渡的route
+'  opaque transition完成后route是否会遮盖以前的route
+'  canTransitionTo  true 此路由支持一个过渡动画，该动画在[nextRoute]被推到它上面或当[nextRoute]从它上面弹出时运行
+'}
+
+abstract class ModalRoute<T>{
+  bool  barrierDismissible
+  bool  offstage
+  bool  maintainState
+  Color barrierColor
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation)
+  Widget buildTransitions(BuildContext context,Animation<double> animation,Animation<double> secondaryAnimation,Widget child,)
+}
+
+'note right of ModalRoute{
+'  阻止与先前路由交互的路由
+'  [ModalRoute]覆盖整个[Navigator]。然而他们不一定[opaque];例如，弹出菜单仅使用[ModalRoute]在与前一个route重叠的小方框中显示菜单
+'  barrierDismissible  是否可以通过点击模态障碍来解除route
+'   true 如果[barrierDismissible]为true，则点击此屏障将导致当前路径被弹出（参见[Navigator.pop]），其值为null
+'  offstage 这条路线目前是否在后台 如果[offstage]为真，则不会呈现modal barrier（如果有）
+'    在route入口过渡的第一帧上，路线使用1.0的动画进度构建[Offstage]。该路径是不可见的非交互式，但每个小部件都有其最终大小和位置。
+'    这个机制让[HeroController]确定任何hero的最终本地小部件被动画化为过渡的一部分
+'  maintainState 路由在处于非活动状态时是否应保留在内存中
+'  barrierColor  用于模态屏障的颜色。如果这是null，屏障将是透明的
+'     当[offstage]为true时，颜色被忽略，屏障变得不可见
+'     如果此getter将开始返回不同的颜色，则应调用[changedInternalState]以使更改可以采取效果
+'}
+
+abstract class PopupRoute<T>{
+  bool get opaque => false;
+  bool get maintainState => true;
+}
+'note right of PopupRoute{
+'  在当前路由上覆盖窗口小部件的模式route
+'}
+
+class _DialogRoute<T>{
+
+}
+
+class PageRoute<T>{
+  bool get opaque
+  bool get barrierDismissible
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute)
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute)
+}
+'note right of PageRoute{
+'  替换整个屏幕的modal route
+'}
+
+class PageRouteBuilder<T>{
+    Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation)
+    Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child)
+}
+'note right of PageRouteBuilder{
+'  用于根据回调定义一次性页面路由的实用程序类
+'  调用者必须定义创建route 主要内容的[pageBuilder]函数.要添加过渡，请定义[transitionsBuilder]功能
+'}
+
+class MaterialPageRoute<T>{
+
+}
+'note right of MaterialPageRoute{
+'  对于Android，页面的入口转换会向上滑动页面并将其淡入。退出转换是相同的，但相反
+'}
+
+class CupertinoPageRoute<T>{
+
+}
+
+'note right of CupertinoPageRoute{
+'  页面从右侧滑入，然后反向退出。它也向左视差运动移动,当另一页进入以覆盖它时
+'}
+abstract class TransitionRoute<T>
 StatefulWidget <|-- Navigator
 State          <|-- NavigatorState
 Navigator      <.. NavigatorState
 NavigatorState <.. Route
+Route          <.. OverlayEntry
+Route          <|-- OverlayRoute
+OverlayRoute   <|-- TransitionRoute
+TransitionRoute<|-- ModalRoute
+ModalRoute     <|-- PopupRoute
+StatefulWidget <|-- Overlay
+Overlay        <.. OverlayEntry
+State          <|-- OverlayState
+Overlay        <..  OverlayState
+OverlayEntry   <..  OverlayState
+PopupRoute     <|--  _DialogRoute
+ModalRoute     <|--  PageRoute
+PageRoute      <|-- PageRouteBuilder
+PageRoute      <|-- MaterialPageRoute
+PageRoute      <|-- CupertinoPageRoute
+
 @enduml

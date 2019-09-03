@@ -1,0 +1,191 @@
+@startuml
+abstract class Layer{
+   ContainerLayer get parent
+   bool  alwaysNeedsAddToScene
+   ui.EngineLayer _engineLayer
+   Layer get nextSibling
+   Layer get previousSibling
+   void markNeedsAddToScene()
+   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ])
+}
+
+'note right of Layer{
+'  合成图层
+'  在绘制过程中，渲染树会生成一个被上传到引擎并由合成器显示的合成图层树。这class是所有合成图层的基类
+'  大多数图层可以使其属性发生变异，并且可以将图层移动到不同的父母.在进行了此更改之后，必须明确地重新组合场景;图层树不保持自己的脏状态
+'
+'  要合成树，请创建一个[SceneBuilder]对象，将其传递给root [Layer]对象的[addToScene]方法，然后调用[SceneBuilder.build]获取[Scene]。
+'  然后可以绘制[scene]使用[Window.render]
+'
+'  parent 图层树中该图层的父级  层树中根节点的[parent]为空   只有[ContainerLayer]的子类可以在层树中拥有子项.所有其​​他图层类用于图层树中的叶子
+'  alwaysNeedsAddToScene   子类可以将其重写为true以禁用保留的绘制
+'  _engineLayer    框架的句柄，用于跨帧保持和保留EngineLayer
+'  nextSibling和previousSibling  父图层子列表中的下一个或上一个兄弟
+'  markNeedsAddToScene  标记该图层已更改且需要调用[addToScene]
+'}
+
+class PictureLayer{
+  ui.Picture _picture
+  final Rect canvasBounds
+}
+'note right of PictureLayer{
+'  包含[Picture]的合成图层  图层在叶子树中始终是叶子
+'  ui.Picture 表示记录的图形操作序列的对象
+'}
+
+class TextureLayer{
+final Rect rect;
+final int textureId;
+final bool freeze;
+}
+
+'note right of TextureLayer{
+'  用于将后端纹理映射到矩形的合成图层
+'}
+
+class PlatformViewLayer {
+ final Rect rect;
+ final int viewId;
+}
+'note right of PlatformViewLayer{
+'   在iOS显示嵌入式[UIView]的图层
+'}
+
+class ContainerLayer{
+  Layer get firstChild
+  Layer get lastChild
+}
+'note right of ContainerLayer{
+'  具有子项列表的合成图层
+'  [ContainerLayer]实例仅获取子列表并插入它们按顺序进入合成渲染。
+'  [ContainerLayer]有子类在过程中应用更精细的效果
+'}
+
+class OffsetLayer{
+   Offset get offset
+
+}
+'note right of OffsetLayer{
+'  显示在与其父图层偏移的图层
+'  偏移层是高效重新绘制的关键，因为它们是重绘[RenderObject]树中的边界（参见[RenderObject.isRepaintBoundary])由创建的
+'
+'     当是一个repaint boundary的render object被要求以PaintingContext给定的offset绘制，render object首先检查自己是否repaint.
+'      如果没有，它通过改变它[offset]属性来重用其现有的[OffsetLayer]（及其整个子树） ，切断绘画流程
+'}
+class ClipRectLayer{
+  Rect get clipRect
+  Clip get clipBehavior
+}
+
+'note right of ClipRectLayer{
+'  使用矩形剪切其子项的复合图层
+'}
+
+class ClipPathLayer{
+ Path get clipPath
+  Clip get clipBehavior
+}
+'note right of ClipPathLayer{
+'
+'  使用路径剪辑其子项的复合图层
+'}
+
+class ColorFilterLayer{
+    ColorFilter get colorFilter
+}
+'note right of ColorFilterLayer{
+'   将[ColorFilter]应用于其子项的复合图层
+'}
+
+class TransformLayer {
+  Matrix4 get transform
+}
+'note right of TransformLayer{
+'  将给定变换矩阵应用于其孩子们的合成图层
+'}
+
+class OpacityLayer{
+  int get alpha
+  Offset get offset
+}
+
+'note right of OpacityLayer{
+'  一个合成图层，使其子项部分透明
+'  尽量避免没有孩子的[OpacityLayer]。如果可以删除该图层来节省一些tree流程
+'}
+
+class ShaderMaskLayer{
+   Shader get shader
+   Rect get maskRect
+   BlendMode get blendMode
+}
+'note right of ShaderMaskLayer{
+'   将着色器应用于其子项的合成图层
+'}
+class BackdropFilterLayer{
+  ui.ImageFilter get filter
+}
+
+'note right of BackdropFilterLayer{
+'  一个合成图层，用于将滤镜应用于场景的现有内容
+'}
+
+class PhysicalModelLayer{
+   Path get clipPath
+   Clip get clipBehavior
+   double get elevation
+   Color get color
+   Color get shadowColor
+}
+'note right of PhysicalModelLayer{
+'  使用物理模型生成光照效果的合成图层
+'  例如，图层根据其几何和灯和其他物理建模对象的相对位置投射阴影在场景
+'
+'}
+class Scene {
+   Future<Image> toImage(int width, int height)
+   void dispose()
+}
+'note right of Scene{
+'  表示合成场景的不透明对象
+'  要创建Scene对象，请使用[SceneBuilder]
+'  可以在屏幕上使用[Window.render]方法显示场景对象
+'
+'  dispose() 释放此场景使用的资源  调用此函数后，场景无法进一步使用
+'}
+
+class SceneBuilder{
+  Scene build()
+}
+'note right of SceneBuilder{
+'  构建包含给定视觉效果的[scene]
+'  然后可以使用[Window.render]渲染[scene]
+'  要在[场景]上绘制图形操作，首先要创建一个使用[PictureRecorder]和[Canvas]的[Picture]，然后使用[addPicture]添加到场景
+'
+'  build() 完成构建场景,返回包含已添加到此Scene Builder的对象的[Scene].然后可以使用[Window.render]在屏幕上显示[Scene]
+'     调用此函数后，SceneBuilder对象无效，并且无法进一步使用
+'}
+AbstractNode     <|-- Layer
+Layer            <|-- PictureLayer
+Layer            <|-- TextureLayer
+Layer            <|-- PlatformViewLayer
+Layer            <|-- ContainerLayer
+ContainerLayer   <|--  ClipRectLayer
+ContainerLayer   <|--  ClipPathLayer
+ContainerLayer   <|--  ColorFilterLayer
+ContainerLayer   <|--  OffsetLayer
+ContainerLayer   <|--  OpacityLayer
+ContainerLayer   <|--  ShaderMaskLayer
+ContainerLayer   <|--  BackdropFilterLayer
+ContainerLayer   <|--  PhysicalModelLayer
+
+OffsetLayer      <|--  TransformLayer
+
+package sky_engine/ui/compositing <<Folder>> {
+  NativeFieldWrapperClass2 <|-- Scene
+  NativeFieldWrapperClass2 <|-- SceneBuilder
+  SceneBuilder             <..  Scene
+}
+
+Layer                    <..  SceneBuilder
+@enduml

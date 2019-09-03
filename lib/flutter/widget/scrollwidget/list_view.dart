@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdemo/flutter/pages/beautiful/reorder_list.dart';
 
 ///SingleChildScrollView 嵌套 ListView 或listView嵌套ListView 不滚动的问题，禁用内部listview的滚动/内部primary设为false(发生滚动的是外部，使用NotificationListener监听)
 class ListViewPage extends StatefulWidget {
@@ -9,6 +10,9 @@ class ListViewPage extends StatefulWidget {
 }
 
 class ListViewPageState extends State<ListViewPage> {
+  GlobalKey keyBBB = GlobalKey();
+  double offsetYAAA = 0.0;
+  ScrollController _controller = ScrollController();
   List<ScrollPhysics> physics = [
     ///android 微光效果
     ClampingScrollPhysics(),
@@ -26,6 +30,7 @@ class ListViewPageState extends State<ListViewPage> {
 
   @override
   Widget build(BuildContext context) {
+    //TODO AnimatedList
 //    itemExtent：该参数如果不为null，则会强制children的"长度"为itemExtent的值；这里的"长度"是指滚动方向上子widget的长度，
 //       即如果滚动方向是垂直方向，则itemExtent代表子widget的高度，如果滚动方向为水平方向，则itemExtent代表子widget的长度。
 //       在ListView中，指定itemExtent比让子widget自己决定自身长度会更高效，这是因为指定itemExtent后，滚动系统可以提前知道列表的长度，而不是总是动态去计算，尤其是在滚动位置频繁变化时（滚动系统需要频繁去计算列表高度）。
@@ -55,11 +60,13 @@ class ListViewPageState extends State<ListViewPage> {
               })
         ],
       ),
+      //TODO listview 缓存策略
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
             // 通过children直接设置，适用于少量item的情况
             ListView(
+              controller: _controller,
               itemExtent: 100, //指定子item的高度
               shrinkWrap: true,
               addAutomaticKeepAlives: true,
@@ -69,7 +76,31 @@ class ListViewPageState extends State<ListViewPage> {
               ///
               ///多个listview，其他不能展开
               children: <Widget>[
-                Container(color: Colors.black12, child: Text("aaaa")),
+                Transform(
+                    transform: Matrix4.identity()..translate(0.0, offsetYAAA),
+                    child: Container(color: Colors.black12, child: Text("aaaa"))),
+                GestureDetector(
+                    key: keyBBB,
+                    onTap: () {
+                      RenderBox rb = keyBBB.currentContext.findRenderObject();
+                      setState(() {
+                        print("rb.paintBounds ${rb.paintBounds}");
+                        Offset localOffset = rb.paintBounds.topLeft;
+                        offsetYAAA =
+                            rb.localToGlobal(localOffset).dy - MediaQuery.of(context).padding.top - kToolbarHeight;
+                        print("offsetYAAA  ===  $offsetYAAA  localOffset $localOffset");
+                      });
+                    },
+                    //
+                    // 另一种思路 交换位置，将交换位置暂存，刷新页面时 build将交换位置放为空白块，打开PopupRoute，此时可以使用context.findRenderObject
+                    // 获取已渲染list的size（网络过慢时要不要判空？list没有渲染完成），执行动画(在popup中绘制相同的内容然后动画)，结束后监听Navigator.of(context).push.then();
+                    // 返回到list页面，将空白位置重新替换为原内容，
+
+                    // todo  各种key使用的总结
+
+                    /// [ReorderListPage]  不使用popup，不使用globalkey 直接使用context+widgetsbings.addpostframecallback 获取渲染后的尺寸，做动画
+                    /// 调用对外暴露的自定义的indexChange回调
+                    child: Container(color: Colors.black12, child: Text("bbbb 点击b移动A到B的位置"))),
                 Checkbox(
                     value: true,
                     activeColor: Colors.red,
@@ -134,16 +165,16 @@ class ListViewPageState extends State<ListViewPage> {
                     Text("list wheel3"),
                     Text("list wheel3"),
                   ]),
-            )
+            ),
 
             ///可以对实际不展示的item的估算算法进行控制
-            /*ListView.custom(
+            ListView.custom(
               shrinkWrap: true,
               semanticChildCount: 10,
               childrenDelegate: SliverChildBuilderDelegate((context, index) {
                 return Text("custom");
               }),
-            )*/
+            )
           ],
         ),
       ),

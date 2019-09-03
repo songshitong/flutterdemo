@@ -13,6 +13,15 @@ import 'package:flutterdemo/flutter/common/MyImgs.dart';
 /// GestureDetector直接可以接收一个子Widget。GestureRecognizer是一个抽象类，一种手势的识别器对应一个GestureRecognizer的子类
 ///
 /// GestureRecognizer集成自[GestureArenaMember]表示参与竞技场的对象,用来解决手势竞争谁胜出
+///
+/// 调用完调用onScaleEnd后会调用onScaleStart,然后调用onScaleUpdate，并且ScaleUpdateDetails.scale变为1  scale开始，scale更新，scale结束，move开始，move更新，move结束
+/// 调整scale的速率  //变化太快，变为原来的1、40    每次变化与1的差距，除以40
+/// double orginScale = 1 + (ScaleUpdateDetails.scale - 1) / 40;
+///
+/// pan移动监听是scale监听的子集，ScaleUpdateDetails.scale为1.0是移动，不是1.0是scale
+///
+/// TODO 子组件实现GestureDetector后，父组件无法继续监听？？？
+///
 class GesureDetectorPage extends StatefulWidget {
   @override
   _GesureDetectorPageState createState() => _GesureDetectorPageState();

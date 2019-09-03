@@ -3,7 +3,9 @@ import 'dart:async';
 main() async {
   ///  Stream    A source of asynchronous data events      异步数据事件源
   ///周期性任务 take流出数量控制
-  Stream.periodic(Duration(seconds: 1)).take(2).listen((data) {
+  Stream.periodic(Duration(seconds: 1), (int) {
+    return "count $int";
+  }).take(2).listen((data) {
     print("1s after $data");
   }).onDone(() {
     print("done");
@@ -68,7 +70,7 @@ main() async {
 //  即使在第一个订阅被取消后，也不允许在单个订阅流上进行两次侦听。
 //  单订阅流通常用于流式传输更大的连续数据块，如文件I / O.
 
-//  广播流允许任意数量的收听者，且无论是否有收听者，他都能产生事件。所以中途进来的收听者将不会收到之前的消息。
+  ///  广播流允许任意数量的收听者，且无论是否有收听者，他都能产生事件。所以中途进来的收听者将不会收到之前的消息!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!。
 //  如果多个收听者想要收听单个订阅流，请使用asBroadcastStream在非广播流之上创建广播流。
 //  如果在触发事件时将收听者添加到广播流，则该侦听器将不会接收当前正在触发的事件。如果取消收听，收听者会立即停止接收事件。
 //  一般的流都是单订阅流。从Stream继承的广播流必须重写isBroadcast 才能返回true
@@ -101,6 +103,13 @@ main() async {
   print("await sumNum from countStream ${await sumNum(countStream(2))}");
 
   print("await sumNum from iterrable ${await sumNum(Stream.fromIterable(countIterable(2)))}");
+
+  //future转stream
+  Future(count).asStream();
+}
+
+Future<int> count() async {
+  return 1 + 1;
 }
 
 Iterable<int> countIterable(int to) sync* {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdemo/flutter/common/MyImgs.dart';
 
 class SwitchPage extends StatelessWidget {
   @override
@@ -16,7 +17,7 @@ class SwitchPage extends StatelessWidget {
             onChanged: (choice) {},
             activeTrackColor: Colors.green, //激活轨道颜色
             inactiveThumbColor: Colors.black, //关闭滑块颜色
-            activeThumbImage: AssetImage("lib/img/test.jpg"), //激活滑块图片
+            activeThumbImage: AssetImage(MyImgs.TEST), //激活滑块图片
           )
         ],
       ),

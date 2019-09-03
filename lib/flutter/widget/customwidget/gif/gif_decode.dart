@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as Math;
 
 import 'gif_frame.dart';
@@ -65,6 +66,7 @@ class CustomDecodeGif {
   List<int> decodeFirstFrame() {
     readLSD();
     readContents();
+    //bytes是滚定长度的list
     return bytes.sublist(0, index);
   }
 
@@ -441,6 +443,7 @@ class CustomDecodeGif {
     read(); //按读取顺序，此处为标识块终结(Block Terminator)
   }
 
+  ///while (!done && frames.length != 1) 只读取第一帧
   void readContents() {
     bool done = false;
     while (!done && frames.length != 1) {

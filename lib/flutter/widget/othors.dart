@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 //todo 自定义scrollview  listview(横竖布局)
 //todo StatefulBuilder  Builder
 //todo align
-//todo  Material  制作material风格控件，使用主题，查看RaisedBtn
+//todo  Material  制作material风格控件，使用主题，查看RaisedBtn  scaffold常用widget  material和sacafflod会将常用属性以inherit widget初始化到widget tree
 //buildcontext可从key获得     buildcontext 不能是pop的会报unsafe,
 
 //Navigator operation requested with a context that does not include a Navigator
@@ -27,22 +27,24 @@ import 'package:flutter/material.dart';
 
 //todo Visibility 替代，动画，原理
 
+//todo widgets.puml的State 注释完善
+
 //StadiumBorder    BeveledRectangleBorder todo 各种border的使用
 //RelativeRect
 //AnimatedSize
 //ScopedModelDescendant
 
-///获取大小
+///获取大小   context.findeRenderObject也可以，但要在绘制完成
 ///globle.currentcontext.size
 ///widgetKey.currentContext.findRenderObject().semanticBounds.size
 ///widgetKey.currentContext.findRenderObject().paintBounds.size
 ///
-///  获取全局的坐标  为什么可以强转为Renderbox
+///  获取全局的坐标  为什么可以强转为Renderbox   Renderbox定义了坐标体系
 ///  RenderBox box = widgetKey.currentContext.findRenderObject();
 //    Offset offset = box.localToGlobal(Offset.zero);
 //    Size size = box.size;
 
-///
+///     监听绘制后    此时大小仍然在layout阶段确定
 ///     WidgetsBinding.instance.addPostFrameCallback(_afterLayout);   WidgetsBinding  widget和flutter engine之间的胶水
 ///
 /// app的生命周期监听   class _AppLifecycleReactorState extends State<AppLifecycleReactor> with WidgetsBindingObserver
@@ -54,6 +56,8 @@ import 'package:flutter/material.dart';
 ///
 ///todo layoutbuilder  实现根据constrains动态子布局，父固定-》constarins固定/充满屏-》类似gallery的多个产品
 ///todo PreferredSize
+///
+/// mediaquery.of(contexy) 不能再inistate之前调用，可以监听addPostFrameCallback第一帧
 /// final MediaQueryData mediaQueryData = MediaQuery.of(context);
 //    final double statusBarHeight = mediaQueryData.padding.top;
 //    final double screenHeight = mediaQueryData.size.height;
@@ -80,7 +84,56 @@ import 'package:flutter/material.dart';
 //TextTheme 字体主题之类的系统资源
 //查看foundation  import 'package:flutter/foundation.dart' as foundation;     foundation.defaultTargetPlatform
 
+//全屏 SystemChrome.setEnabledSystemUIOverlays([]) services层
 //Table table cell
+
+//todo Material 控件
+//MaterialApp navigatorObsevrs 导航监听 监听全局页面进入和离开
+
+//TODO Matrix4.identity()
+//              ..translate(offsetX, offsetY)
+//              ..scale(scaleNum)    matrix 平移距离相同时，先平移后缩放，与先缩放后平移的效果不一样
+
+//TODO 分析图片加载结构，GIF一直播放？ 内存缓存机制 ，预加载机制，手写一个图片缓存，内存/磁盘
+
+////曝光坑位Widget的context
+//
+//final RenderObject childRenderObject = context.findRenderObject();
+//
+//final RenderAbstractViewport viewport = RenderAbstractViewport.of(childRenderObject);
+//
+//if (viewport == null) {
+//
+//  return;
+//
+//}
+//
+//if (!childRenderObject.attached) {
+//
+//  return;
+//
+//}
+//
+////曝光坑位在容器内的偏移量
+//
+//final RevealedOffset offsetToRevealTop = viewport.getOffsetToReveal(childRenderObject, 0.0);
+//
+
+//hasDrawer scaffold中了解关于context的用法
+
+//static Future<ui.Image> getImage(String asset) async {
+//ByteData data = await rootBundle.load(asset);
+//ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+//ui.FrameInfo fi = await codec.getNextFrame();
+//return fi.image;
+//}
+
+//todo SingleTickerProviderStateMixin 原理 与 controller的关系  controller内部实例化了ticker
+
+//todo ServicesBinding 中的BinaryMessenger 消息传递
+//todo globlekey的应用 Currently the key is recreated every time _LoginState is rebuilt, which defeats it's purpose.
+//     https://github.com/flutter/flutter/issues/20042 声明为static final
+
 void main() {
   Visibility(
     child: LayoutBuilder(builder: null),

@@ -62,6 +62,8 @@ class _RouteAnimationPageState extends State<RouteAnimationPage> {
 
 //实际使用时应考虑优先使用PageRouteBuilder，这样无需定义一个新的路由类，使用起来会比较方便。
 //但是有些时候PageRouteBuilder是不能满足需求的，例如在应用过渡动画时我们需要读取当前路由的一些属性，这时就只能通过继承PageRoute的方式了
+//
+///[opaque]  true遮挡前一页  false不遮挡
 class FadeRoute extends PageRoute {
   FadeRoute({
     @required this.builder,

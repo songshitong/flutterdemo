@@ -1,7 +1,10 @@
 import 'dart:async';
 //typedef 可以看作function的别名，当函数类型分配给变量时，typedef会保留类型信息
-//定义function的检查类型
+//定义function的检查类型   T被编译为dynamic？？
 // typedef Compare<T> = int Function(T a, T b);
+
+typedef Compare<T> = Null Function(T a, T b);
+typedef CompareA<T> = void Function(T a, T b);
 
 typedef TestFunction = dynamic Function(String param);
 //(T,action)=>T  函数式
@@ -24,7 +27,7 @@ class SortedCollection {
   }
 }
 
-///顶层函数不与类绑定的方法  静态函数    类中为实例函数
+///顶层函数(Function)不与类绑定的方法  静态函数    类中为实例函数(method 方法)
 // Initial, broken implementation.
 int sort(int a, int b) {
   print("a + b 结果是");

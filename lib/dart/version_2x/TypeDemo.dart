@@ -23,7 +23,7 @@ void main() {
 
   ///  _私有
   Button btn = new Button();
-//  btn._btn;
+  btn.btn = "change btn";
   btn.text;
   btn.color;
 
@@ -50,4 +50,10 @@ void main() {
   //string 重写了[]操作符，可以直接取
   String a5str = a5[4];
   print("a5str is $a5str");
+
+  ///引用传递 指向实际内容的地址
+  String aTest = "i am a";
+  String bTest = aTest;
+  aTest = "a change to b";
+  print("bTest $bTest"); //bTest 指向的地址不变
 }

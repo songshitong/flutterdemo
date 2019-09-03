@@ -11,7 +11,7 @@ class TransformationPage extends StatelessWidget {
     //  多个widget,一个变化会覆盖，而不会重新布局
 
 //    由于矩阵变化只会作用在绘制阶段，所以在某些场景下，在UI需要变化时，可以直接通过矩阵变化来达到视觉上的UI改变，
-//    而不需要去重新触发build流程，这样会节省layout的开销，所以性能会比较好。
+//    而不需要去重新触发build流程，这样会节省layout的开销，所以性能会比较好。但是大小和位置不变
 //    如之前介绍的Flow flutter.widget，它内部就是用矩阵变换来更新UI，除此之外，Flutter的动画widget中也大量使用了Transform以提高性能。
     return Scaffold(
       appBar: AppBar(

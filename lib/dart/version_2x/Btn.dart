@@ -12,4 +12,8 @@ class Button {
     color = cColor;
     print("setColor -> " + cColor);
   }
+
+  set btn(String value) {
+    _btn = value;
+  }
 }

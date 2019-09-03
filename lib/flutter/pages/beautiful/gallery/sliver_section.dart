@@ -265,6 +265,7 @@ class BackButtonWithCall extends StatelessWidget {
 }
 
 //支持捕捉滚动到midScrollOffset：在那一点app栏的高度为_kAppBarMidHeight，只有一个部分标题可见
+
 class _SnappingScrollPhysics extends ClampingScrollPhysics {
   const _SnappingScrollPhysics({
     ScrollPhysics parent,
@@ -293,15 +294,21 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
   Simulation createBallisticSimulation(ScrollMetrics position, double dragVelocity) {
     final Simulation simulation = super.createBallisticSimulation(position, dragVelocity);
     final double offset = position.pixels;
-
+    print("simulation $simulation");
     if (simulation != null) {
       // 拖动以足够的速度结束以触发创建simulation.
       // 如果simulation朝向midScrollOffset但不会到达它,
       // 然后把它抓到那里. 同样，如果simulation
       // 朝向midScrollOffset然后超过了但不会达到零, 然后将其捕捉到零.
       final double simulationEnd = simulation.x(double.infinity);
+
+      ///滚动超过midScrollOffset,继续滚动到底   midScrollOffset可以定义为屏幕的任意位置
       if (simulationEnd >= midScrollOffset) return simulation;
+
+      ///没有滚动到midScrollOffset但有速度，此时滚动到midScrollOffset
       if (dragVelocity > 0.0) return _toMidScrollOffsetSimulation(offset, dragVelocity);
+
+      ///没有滚动到midScrollOffset但速度<0，滚动到初始位置
       if (dragVelocity < 0.0) return _toZeroScrollOffsetSimulation(offset, dragVelocity);
     } else {
       // 用户以很少或没有速度结束拖动。 如果他们
@@ -309,8 +316,12 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
       //如果它们超过一半，就会捕捉到midScrollOffset,
       // 否则会零.
       final double snapThreshold = midScrollOffset / 2.0;
+
+      ///偏移超过midScrollOffset/2但小于midScrollOffset，滚动到midScrollOffset
       if (offset >= snapThreshold && offset < midScrollOffset)
         return _toMidScrollOffsetSimulation(offset, dragVelocity);
+
+      ///偏移不超过midScrollOffset/2，滚动到0初始位置
       if (offset > 0.0 && offset < snapThreshold) return _toZeroScrollOffsetSimulation(offset, dragVelocity);
     }
     return simulation;
