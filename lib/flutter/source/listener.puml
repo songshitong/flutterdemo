@@ -1,0 +1,43 @@
+@startuml
+abstract class Listenable{
+   void addListener(VoidCallback listener)
+   void removeListener(VoidCallback listener)
+}
+
+'note right of Listenable{
+'  维护侦听器列表的对象。
+'  侦听器通常用于通知客户端对象已更新。
+'}
+
+abstract class ValueListenable<T> {
+   T get value
+}
+'note right of ValueListenable{
+'  [Listenable]子类的接口，显示[value]
+'}
+class ChangeNotifier{
+   ObserverList<VoidCallback> _listeners
+   bool get hasListeners
+   void dispose()
+   void notifyListeners()
+}
+'note right of ChangeNotifier{
+'   可以扩展或混合的类，使用[VoidCallback]为通知提供更改通知API.
+'   [ChangeNotifier]针对少数（一个或两个）侦听器进行了优化。添加和删​​除侦听器是O（N），调度通知是O（N²）（其中N是侦听器的数量）。
+'      （查看代码：调度notifyListeners中的contain方法，是ObserverList做的优化）
+'}
+class ValueNotifier<T>{
+   T get value
+   set value(T newValue)
+}
+
+'note right of ValueNotifier{
+'  包含单个值的[ChangeNotifier]
+'  当[value]被等于运算符==评估的不等于旧值的内容替换时，此类通知其侦听器。
+'  (set value时，如果value发生改变，自动调用notifyListeners()来通知监听者)
+'}
+Listenable <|-- ValueListenable
+Listenable <|.. ChangeNotifier
+ChangeNotifier <|-- ValueNotifier
+ValueListenable <|.. ValueNotifier
+@enduml

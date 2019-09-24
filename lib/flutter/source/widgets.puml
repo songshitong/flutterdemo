@@ -1,5 +1,6 @@
 @startuml
 abstract class Widget {
+  final Key key
   Element createElement()
   static bool canUpdate(Widget oldWidget, Widget newWidget)
 }
@@ -9,6 +10,14 @@ abstract class Widget {
 '   canUpdate方法是否可以使用`newWidget`来更新当前具有`oldWidget`作为其配置的[Element]
 '      通过runtimeType和key进行判断
 '  createElement 在element的updatechild inflateWidget调用，第一次在WidgetsBinding的attachToRenderTree，也是runApp时调用
+
+'    key 控制一个widget如何替换树中的另一个widget
+'    如果两个widget的[runtimeType]和[key]属性分别是[operator ==]，则新widget通过更新底层element来替换旧widget（即，通过使用新widget调用[Element.update] ）
+'       否则，将从树中删除旧element，将新widget扩展为element，并将新element插入树中.
+'    此外，使用[GlobalKey]作为小部件的[key]允许element在树周围移动（更改父级）而不会丢失状态.
+'      找到新widget时 (其key和type与同一位置中的上一个widget不匹配), 但是有一个widget在前一帧的树中的其他位置具有相同的全局键,
+'      然后该widget的元素被移动到新位置。
+'    通常，作为另一个小部件的唯一子节点的小部件不需要显式键
 'end note
 
 abstract class StatelessWidget{
@@ -81,7 +90,11 @@ abstract class BuildContext{
    RenderObject findRenderObject()
    InheritedWidget inheritFromWidgetOfExactType(Type targetType)
    Widget ancestorWidgetOfExactType(Type targetType)
-
+   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType)
+   Widget ancestorWidgetOfExactType(Type targetType)
+   State ancestorStateOfType(TypeMatcher matcher)
+   State rootAncestorStateOfType(TypeMatcher matcher)
+   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher)
 }
 'note bottom of BuildContext
 '  定义：定位一个widget到widget树的句柄
@@ -95,6 +108,19 @@ abstract class BuildContext{
 '  随着时间推移，特定widget的BuildContext会改变location当widget在树周围移动时，
 '     因此该类的返回值不应该在返回方法之外缓存
 '  [BuildContext]对象实际上是[Element]对象。 [BuildContext]接口用于阻止对[Element]对象的直接操作
+'
+'  findRenderObject 找到当前widget的RenderObject
+'  inheritFromWidgetOfExactType 获取给定类型的最近InheritedWidget
+'     最好在State.didChangeDependencies和build methods, layout and paint callbacks,中调用，(InheritedWidget会变)
+'     不要在initState和dispose中调用
+'  ancestorInheritedElementForWidgetOfExactType 获得与给定类型的最近widget对应的元素, targetType是InheritedWidget子类
+'     在State.didChangeDependencies调用
+'  ancestorWidgetOfExactType  返回给定类型的最近祖先widget，在State.didChangeDependencies中调用
+'  ancestorStateOfType  返回与给定[TypeMatcher]匹配的最近祖先[StatefulWidget]的[State]对象
+'     在State.didChangeDependencies中调用
+'  rootAncestorStateOfType  返回与给定[TypeMatcher]匹配的最远祖先[StatefulWidget]的[State]对象
+'  ancestorRenderObjectOfType  返回与给定[TypeMatcher]匹配的最近祖先[RenderObjectWidget]的[RenderObject]对象
+'     在State.didChangeDependencies中调用
 'end note
 
 abstract class Element{
@@ -102,6 +128,7 @@ abstract class Element{
   BuildOwner _owner
   Element _parent
   bool _dirty
+  dynamic _slot
   void markNeedsBuild()
   void mount(Element parent, dynamic newSlot)
   RenderBox createRenderObject(BuildContext context)
@@ -116,9 +143,10 @@ abstract class Element{
 '  _widget 是Element的配置
 '  _owner 是管理当前Element生命周期的对象
 '  bool _dirty true标记当前element需要重建
+'  _slot  父项设置的信息，用于定义此子项在其父项子列表中的位置.只有一个子元素的Element子类应该为该子节点的插槽使用null。
 '  markNeedsBuild 将元素标记为脏，并将其添加到全局widget列表中，以便在下一帧中重建，
 '   由于在一个帧中构建一个元素两次是低效的，应用程序和widget应该被构造仅在帧开始的事件处理程序期间标记widget脏，而不是在构建本身期间
-
+'
 '   1 框架通过调用[Widget.createElement]来创建一个元素小部件将用作元素的初始配置
 '   2 框架调用[mount]将新创建的元素添加到在给定父级的给定位置的树中，[mount]方法负责给任何子窗口小部件解析并调用[attachRenderObject]
 '     来将任何关联的渲染对象附加到渲染树
@@ -491,6 +519,26 @@ abstract class RenderObjectWidgets{
 '   void didUnmountRenderObject(covariant RenderObject renderObject)
 '}
 
+abstract class RenderObjectElement{
+    RenderObject _renderObject
+    void mount(Element parent, dynamic newSlot)
+    void update(covariant RenderObjectWidget newWidget)
+    void performRebuild()
+    List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element> forgottenChildren })
+}
+
+'note right of RenderObjectElement{
+'   使用[RenderObjectWidget]作为其配置的[Element]
+'   [RenderObjectElement]对象在渲染树中具有关联的[RenderObject]widget, 它处理布局，绘画和命中测试等具体操作.
+'}
+abstract class RootRenderObjectElement{
+  void assignOwner(BuildOwner owner)
+}
+'note right of RootRenderObjectElement{
+'  树根处的element
+'  只有根元素可以显式设置其所有者。所有其他元素都从其父级继承其所有者。
+'  assignOwner  _owner = owner 将BuildOwner初始化
+'}
 abstract class LeafRenderObjectWidget{
     LeafRenderObjectElement createElement()
 }
@@ -595,7 +643,9 @@ BuildContext    <|.. Element
 BuildContext    <.. RenderObject
 Element         <-- RenderObject
 Element         <|-- ComponentElement
-Element         <-- BuildOwner
+Element         <.. BuildOwner
+Element         <|-- RenderObjectElement
+RenderObjectElement <|-- RootRenderObjectElement
 ComponentElement  <|-- StatelessElement
 ComponentElement  <|-- StatefulElement
 AbstractNode      <|-- RenderObject
@@ -607,7 +657,7 @@ RenderObjectWidgets <|-- LeafRenderObjectWidget
 RenderObjectWidgets <|-- SingleChildRenderObjectWidget
 RenderObjectWidgets <|-- MultiChildRenderObjectWidget
 RenderObjectWidgets <|-- SliverWithKeepAliveWidget
-
+RenderObjectWidgets <..  RenderObjectElement
 ProxyWidget         <|-- ParentDataWidget
 ProxyWidget         <|-- InheritedWidget
 

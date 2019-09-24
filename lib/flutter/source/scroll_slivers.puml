@@ -95,6 +95,8 @@ class ScrollableState{
 'note left of ScrollableState{
 '   build 重写方法，excludeFromSemantics为false，创建_ScrollSemantics，为true,创建_ScrollableScope。最后将结果通过ScrollBehavior的
 '      buildViewportChrome创建widget
+'
+'       _ScrollableScope负责ScrollPosition的通知，RawGestureDetector负责手势，滚动通知
 '}
 
 class Viewport{
@@ -104,6 +106,7 @@ class Viewport{
    final double cacheExtent
    RenderViewport createRenderObject(BuildContext context)
 }
+
 
 'note right of Viewport{
 '  定义： 内部更大的widget
@@ -127,7 +130,8 @@ class Viewport{
 '}
 
 class RenderViewport{
-
+   void performResize()
+   void performLayout()
 }
 'note right of RenderViewport{
 ' 内部较大的渲染对象
@@ -136,9 +140,27 @@ class RenderViewport{
 ' 显示子列表中早于[中心]的条带从[center]开始反向[axisDirection]的逆序展示
 ' [RenderViewport]不能直接包含[RenderBox]子项。相反，使用 [RenderSliv​​erList]，[RenderSliv​​erFixedExtentList]，[RenderSliv​​erGrid]或
 ' [RenderSliv​​erToBoxAdapter]
+'
+'    performResize()  将viewport大小给Viewportoffset
+'    performLayout   _attemptLayout->layoutChildSequence 返回correction->offset.correctBy(correction)
+'                   通过offset确定整页的滚动偏移
 '}
 
 abstract class RenderViewportBase{
+   ViewportOffset get offset
+
+   double layoutChildSequence({required RenderSliver child,
+       @required double scrollOffset,
+       @required double overlap,
+       @required double layoutOffset,
+       @required double remainingPaintExtent,
+       @required double mainAxisExtent,
+       @required double crossAxisExtent,
+       @required GrowthDirection growthDirection,
+       @required RenderSliver advance(RenderSliver child),
+       @required double remainingCacheExtent,
+       @required double cacheOrigin,
+     })
 }
 'note right of RenderViewportBase{
 '  内部较大的渲染对象的基类
@@ -146,9 +168,54 @@ abstract class RenderViewportBase{
 '  视口建立一个[axisDirection]，它定位了条子的坐标系，即基于滚动偏移而不是笛卡尔坐标
 '  视口还会侦听[offset]，它决定了[SliverConstraints.scrollOffset]输入到条子布局协议
 '  子类通常覆盖[performLayout]并调用[layoutChildSequence]，也许多次
+'
+'  layoutChildSequence() 决定viewport中children的大小和位置，此函数是子类中“performlayout”实现的主力。
+'     布局以“child”开头，根据“advance”回调继续，并在“advance”返回空值时停止
+'     返回遇到的第一个非零[Slivergometry.ScrollOffsetCorrection]，如果有的话。否则返回0.0。典型的调用者将重复调用此函数，直到它返回0.0
+'
+'     最终调用RenderSliver的layout进行布局
+'
+'   offset 视口中的内容的哪个部分应该可见 [viewport offset.pixels]值决定了视窗用来选择要显示的内容部分的滚动偏移量。
+'      当用户滚动视区时，此值将更改，这将更改显示的内容。
+'
 '}
 
+class SliverConstraints{
+
+}
+
+abstract class ViewportOffset{
+   double get pixels
+   bool applyViewportDimension(double viewportDimension)
+   void correctBy(double correction)
+}
+
+'note right of ViewportOffset{
+'  视口中的内容的哪个部分应该可见 [viewport offset.pixels]值决定了视窗用来选择要显示的内容部分的滚动偏移量。
+'         当用户滚动视区时，此值将更改，这将更改显示的内容。
+'}
+
+abstract class ScrollPosition{
+
+
+}
+
+class ScrollPositionWithSingleContext{
+
+}
+
+class ScrollController {
+  ScrollPosition createScrollPosition(ScrollPhysics physics,ScrollContext context,ScrollPosition oldPosition)
+}
+
+'note right of ScrollController{
+'   createScrollPosition  创建供[Scrollable]widget使用的[ScrollPosition]
+'
+'}
+
+
 abstract class RenderSliver{
+   SliverGeometry _geometry
 }
 
 'note right of RenderSliver{
@@ -211,7 +278,43 @@ abstract class RenderSliver{
 '    childCrossAxisPosition
 '      如果子类将子children放在横轴的另一个非0位置，然后它应该覆盖[childCrossAxisPosition]。例如 [RenderSliv​​erGrid]会覆盖此方法
 '
+'
+'
+'      _geometry sliver所占的空间  在viewport的performlayout中使用
 '}
+
+class SliverGeometry{
+   final double scrollExtent
+   final double paintExtent
+   final double maxPaintExtent
+   final double cacheExtent
+   final bool hasVisualOverflow
+}
+
+'note right of SliverGeometry{
+'   描述RenderSliver占据的空间。 sliver可以以几种不同的方式占用空间，这就是这个类包含多个值的原因。
+'   scrollExtent 此条具有内容的（估计的）总可滚动范围。  这是用户从这个条开始到这个条结束所需的滚动量。
+'     该值用于计算可滚动条中所有条目的[SliverConstraints.ScrollOffset]，因此无论条当前是否在视口中，都应提供该值
+'     在典型的滚动场景中，在整个滚动过程中，[ScrollExtent]对于一个小条是恒定的，而[PaintExtent]和[LayoutExtent]将从屏幕外的“0”前进到“0”和[ScrollExtent]之间，
+'        因为小条部分滚动到屏幕内外，并且等于[ScrollExtent]，而小条是完全滚动的在屏幕上。但是，可以自定义这些关系以获得更多的特殊效果
+'      如果[PaintExtent]小于布局期间提供的[SliveConstraints.RemainingPaintExtent]，则此值必须准确。
+'
+'   paintExtent  在当前视图中，条带所呈现的当前可见可视空间的数量，该条带覆盖了全部或部分[SliverConstraints.remainingPaintExtent]的条带子集。
+'       此值不影响下一条棉条的定位方式。换句话说，如果该值为100，[layoutextent]为0，则放置在其后面的典型切片在绘制时最终将绘制在相同的100像素空间中。
+'       这必须介于0和[SliveConstraints.RemainingPaintExtent]之间
+'       此值通常在视口外为0，并且在滚动条进出视口时从0长大或缩小到0，除非滚动条希望获得特殊效果并在滚动时绘制。
+'       这有助于计算下一条棉条的[SliverConstraints.overlap]
+
+'   maxPaintExtent  如果[SliverConstraints.remainingPaintExtent]是无限的，这个条目的总paint量将能够提供
+'        这由实现shrink-wrapping的视口使用，根据定义，这不能小于[paintextent]。
+'   cacheExtent 在[SliverConstraints.RemainingCacheExtent]中，sliver消耗了多少像素
+'        此值应等于或大于[LayoutExtent]，因为小条始终至少使用[SliveConstraints.RemainingCacheExtent]中的[LayoutExtent]，
+'        如果它落在视区的缓存区域中，则可能会使用更多。
+'   hasVisualOverflow 此条是否有视觉溢出
+'        默认情况下，该值为false，这意味着视口不需要剪裁其子对象。如果任何片段有视觉溢出，则该视口将对其子对象应用剪辑。
+'}
+
+
 
 abstract class RenderSliverMultiBoxAdaptor{
    final RenderSliverBoxChildManager _childManager
@@ -224,6 +327,7 @@ abstract class RenderSliverMultiBoxAdaptor{
 '  从渲染对象添加和删除子项的合同是比普通渲染对象更严格
 '     如果他们已经在布局过程中布局，除布局过程，儿童可以被移除
 '     除了在[childManager]的调用期间，不能添加子项，然后仅当没有与该索引（或子项）对应的子项时（首先删除了与该索引对应的子项）
+'   _keepAliveBucket 尽管节点不可见，但仍保持活动状态
 '}
 
 class RenderSliverFixedExtentBoxAdaptor{
@@ -314,6 +418,9 @@ class SliverFillRemaining{
 class RenderSliverFillRemaining{
   void performLayout()
 }
+
+
+
 StatelessWidget <|-- ScrollView
 ScrollView      <|-- BoxScrollView
 ScrollView      <|-- CustomScrollView
@@ -329,6 +436,9 @@ MultiChildRenderObjectWidget <|-- Viewport
 Viewport <.. RenderViewport
 RenderViewportBase <|-- RenderViewport
 RenderViewportBase <.. RenderSliver
+RenderViewportBase <.. ViewportOffset
+ViewportOffset     <|-- ScrollPosition
+ScrollPosition     <|--  ScrollPositionWithSingleContext
 
 RenderViewport <.. RenderSliver
 
@@ -336,6 +446,7 @@ RenderObject <|-- RenderSliver
 
 RenderSliver <|-- RenderSliverMultiBoxAdaptor
 RenderSliver <|-- RenderSliverSingleBoxAdapter
+RenderSliver <.. SliverGeometry
 
 RenderSliverMultiBoxAdaptor <|-- RenderSliverList
 RenderSliverMultiBoxAdaptor <|-- RenderSliverGrid

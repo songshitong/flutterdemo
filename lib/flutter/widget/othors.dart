@@ -66,7 +66,6 @@ import 'package:flutter/material.dart';
 //各种theme
 
 // function 是const吗  一个const构造器，接受一个function     class外面的是function，里面的是method???
-//pageview  快速回弹效果 PageScrollPhysics
 //ValueNotifier 各种listener
 //WidgetsBinding.instance.window.devicePixelRatio
 
@@ -84,7 +83,6 @@ import 'package:flutter/material.dart';
 //TextTheme 字体主题之类的系统资源
 //查看foundation  import 'package:flutter/foundation.dart' as foundation;     foundation.defaultTargetPlatform
 
-//全屏 SystemChrome.setEnabledSystemUIOverlays([]) services层
 //Table table cell
 
 //todo Material 控件
@@ -133,6 +131,20 @@ import 'package:flutter/material.dart';
 //todo ServicesBinding 中的BinaryMessenger 消息传递
 //todo globlekey的应用 Currently the key is recreated every time _LoginState is rebuilt, which defeats it's purpose.
 //     https://github.com/flutter/flutter/issues/20042 声明为static final
+
+//TODO 查看constranlayout源码进行改造
+//一个易用的布局
+//居中  水平居中，竖直居中
+//靠边  与父级的上下左右对齐
+//流式布局  flowlayout  按百分比扩散  布局如何扩展  多种布局是应结合到一起还是进行拆分，组件式设计？？
+//按比例  占据某个方向的比例位置和宽度
+//相邻子元素的关系  一起运动，相对运动（相对位置的不断变化）
+//适配？？自动缩放
+//性能  layout和paint的次数，重绘边界，延迟处理计算？？
+//是否便于获取布局信息（孩子的大小，位置，自身信息等）
+//滚动是否支持？？（优先级很低，）
+// 重叠(重叠谁在上，谁在下)，是否可以更改子的绘制顺序，
+//  相对布局  一个元素与另一个的对齐关系    使用水平竖直排列是否可以完成
 
 void main() {
   Visibility(

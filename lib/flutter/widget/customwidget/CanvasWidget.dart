@@ -159,6 +159,9 @@ class MyPainter extends CustomPainter {
     canvas.drawRect(Rect.fromLTWH(0, size.height / 2 - textPainter.height / 2, 20, textPainter.size.height), myPaint);
     print(
         "baseDis $baseDis size ${textPainter.size}   baseline到底部textPainter.height-baseDis ${textPainter.height - baseDis}");
+
+    //设置maxLines后，超过maxLines返回true
+    textPainter.didExceedMaxLines;
   }
 
   @override

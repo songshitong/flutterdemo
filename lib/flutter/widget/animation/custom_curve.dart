@@ -96,6 +96,16 @@ class _CustomCurvePageState extends State<CustomCurvePage> with SingleTickerProv
                 "test TweenSequence",
                 style: TextStyle(fontSize: 30),
               )),
+
+          ///AnimatedBuilder 提高重用，减少setState范围及次数，限定了rebuild的范围
+          ///child 给builer中使用
+          /// 在builder中给child增加container控制大小，transform,transition各种动画，实现动画和组件的分离，而不是将动画和组件糅合在一起
+          ///
+          AnimatedBuilder(
+            animation: null,
+            builder: (BuildContext context, Widget child) {},
+            child: Text(""),
+          )
         ],
       ),
     );

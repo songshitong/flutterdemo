@@ -339,7 +339,7 @@ class PopupContent extends StatelessWidget {
       case 5:
         child = new CustomMultiChildLayout(
           children: <Widget>[
-            //todo 刷新逻辑，一层不变，自层变化是否刷新，还是与LayoutID有关
+            //前后LayoutId相同（child PopupChildOne不同 ）不进行更新，
             LayoutId(
                 id: "five1",
                 child: PopupChildOne(

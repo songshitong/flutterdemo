@@ -7,7 +7,7 @@ import 'package:flutterdemo/flutter/common/MyImgs.dart';
 import 'dart:math' as Math;
 
 class ImagePreviewPage extends StatelessWidget {
-  String url1 = "http://s4.sinaimg.cn/mw690/001oUilwzy7089XKLaX83&690";
+  String url1 = "http://pic13.nipic.com/20110409/7119492_114440620000_2.jpg";
   @override
   Widget build(BuildContext context) {
     return Scaffold(

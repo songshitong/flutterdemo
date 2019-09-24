@@ -74,10 +74,12 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'beautiful/circle_to_rectangle.dart';
+import 'beautiful/drops.dart';
 import 'beautiful/image_preview.dart';
 import 'beautiful/reorder_list.dart';
 import 'beautiful/shimmer_wiget.dart';
 import 'custom_popup_page.dart';
+import 'principle/widget_update.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -828,6 +830,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   }));
                 },
                 child: Text("电影音频替换")),
+            Text("原理认证  ----------------------- "),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return WidgetUpdate();
+                  }));
+                },
+                child: Text("widget 更新")),
             Text("酷炫效果和自定义----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -906,6 +916,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   }));
                 },
                 child: Text("reorderList 重排序列表")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return DropsPage();
+                  }));
+                },
+                child: Text("仿drops应用")),
             Text("测试第三方包 ----------------------- "),
             FlatButton(
                 onPressed: () {

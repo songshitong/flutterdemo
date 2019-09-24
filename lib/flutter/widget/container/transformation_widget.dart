@@ -74,6 +74,10 @@ class TransformationPage extends StatelessWidget {
                 //旋转90度
                 angle: math.pi / 2,
                 child: Text("Hello world"),
+                //中点 可以设置超出offset(0,10000)
+                origin: Offset(0, 0),
+                //中点
+                alignment: Alignment.center,
               ),
             ),
           ),
