@@ -167,13 +167,12 @@ class ListViewPageState extends State<ListViewPage> {
                   ]),
             ),
 
-            ///可以对实际不展示的item的估算算法进行控制
+//            ///可以对实际不展示的item的估算算法进行控制
             ListView.custom(
               shrinkWrap: true,
-              semanticChildCount: 10,
               childrenDelegate: SliverChildBuilderDelegate((context, index) {
                 return Text("custom");
-              }),
+              }, childCount: 10),
             )
           ],
         ),

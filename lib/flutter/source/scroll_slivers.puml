@@ -130,6 +130,8 @@ class Viewport{
 '}
 
 class RenderViewport{
+   double get anchor
+   RenderSliver _center
    void performResize()
    void performLayout()
 }
@@ -137,13 +139,19 @@ class RenderViewport{
 ' 内部较大的渲染对象
 ' [RenderViewport]是滚动机械的视觉主力,它根据自己的维度和给出的[偏移]显示一个子项的子集，随着偏移量的变化，可以在视口中看到不同的孩子
 ' [RenderViewport]托管一个双向的条子列表，锚定在一个[center] sliver，位于零滚动偏移处。中心widget根据[anchor]属性显示在视口中
-' 显示子列表中早于[中心]的条带从[center]开始反向[axisDirection]的逆序展示
+'      显示子列表中早于[中心]的条带从[center]开始反向[axisDirection]的逆序展示
 ' [RenderViewport]不能直接包含[RenderBox]子项。相反，使用 [RenderSliv​​erList]，[RenderSliv​​erFixedExtentList]，[RenderSliv​​erGrid]或
 ' [RenderSliv​​erToBoxAdapter]
 '
 '    performResize()  将viewport大小给Viewportoffset
 '    performLayout   _attemptLayout->layoutChildSequence 返回correction->offset.correctBy(correction)
 '                   通过offset确定整页的滚动偏移
+'
+'     anchor 零滚动偏移的相对位置   例如，如果[Anchor]为0.5，[AxisDirection]为[AxisDirection.Down]或[AxisDirection.Up]，
+'        则零滚动偏移在视口中垂直居中。如果[Anchor]为1.0，[AxisDirection]为[AxisDirection.Right]，则零滚动偏移位于视口的左边缘
+'     _center  成长方向的第一个孩子   当[offset.pixels]为“0”时，将位于[Anchor]定义位置的子项。
+'         在[center]之后的子项将被放置在相对于[center]的[axisdirection]中。在[center]之前的子项将被放置在相对于[center]的[axisdirection]的相反位置。
+'        [center]必须是vieport的子级
 '}
 
 abstract class RenderViewportBase{
@@ -160,6 +168,14 @@ abstract class RenderViewportBase{
        @required RenderSliver advance(RenderSliver child),
        @required double remainingCacheExtent,
        @required double cacheOrigin,
+     })
+
+   static Rect showInViewport({RenderObject descendant,
+       Rect rect,
+       @required RenderAbstractViewport viewport,
+       @required ViewportOffset offset,
+       Duration duration = Duration.zero,
+       Curve curve = Curves.ease,
      })
 }
 'note right of RenderViewportBase{
@@ -178,11 +194,87 @@ abstract class RenderViewportBase{
 '   offset 视口中的内容的哪个部分应该可见 [viewport offset.pixels]值决定了视窗用来选择要显示的内容部分的滚动偏移量。
 '      当用户滚动视区时，此值将更改，这将更改显示的内容。
 '
+'    showInViewport
+'    //           scrollOffset
+'        //                       0 +---------+
+'        //                         |         |
+'        //                       _ |         |
+'        //    viewport position |  |         |
+'        // with `descendant` at |  |         | _
+'        //        trailing edge |_ | xxxxxxx |  | viewport position
+'        //                         |         |  | with `descendant` at
+'        //                         |         | _| leading edge
+'        //                         |         |
+'        //                     800 +---------+
+'        //
+'        // `trailingEdgeOffset`: Distance from scrollOffset 0 to the start of the
+'        //                       viewport on the left in image above.
+'        // `leadingEdgeOffset`: Distance from scrollOffset 0 to the start of the
+'        //                      viewport on the right in image above.
+'        //
+'        // The viewport position on the left is achieved by setting `offset.pixels`
+'        // to `trailingEdgeOffset`, the one on the right by setting it to
+'        // `leadingEdgeOffset`.
+''
+'
+'         布局顺序 SliverConstraints.scrollOffset  cacheOrigin1  viewport  cacheOrigin2  其他
+'         scrollOffset = constraints.scrollOffset + constraints.cacheOrigin
+'         constraints.remainingCacheExtent=viewport+cacheOrigin2
+'         targetEndScrollOffset = scrollOffset + remainingExtent
 '}
 
 class SliverConstraints{
-
+   final AxisDirection axisDirection
+   final GrowthDirection growthDirection
+   final ScrollDirection userScrollDirection
+   final double scrollOffset
+   final double precedingScrollExtent
+   final double overlap
+   final double remainingPaintExtent
+   final double crossAxisExtent
+   final AxisDirection crossAxisDirection
+   final double viewportMainAxisExtent
+   final double remainingCacheExtent
+   final double cacheOrigin
+   BoxConstraints asBoxConstraints({double minExtent = 0.0,double maxExtent = double.infinity,double crossAxisExtent,})
 }
+
+'note right of SliverConstraints{
+'   overlap 在[AxisDirection]中，从对应于[ScrollOffset]的像素被绘制到第一个尚未被先前的条绘制的像素的像素数。
+'      例如，如果前一条切片的[Slivergometry.Paintextent]为100.0像素，而[Slivergometry.Layoutextent]仅为50.0像素，
+'      则此切片的[Overlap]将为50.0。
+'      这通常被忽略，除非银条本身将被固定或浮动，并且希望避免在前一条银条下这样做。
+'    remainingPaintExtent 小条应该考虑提供的内容像素数（提供的像素数比这多是低效的）
+'        提供的实际像素数应在[rendersliver.geometry]中指定为[slivergometry.paintextent]。
+'        该值可能是无限的，例如，如果viewport是无约束[rendershrinkwrappingviewport]
+'        该值可能为0.0，例如，如果从向下垂直视口的底部滚动条
+'         (剩余要绘制的大小，为0不用绘制此时已不可见)
+'
+'     remainingCacheExtent  描述从[CacheOrigin]开始，小条应该提供多少内容。
+'           并非[RemainingCacheExtent]中的所有内容都可见，因为其中一些内容可能会落在视区的缓存区域中
+'           每个小片段都应该开始在[CacheOrigin]布局内容，并尽量提供[RemainingCacheExtent]允许的内容
+'           [RemainingCacheExtent]总是大于或等于[remainingPaintExtent]。位于[RemainingCacheExtent]中但位于[RemainingPaintExtent]外部的内容当前在视口中不可见。
+
+'   crossAxisExtent  交叉轴上的像素数  对于垂直列表，这是条的宽度。
+'    viewportMainAxisExtent  viewport在主轴上可以显示的像素数   对于垂直列表，这是视口的高度
+'    cacheOrigin  缓存区域相对于[ScrollOffset]开始的位置
+'
+'     scrollOffset  在这个条子的坐标系中，当[GrowthDirection]是[GrowthDirection.Forward]时，
+'        对应于这个条子在[AxisDirection]中最早可见部分的滚动偏移；当[GrowthDirection]是[GrowthDirection.Reverse]时，
+'          对应于相反的[AxisDirection]方向的滚动偏移
+'        例如，如果[AxisDirection]是[AxisDirection.Down]，而[GrowthDirection]是[GrowthDirection.Forward]，
+'          则Scroll Offset是条带顶部滚动过视区顶部的量
+'        此值通常用于计算是否仍应通过[SliVergeometry.Paintextent]和[SliVergeometry.Layoutextent]将此条线突出到视口中，
+'           并考虑条子的起点在视口的起点之上的距离
+'        对于顶部不超过视区顶部的切片，当[AxisDirection]为[AxisDirection.Down]且[GrowthDirection]为[GrowthDirection.Forward]时，
+'           [ScrollOffset]为“0”。具有[ScrollOffset]`0'的片段集包括位于视口底部以下的所有片段。
+'        [sliverconstraints.remainingpaintextent]通常用于完成计算滚动出的片段是否仍应部分从视图底部“凸出”的相同目标
+'        这是否对应于棉条内容物的开始或结束取决于[生长方向]。
+
+'   asBoxConstraints  返回[boxConstraints]以反映条带约束。对于具有[renderbox]子级的切片非常有用
+'       “minextent”和“maxtent”用作主轴中的约束。如果非空，则将给定的“crossAxisExtent”用作十字轴中的紧约束。
+'         否则，此对象的[CrossAxisExtent]将用作交叉轴中的约束
+'}
 
 abstract class ViewportOffset{
    double get pixels
@@ -216,6 +308,10 @@ class ScrollController {
 
 abstract class RenderSliver{
    SliverGeometry _geometry
+   double childCrossAxisPosition(covariant RenderObject child)
+   double childMainAxisPosition(covariant RenderObject child)
+   double calculateCacheOffset(SliverConstraints constraints, { @required double from, @required double to })
+   double calculatePaintOffset(SliverConstraints constraints, { @required double from, @required double to })
 }
 
 'note right of RenderSliver{
@@ -281,6 +377,32 @@ abstract class RenderSliver{
 '
 '
 '      _geometry sliver所占的空间  在viewport的performlayout中使用
+'
+'      childCrossAxisPosition() 默认返回0.0 （竖直列表，子在横轴距离父的边距）
+'        返回沿十字轴的距离，该距离从该条[paint]坐标空间中十字轴的零到给定子对象的最近边
+'        例如，如果[Constraints]将此片段描述为轴方向为[AxisDirection.Down]，则这是从片段左侧到子片段左侧的距离。
+'           类似地，如果[constraints]将这个片段描述为轴方向为[axis direction.up]，那么这个值是相同的。
+'           如果轴方向是[AxisDirection.Left]或[AxisDirection.Right]，则它是从条顶部到子顶部的距离。
+'        为不可见的子项调用此命令无效
+'
+'      childMainAxisPosition() 返回从条子的前可见边到给定子对象最靠近该边的边的距离。
+'         例如，如果[Constraints]将此小条描述为轴方向为[AxisDirection.Down]，则这是小条可见部分顶部到子条顶部的距离。
+'           另一方面，如果[Constraints]将这个片段描述为轴方向为[AxisDirection.Up]，则这是从片段可见部分底部到子片段底部的距离。
+'           在这两种情况下，这都是增加[SliverConstraints.ScrollOffset]和[SliverLogicalParentData.LayoutOffset]的方向。
+'         对于[rendersliver]的子对象，子对象的前缘将是子对象的可见前缘，而不是子对象的局部滚动偏移0.0的部分。
+'           对于不是[rendersliver]的子对象，例如[renderbox]子对象，它是到框边缘的实际距离，因为这些框不知道如何处理滚动
+'         此方法与[ChildScrollOffset]不同，因为[ChildMainAxisPosition]给出了与条子的前可见边缘的距离，而[ChildScrollOffset]给出了与条子的零滚动偏移的距离。
+'
+'        calculateCacheOffset() 计算区域从“from”到“to”的部分，该部分位于视区的缓存范围内，
+'            假设只有来自[sliverconstraints.cacheorigin]的区域（即[sliverconstraints.remainingcacheextent]高）可见，
+'              并且滚动偏移和绘制之间的关系偏移量是线性的。
+'            如果消耗的滚动偏移量与消耗的缓存范围之间不存在1:1的关系，则此方法无效
+'        calculatePaintOffset()
+'            计算区域从“from”到“to”可见的部分，假设只有[SliverConstraints.ScrollOffset]中的区域
+'              （即[SliverConstraints.RemainingPaintextent]高）可见，并且滚动偏移和绘制偏移之间的关系是线性的
+'            例如，如果约束的滚动偏移量为100，剩余的绘制范围为100，并且此方法的参数描述区域50..150，则返回值为50（从滚动偏移量100到滚动偏移量150）
+'            如果消耗的滚动偏移量和消耗的绘制范围之间没有1:1的关系，则此方法无效。例如，如果小条始终绘制相同的量，
+'              但使用与[SliverConstraints.ScrollOffset]成比例的滚动偏移范围，则此函数的结果将不一致。
 '}
 
 class SliverGeometry{
@@ -289,6 +411,7 @@ class SliverGeometry{
    final double maxPaintExtent
    final double cacheExtent
    final bool hasVisualOverflow
+   final double scrollOffsetCorrection
 }
 
 'note right of SliverGeometry{
@@ -310,8 +433,15 @@ class SliverGeometry{
 '   cacheExtent 在[SliverConstraints.RemainingCacheExtent]中，sliver消耗了多少像素
 '        此值应等于或大于[LayoutExtent]，因为小条始终至少使用[SliveConstraints.RemainingCacheExtent]中的[LayoutExtent]，
 '        如果它落在视区的缓存区域中，则可能会使用更多。
+'         RenderViewport.cacheExtent 中指预加载的区域
 '   hasVisualOverflow 此条是否有视觉溢出
 '        默认情况下，该值为false，这意味着视口不需要剪裁其子对象。如果任何片段有视觉溢出，则该视口将对其子对象应用剪辑。
+'
+'    scrollOffsetCorrection  如果返回[rendersliver.performlayout]后该值为非零，则父级将调整滚动偏移，然后重新运行父级的整个布局
+'      当值为非零时，[rendersliver]在构造[slivergometry]时不需要计算其余的值，也不需要对其子级调用[rendersliver.performlayout]，
+'         因为在[sliverconstraints.scrolloffset]校正完成后，将在同一帧中再次对该条调用[rendersliver.performlayout]应用时，
+'         其子项的正确[滑动测量]和布局可以计算
+'      如果父对象也是[rendersliver]，则它必须在自己的[rendersliver.geometry]属性中传播此值，直到基于此值调整其偏移量的视口为止。
 '}
 
 
@@ -319,6 +449,11 @@ class SliverGeometry{
 abstract class RenderSliverMultiBoxAdaptor{
    final RenderSliverBoxChildManager _childManager
    final Map<int, RenderBox> _keepAliveBucket
+   RenderBox insertAndLayoutLeadingChild(BoxConstraints childConstraints, {bool parentUsesSize = false,})
+   RenderBox insertAndLayoutChild(BoxConstraints childConstraints, {@required RenderBox after,bool parentUsesSize = false,})
+   double childScrollOffset(RenderObject child)
+   double paintExtentOf(RenderBox child)
+   void collectGarbage(int leadingGarbage, int trailingGarbage)
 }
 'note right of RenderSliverMultiBoxAdaptor{
 '  有多个box children的sliver
@@ -328,6 +463,27 @@ abstract class RenderSliverMultiBoxAdaptor{
 '     如果他们已经在布局过程中布局，除布局过程，儿童可以被移除
 '     除了在[childManager]的调用期间，不能添加子项，然后仅当没有与该索引（或子项）对应的子项时（首先删除了与该索引对应的子项）
 '   _keepAliveBucket 尽管节点不可见，但仍保持活动状态
+'
+'   insertAndLayoutLeadingChild()  在布局期间调用以在[firstchild]之前创建、添加和布局子级
+'     调用[rendersliveboxchildmanager.createChild]以实际创建并添加子项（如果需要）。可以从缓存中获取子项；
+'        请参阅[SliverMultiboxAdapterParentData.KeepAlive]。
+'     返回新的子项，如果未获得子项，则返回空值
+'     如果在此布局过程中尚未布局，则可以通过此调用移除先前是第一个子级的子级以及任何后续子级。在调用期间不应添加子项，
+'       除了由“createchild”创建并返回的子项。
+'
+'     insertAndLayoutChild() 在布局期间调用，以在给定子级之后创建、添加和布局子级。
+'        调用[rendersliveboxchildmanager.createChild]以实际创建并添加子项（如果需要）。可以从缓存中获取子项；
+'           请参阅[SliverMultiboxAdapterParentData.KeepAlive]。
+'
+'
+'    childScrollOffset() 返回child的layoutOffset
+'    paintExtentOf()  返回主轴中给定子项的维度，如子项的[RenderBox.Size]属性所示。这仅在布局后有效。
+'       竖直布局中，返回child.size.height
+'
+'    collectGarbage()  在布局后调用，在子列表的开头和结尾处可以垃圾收集的子列表数
+'      属性[SliverMultiBoxAdaptorParentData.keepAlive]设置为true的子级将被删除到缓存中，而不是被删除
+'      这种方法还收集以前存活但现在不再需要的任何孩子。因此，每次运行[performlayout]时都应该调用它，即使参数都为零
+'         回收时 leadingGarbage每次去掉firstChild   trailingGarbage每次去掉lastChild
 '}
 
 class RenderSliverFixedExtentBoxAdaptor{
@@ -335,6 +491,26 @@ class RenderSliverFixedExtentBoxAdaptor{
 }
 class RenderSliverList{
 
+}
+
+abstract class RenderSliverBoxChildManager{
+    void setDidUnderflow(bool value)
+    double estimateMaxScrollOffset(
+        SliverConstraints constraints, {
+        int firstIndex,
+        int lastIndex,
+        double leadingScrollOffset,
+        double trailingScrollOffset,
+      })
+}
+
+note right of RenderSliverBoxChildManager{
+   estimateMaxScrollOffset()  调用以估计此对象的总可滚动范围
+       必须返回从具有最早可能索引的子项开始到具有最后可能索引的子项结束的总距离
+     该接口的实现SliverMultiBoxAdaptorElement 调用widget即SliverMultiBoxAdaptorWidget的estimateMaxScrollOffset
+        widget的默认实现是delegate.estimateMaxScrollOffset=null
+        或者调用SliverMultiBoxAdaptorElement._extrapolateMaxScrollOffset
+   在布局期间调用，以指示此对象是否没有为[RendersLiverMultiboxAdapter]提供足够的子级来填充[SliverConstraints.RemainingPaintExtent]。
 }
 
 class RenderSliverGrid{
@@ -386,6 +562,13 @@ class SliverFillViewport{
 '  [SliverFillViewport]将其子项放在主轴的线性数组中
 '  每个孩子的大小都可以填充视口，包括主视图和cross轴
 '  viewportFraction 每个子项应填充主轴的视口部分,如果此分数小于1.0，则在一次可以看到多个子项,如果此分数大于1.0，则每个子项将大于主轴中的视口
+' }
+class RenderSliverSingleBoxAdapter{
+   RenderBox child
+}
+
+' note right of RenderSliverSingleBoxAdapter{
+'    包含一个[RenderBox]的[RenderSliver]类
 ' }
 
 class SliverToBoxAdapter{
@@ -461,6 +644,7 @@ SliverMultiBoxAdaptorWidget <|-- SliverFixedExtentList
 SliverMultiBoxAdaptorWidget <|-- SliverFillViewport
 
 SliverList                  <..  RenderSliverList
+RenderSliverList            <..  RenderSliverBoxChildManager
 SliverFixedExtentList       <..  RenderSliverFixedExtentList
 SliverGrid                  <..  RenderSliverGrid
 SliverFillViewport          <..  RenderSliverFillViewport

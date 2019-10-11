@@ -133,6 +133,9 @@ import 'package:flutter/material.dart';
 //     https://github.com/flutter/flutter/issues/20042 声明为static final
 
 //TODO 查看constranlayout源码进行改造
+//https://blog.csdn.net/m0_37667770/article/details/100557072 动画 基础，一个view，两个view，多个view
+
+//todo 截长图 自动滚动，做图片拼接
 //一个易用的布局
 //居中  水平居中，竖直居中
 //靠边  与父级的上下左右对齐

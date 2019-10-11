@@ -2,6 +2,8 @@
 
 import 'dart:math';
 
+import 'dart:typed_data';
+
 void main() {
   List<int> inits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -96,9 +98,14 @@ void main() {
   print("lastIndexWhere1 $lastIndexWhere1");
   int lastIndexWhere2 = notes.lastIndexWhere((note) => note.startsWith('r'), 2); //1  me,re,do
   print("lastIndexWhere2 $lastIndexWhere2");
-
+  Uint8List t;
   //shuffle  洗牌,打乱顺顺序
   List<int> list4 = [1, 2, 3, 4];
   list4.shuffle(Random.secure());
   print("shuffle $list4");
+
+  //嵌套list
+  var lists = List<List<LineItem>>();
 }
+
+class LineItem {}

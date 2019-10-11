@@ -56,4 +56,7 @@ void main() {
   String bTest = aTest;
   aTest = "a change to b";
   print("bTest $bTest"); //bTest 指向的地址不变
+
+  double db = 0.0;
+  print("db==0 ${db == 0}");
 }

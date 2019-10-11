@@ -32,30 +32,31 @@ class _DropsPageState extends State<DropsPage> with SingleTickerProviderStateMix
                 startX = start.globalPosition.dx;
               },
               onHorizontalDragUpdate: (DragUpdateDetails update) {
+                //todo 以手势移动为驱动，手势停止时光圈不会消失   时间+手势  手势往集合添加，时间控制item的衰减？？
                 updateX = update.globalPosition.dx;
                 centerX = update.localPosition.dx;
                 centerY = update.localPosition.dy;
 //                print("centerX $centerX centerY $centerY");
-                items
-                  ..forEach((e) {
-                    e.radius = e.radius - 1;
-                    e.opacity = e.opacity - 0.02;
-                  })
-                  ..removeWhere((e) {
-                    return e.radius <= 0;
-                  });
-                items.add(TrailingItem()
-                  ..centerX = centerX
-                  ..centerY = centerY
-                  ..radius = 20
-                  ..opacity = 0.8);
+                //减少光圈的数量
+                if (items.isNotEmpty) {
+                  var last = items.last;
+                  if ((last.centerX - centerX).abs() > 3 || (last.centerY - centerY).abs() > 3) {
+                    addItem();
+                  }
+                } else {
+                  addItem();
+                }
+
                 setState(() {
-                  print("items $items");
+//                  print("items $items");
+                  print("items length ${items.length}");
                 });
               },
               onHorizontalDragEnd: (DragEndDetails end) {
                 setState(() {
-                  items.removeRange(0, items.length - 1);
+                  //清空
+                  items.clear();
+                  addItem();
                 });
               },
               child: Transform.rotate(
@@ -76,6 +77,24 @@ class _DropsPageState extends State<DropsPage> with SingleTickerProviderStateMix
         ],
       ),
     );
+  }
+
+  void addItem() {
+    items
+      ..forEach((e) {
+        if (items.length > 1) {
+          e.radius = e.radius - 1;
+          e.opacity = e.opacity - 0.02;
+        }
+      })
+      ..removeWhere((e) {
+        return e.radius <= 0;
+      })
+      ..add(TrailingItem()
+        ..centerX = centerX
+        ..centerY = centerY
+        ..radius = 20
+        ..opacity = 0.8);
   }
 }
 

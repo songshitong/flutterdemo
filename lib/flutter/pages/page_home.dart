@@ -63,6 +63,7 @@ import 'package:flutterdemo/flutter/widget/scrollwidget/grid_view.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/list_view.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/scroll_notification.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/single_childs_croll_view.dart';
+import 'package:flutterdemo/flutter/widget/sliver/custom_sliver_list.dart';
 import 'package:flutterdemo/flutter/widget/sliver/nested_scroll_view_page.dart';
 import 'package:flutterdemo/flutter/widget/sliver/sliver_app_bar.dart';
 import 'package:flutterdemo/flutter/widget/switch.dart';
@@ -570,6 +571,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   }));
                 },
                 child: Text("SliverAppBar")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return CustomSliverPage();
+                  }));
+                },
+                child: Text("自定义sliver")),
             FlatButton(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {

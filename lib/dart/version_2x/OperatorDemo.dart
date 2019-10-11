@@ -2,14 +2,17 @@ import 'package:flutterdemo/dart/version_2x/Btn.dart';
 
 void main() {
 //  /// =
-//  var c/*= "c"*/;
-//  print("c 结果是 ");
-//  print(c);
+  var c/*= "c"*/;
+  print("c 结果是 ");
+  print(c);
 //
-//  ///   ??=
-//  c ??= "cc";
-//  print("c 结果是 ");
-//  print(c);
+//  ///   ??=  为空赋值，不为空不赋值
+  c ??= "cc";
+  print("c 结果是 ");
+  print(c);
+
+  c ??= "cccc";
+  print("c 结果是 $c");
 
   ///  / 除法
 //  print("\n1/2 结果为 ");
