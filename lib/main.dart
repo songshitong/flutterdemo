@@ -13,7 +13,6 @@ void main() {
 class IosPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ScrollView()
     return CupertinoApp(home: IosFulePage());
   }
 }
