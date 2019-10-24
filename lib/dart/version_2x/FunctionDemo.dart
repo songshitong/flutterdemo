@@ -28,6 +28,7 @@ class SortedCollection {
 }
 
 ///顶层函数(Function)不与类绑定的方法  静态函数    类中为实例函数(method 方法)
+///顶级变量  dart支持顶级变量  在一个文件中声明顶级变量(在方法和类外面)，在另一个文件中使用
 // Initial, broken implementation.
 int sort(int a, int b) {
   print("a + b 结果是");

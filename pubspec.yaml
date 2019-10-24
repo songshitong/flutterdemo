@@ -28,28 +28,35 @@ dependencies:
   #国际化加翻译
   intl: ^0.16.0
   #webview
-  webview_flutter: ^0.3.6
+  webview_flutter: ^0.3.14+1
   #视频播放
   video_player: ^0.10.0+8
   #android intent
   android_intent: ^0.3.0+2
   #使用URL拉起
-  url_launcher: ^5.0.2
+  url_launcher: ^5.2.0
   gif_ani: ^0.0.2
   #image解析
   image: ^2.1.4
   # ffmpeg
-  flutter_ffmpeg:
-    git:
-      url: git://github.com/tanersener/flutter-ffmpeg.git
-      ref: v0.2.5
-      path: packages/flutter_ffmpeg_https_lts
+  flutter_ffmpeg: ^0.2.7
   #image picker
   image_picker: ^0.6.0+17
   # 音频录制，播放
   flutter_sound: ^1.4.2
 
   w_reorder_list: ^0.1.0
+
+  #高德地图
+  amap_base_location: ^0.4.0+1
+
+  # 阿里推送
+  rammus: ^0.0.4
+  #分享 shareSDK
+  sharesdk: ^1.1.8
+  #权限
+  permission_handler: ^3.2.2
+
 
 
 

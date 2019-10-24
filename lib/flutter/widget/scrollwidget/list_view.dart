@@ -24,6 +24,7 @@ class ListViewPageState extends State<ListViewPage> {
 
     ///需要限制长度
     FixedExtentScrollPhysics(),
+    ScrollPhysics()
   ];
 
   int physicIndex = 0;
@@ -97,7 +98,6 @@ class ListViewPageState extends State<ListViewPage> {
                     // 返回到list页面，将空白位置重新替换为原内容，
 
                     // todo  各种key使用的总结
-
                     /// [ReorderListPage]  不使用popup，不使用globalkey 直接使用context+widgetsbings.addpostframecallback 获取渲染后的尺寸，做动画
                     /// 调用对外暴露的自定义的indexChange回调
                     child: Container(color: Colors.black12, child: Text("bbbb 点击b移动A到B的位置"))),
@@ -105,6 +105,9 @@ class ListViewPageState extends State<ListViewPage> {
                     value: true,
                     activeColor: Colors.red,
                     onChanged: (value) {
+                      //todo 自定义ScrollConfiguration ScrollBehavior 去掉蓝色回弹https://www.jianshu.com/p/b9e92c37f4ec
+                      ///与[CustomScrollPhysics]去掉TODO
+                      ScrollConfiguration(behavior: null, child: null);
                       print("onchaged1 $value");
                     }),
                 Checkbox(

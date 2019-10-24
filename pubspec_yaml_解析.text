@@ -25,6 +25,12 @@ Git依赖
          git:
            url: git://github.com/icepy/plugin1.git
            path: packages/url
+           ref: 0.0.1/branch/commit/tag   制定版本/分支/提交/tag
+       transmogrify:   制定源
+           hosted:
+             name: transmogrify
+             url: http://some-package-server.com
+           version: ^1.0.0
 
 
 开发一个自己的包

@@ -49,6 +49,8 @@ class _CustomScrollPhysicsState extends State<CustomScrollPhysicsPage> {
   }
 }
 
+//todo 查看ClampingScrollPhysics 和Ios原理
+// 微光是怎么实现的，simulation的关系
 ///模拟pageView的效果  滚动超过一半，弹到下一页，滚动不超过一半，回到原位置
 ///也可以参考gallery[_SnappingScrollPhysics]
 class CustomScrollPhysics extends ScrollPhysics {

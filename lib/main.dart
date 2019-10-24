@@ -6,20 +6,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutterdemo/flutter/pages/page_home.dart';
 import 'dart:ui' as ui;
 
-void main() => runApp(/*IosPage()*/ HomePage());
+void main() {
+  runApp(/*IosPage()*/ HomePage());
+}
 
 class IosPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    RenderViewport s;
-    SliverConstraints d;
-    RenderSliverList(childManager: null);
-    ListView v;
-    SliverList tt;
-    RenderSliverGrid ss;
-    SingleChildScrollView sss;
-    Scrollable dd;
-    SliverAppBar bb;
+    ScrollView()
     return CupertinoApp(home: IosFulePage());
   }
 }

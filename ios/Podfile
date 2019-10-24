@@ -1,14 +1,20 @@
 # Uncomment this line to define a global platform for your project
-platform :ios, '9.0'
+platform :ios, '9.3'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+#阿里云推送
+source 'https://github.com/CocoaPods/Specs.git'
+source 'https://github.com/aliyun/aliyun-specs.git'
+
 
 project 'Runner', {
   'Debug' => :debug,
   'Profile' => :release,
   'Release' => :release,
 }
+
 
 def parse_KV_file(file, separator='=')
   file_abs_path = File.expand_path(file)
@@ -53,11 +59,22 @@ target 'Runner' do
 
   # Plugin Pods
   plugin_pods = parse_KV_file('../.flutter-plugins')
-  plugin_pods.map { |p|
+    plugin_pods.map { |p|
     symlink = File.join('.symlinks', 'plugins', p[:name])
     File.symlink(p[:path], symlink)
-    pod p[:name], :path => File.join(symlink, 'ios')
-  }
+    #配置ffmpeg
+    if p[:name] == 'flutter_ffmpeg'
+        pod p[:name]+'/full-lts', :path => File.join(symlink, 'ios')
+    else
+        pod p[:name], :path => File.join(symlink, 'ios')
+    end
+    }
+  #plugin_pods = parse_KV_file('../.flutter-plugins')
+  #plugin_pods.map { |p|
+  #  symlink = File.join('.symlinks', 'plugins', p[:name])
+  #  File.symlink(p[:path], symlink)
+  #  pod p[:name], :path => File.join(symlink, 'ios')
+  #}
 end
 
 post_install do |installer|

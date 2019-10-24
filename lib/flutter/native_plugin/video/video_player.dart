@@ -12,10 +12,13 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   String url1 = "http://vfx.mtime.cn/Video/2017/03/31/mp4/170331093811717750.mp4";
   String url3 = "http://vfx.mtime.cn/Video/2019/06/29/mp4/190629004821240734.mp4";
   String url2 = "http://www.sample-videos.com/video123/mp4/720/big_buck_bunny_720p_20mb.mp4";
+  //阿里云
+  String url4 =
+      "https://out-20170629113118784-ottgas6dn7.oss-cn-shanghai.aliyuncs.com/sv/1b43e744-16aba3e7fd3/1b43e744-16aba3e7fd3.mp4";
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.network(url1)
+    _controller = VideoPlayerController.network(url4)
       ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() {});

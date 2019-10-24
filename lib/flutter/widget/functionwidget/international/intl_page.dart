@@ -49,7 +49,7 @@ class _IntlPageState extends State<IntlPage> {
         GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate,
         // 注册我们的Delegate
         DemoLocalizationsDelegate(),
-        IntlLocalizationsDelegate()
+        IntlLocalizationsDelegate(),
       ],
       //设置支持的语言
       supportedLocales: locals,

@@ -24,30 +24,6 @@ class ContainerPageState extends State<ContainerPage> {
       ),
       body: Column(
         children: <Widget>[
-          Container(
-            margin: EdgeInsets.only(top: 50.0, left: 120.0),
-            //容器外补白
-            constraints: BoxConstraints.tightFor(width: 200.0, height: 150.0),
-            //卡片大小
-            decoration: BoxDecoration(
-                border: Border.all(color: Colors.black45), //设置边框
-                //背景装饰
-                gradient: RadialGradient(//背景径向渐变
-                    colors: [Colors.red, Colors.orange], center: Alignment.topLeft, radius: .98),
-                boxShadow: [
-                  //卡片阴影
-                  BoxShadow(color: Colors.black54, offset: Offset(2.0, 2.0), blurRadius: 4.0)
-                ]),
-            transform: Matrix4.rotationZ(.5),
-            //卡片倾斜变换
-            alignment: Alignment.center,
-            //卡片内文字居中
-            child: Text(
-              //卡片文字
-              "5.20", style: TextStyle(color: Colors.white, fontSize: 40.0),
-            ),
-          ),
-//          inkwell 在container等不透明控件下面没有水波效果 用ink代替container
           Padding(
             padding: const EdgeInsets.only(top: 300),
             child: InkWell(
@@ -60,6 +36,30 @@ class ContainerPageState extends State<ContainerPage> {
                   ],
                 ),
               ),
+            ),
+          ),
+//          inkwell 在container等不透明控件下面没有水波效果 用ink代替container
+          Container(
+            margin: EdgeInsets.only(top: 50.0, left: 120.0),
+            //容器外补白
+            constraints: BoxConstraints.tightFor(width: 200.0, height: 150.0),
+            //卡片大小
+            decoration: BoxDecoration(
+                border: Border.all(color: Colors.black45), //设置边框
+                //背景装饰
+                gradient: RadialGradient(//背景径向渐变    center确定占比
+                    colors: [Colors.red, Colors.orange], center: Alignment.topLeft, radius: .98),
+                boxShadow: [
+                  //卡片阴影  Offset对阴影进行平移   blurRadius模糊程度   spreadRadius阴影范围
+                  BoxShadow(color: Colors.black54, offset: Offset(2.0, 2.0), blurRadius: 4.0)
+                ]),
+            transform: Matrix4.rotationZ(.5),
+            //卡片倾斜变换
+            alignment: Alignment.center,
+            //卡片内文字居中
+            child: Text(
+              //卡片文字
+              "5.20", style: TextStyle(color: Colors.white, fontSize: 40.0),
             ),
           ),
           Padding(

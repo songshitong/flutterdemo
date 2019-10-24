@@ -63,6 +63,8 @@ class _WebviewPageState extends State<WebviewPage> {
       "flutter": "https://flutter.dev",
       "weibo": "https://www.weibo.com",
       "huya": "https://www.huya.com/",
+      "vant": "https://youzan.github.io/vant/mobile#/zh-CN/",
+      "cube-ui": "https://didi.github.io/cube-ui/example/#/",
       "AndroidDemo": "data:text/html;base64,$contentBase64",
       "hilo--flappybird": "file:///android_asset/flutter_assets/lib/game/flappybird/index.html",
       "hilo--水果忍者": "http://g.alicdn.com/tmapp/hilodemos/3.0.7/fruit-ninja/index.html",

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutterdemo/flutter/common/MyImgs.dart';
 
 class ImagePage extends StatelessWidget {
+  static const url = "https://img.alicdn.com/imgextra/i2/2053469401/O1CN01HnPAtY2JJhyZa3MFe_!!2053469401.jpg";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -14,6 +15,7 @@ class ImagePage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
+            Image.network(url),
             Image.asset(
               MyImgs.TEST,
               height:

@@ -29,6 +29,7 @@ class _HeroPageState extends State<HeroPage> {
           Hero(
             tag: "hero",
 
+            ///[HeroController] 控制hero    didPop  navigator.userGestureInProgress为false不进行动画
             //手势触发page transition时，是否进行hero动画，例如iOS，右滑动返回上一页
             transitionOnUserGestures: false,
             //hero动画中，代替child留在原地的widget

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:w_reorder_list/w_reorder_list.dart';
 
+///w_reorder_list 的不同实现方式
 class ReorderListPage extends StatefulWidget {
   @override
   _ReorderListPageState createState() => _ReorderListPageState();

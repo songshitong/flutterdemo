@@ -6,8 +6,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutterdemo/flutter/common/Style.dart';
+import 'package:flutterdemo/flutter/native_plugin/ali/push.dart';
 import 'package:flutterdemo/flutter/native_plugin/ffmpeg/ffmpeg_page.dart';
 import 'package:flutterdemo/flutter/native_plugin/ffmpeg/movie_audio_replace.dart';
+import 'package:flutterdemo/flutter/native_plugin/map/amap_page.dart';
+import 'package:flutterdemo/flutter/native_plugin/share/share_sdk.dart';
 import 'package:flutterdemo/flutter/native_plugin/video/video_player.dart';
 import 'package:flutterdemo/flutter/native_plugin/webview_page.dart';
 import 'package:flutterdemo/flutter/packages/annotationroute/annotation_route.dart';
@@ -70,6 +73,7 @@ import 'package:flutterdemo/flutter/widget/switch.dart';
 import 'package:flutterdemo/flutter/widget/text.dart';
 import 'package:flutterdemo/flutter/widget/textfield.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutterdemo/main.dart';
 import 'package:grpc/service_api.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -105,7 +109,15 @@ class _HomePageState extends State<HomePage> {
 
     ///Android变色
     if (defaultPlatform == TargetPlatform.android) {
-      androidTheme = ThemeData(primaryColor: color, brightness: isDark ? Brightness.dark : Brightness.light);
+      androidTheme = ThemeData(
+          primaryColor: color,
+          brightness: isDark ? Brightness.dark : Brightness.light,
+
+          //设置全局的页面切换效果 ios 左右  Android默认上下
+          pageTransitionsTheme: PageTransitionsTheme(builders: {
+            TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          }));
     }
     return RawGestureDetector(
       gestures: <Type, GestureRecognizerFactory>{
@@ -140,13 +152,13 @@ class _HomePageState extends State<HomePage> {
             themeMode: ThemeMode.dark,
             navigatorObservers: [MNavigatorObserber()],
             home: RepaintBoundary(
-              child: Home(() {
+              child: Home(change: () {
                 color = Colors.green;
                 setState(() {});
-              }, () {
+              }, reset: () {
                 color = Colors.amber;
                 setState(() {});
-              }, () {
+              }, themeChange: () {
                 setState(() {
                   isDark = !isDark;
                 });
@@ -173,7 +185,6 @@ class MNavigatorObserber extends NavigatorObserver {
   @override
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
 //    ModalRoute.of().isCurrent; 最上层的route
-
     ///只监听页面route
     if (route is PageRoute && previousRoute is PageRoute) {
       print("HomePage MNavigatorObserber  didPop current ${route?.settings}  previousRoute ${previousRoute?.settings}");
@@ -185,7 +196,7 @@ class Home extends StatefulWidget {
   VoidCallback change;
   VoidCallback reset;
   VoidCallback themeChange;
-  Home(this.change, this.reset, this.themeChange);
+  Home({this.change, this.reset, this.themeChange});
 
   @override
   _HomeState createState() => _HomeState();
@@ -326,7 +337,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 popupX = 100.0;
                 popupY = 100.0;
                 overlayState.setState(() {});
-
                 //退出该事件
                 return;
               }
@@ -939,6 +949,27 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   }));
                 },
                 child: Text("咸鱼 annotation route")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return PushPage();
+                  }));
+                },
+                child: Text("阿里推送")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return ShareSDKPage();
+                  }));
+                },
+                child: Text("ShareSDK分享")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return AmapPage();
+                  }));
+                },
+                child: Text("高德地图")),
 //            FlatButton(
 //                key: Key("list_last"),
 //                onPressed: () {

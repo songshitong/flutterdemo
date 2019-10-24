@@ -149,6 +149,9 @@ import 'package:flutter/material.dart';
 // 重叠(重叠谁在上，谁在下)，是否可以更改子的绘制顺序，
 //  相对布局  一个元素与另一个的对齐关系    使用水平竖直排列是否可以完成
 
+//todo 加载3d模型 https://blog.csdn.net/m0_37667770/article/details/81042916#comments
+
+//todo  减少滚动速度的插件
 void main() {
   Visibility(
     child: LayoutBuilder(builder: null),

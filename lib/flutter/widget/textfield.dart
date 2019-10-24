@@ -70,6 +70,7 @@ class _TextfieldPageState extends State<TextfieldPage> {
                 hintMaxLines: 3, //设置hint最大行数
                 suffixText: "suffixtext", //右侧提醒文字
                 suffixIcon: IconButton(
+                    // 点击icon会自动激活输入框，目前没有办法拦截
                     icon: Icon(Icons.print),
                     onPressed: () {
                       print("suffixIcon click");
@@ -101,6 +102,7 @@ class _TextfieldPageState extends State<TextfieldPage> {
             child: TextField(
               decoration: InputDecoration(
                 hintText: "有边框",
+                //border不生效，查看theme和border，enableborder，focusborder等 ,源码也有相关注释
                 border: OutlineInputBorder(
                     gapPadding: 8,
                     borderSide: BorderSide(style: BorderStyle.solid),

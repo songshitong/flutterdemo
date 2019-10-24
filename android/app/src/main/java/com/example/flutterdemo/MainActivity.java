@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,7 +23,7 @@ public class MainActivity extends FlutterActivity {
     context = this;
     //注册自己的原生控件
     AndroidNativeViewFlutterPlugin.registerWith(this);
-
+    Bitmap b;
     GeneratedPluginRegistrant.registerWith(this);
 //    1创建MethodChannel并设置一个MethodCallHandler。确保使用和Flutter客户端中使用的通道名称相同的名称。
 //    2我们需要处理平台方法名为getBatteryLevel的调用消息，所以我们需要先在call参数判断调用的方法是否为getBatteryLevel。
