@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 ///自定义 scrolls physics 使用自定义的scrollphysic+listview模拟PageView效果
+///
+/// 减弱滚动速度的ScrollPhysics
 class CustomScrollPhysicsPage extends StatefulWidget {
   @override
   _CustomScrollPhysicsState createState() => _CustomScrollPhysicsState();
@@ -28,22 +30,42 @@ class _CustomScrollPhysicsState extends State<CustomScrollPhysicsPage> {
       appBar: AppBar(
         title: Text("CustomScrollPhysics"),
       ),
-      body: SizedBox(
-        height: 200,
-        child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: itemCount,
-            physics: _physics,
-            controller: _controller,
-            itemBuilder: (context, index) {
-              return Container(
-                width: MediaQuery.of(context).size.width,
-                height: 150,
-                decoration: BoxDecoration(
-                    color: Color.fromARGB(255, math.Random.secure().nextInt(255), math.Random.secure().nextInt(255),
-                        math.Random.secure().nextInt(255))),
-              );
-            }),
+      body: Column(
+        children: <Widget>[
+          SizedBox(
+            height: 200,
+            child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: itemCount,
+                physics: _physics,
+                controller: _controller,
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: 150,
+                    decoration: BoxDecoration(
+                        color: Color.fromARGB(255, math.Random.secure().nextInt(255), math.Random.secure().nextInt(255),
+                            math.Random.secure().nextInt(255))),
+                  );
+                }),
+          ),
+          SizedBox(
+            height: 200,
+            child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: itemCount,
+                physics: CustomDegreeScrollPhysics(),
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: 150,
+                    decoration: BoxDecoration(
+                        color: Color.fromARGB(255, math.Random.secure().nextInt(255), math.Random.secure().nextInt(255),
+                            math.Random.secure().nextInt(255))),
+                  );
+                }),
+          ),
+        ],
       ),
     );
   }
@@ -55,7 +77,6 @@ class _CustomScrollPhysicsState extends State<CustomScrollPhysicsPage> {
 ///也可以参考gallery[_SnappingScrollPhysics]
 class CustomScrollPhysics extends ScrollPhysics {
   final double itemDimension;
-
   CustomScrollPhysics({this.itemDimension, ScrollPhysics parent}) : super(parent: parent);
 
   @override
@@ -113,4 +134,36 @@ class CustomScrollPhysics extends ScrollPhysics {
 
   @override
   bool get allowImplicitScrolling => false;
+}
+
+//Todo 多方向滚动   Scrollable只支持单一方向滚动
+//在同一个方向上（上下都可以）无限滚动，参考infinite_listview  Scrollable的ViewPortBuilder返回Stack里面有两个viewport
+class CustomDegreeScrollPhysics extends ScrollPhysics {
+  CustomDegreeScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+
+  CustomDegreeScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return CustomDegreeScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  //滚动减弱倍数
+  final degreeFraction = 2;
+  @override
+  Tolerance get tolerance {
+    return Tolerance(
+      velocity: (1.0 / (0.050 * WidgetsBinding.instance.window.devicePixelRatio)) /
+          degreeFraction, // logical pixels per second
+      distance: (1.0 / WidgetsBinding.instance.window.devicePixelRatio), // logical pixels
+    );
+  }
+
+  @override
+  double get minFlingVelocity => super.minFlingVelocity / (degreeFraction * 10);
+  @override
+  double get minFlingDistance => super.minFlingDistance / degreeFraction;
+
+  //将手势滑动距离转化为滚动距离
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    return super.applyPhysicsToUserOffset(position, offset) / degreeFraction;
+  }
 }

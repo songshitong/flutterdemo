@@ -68,6 +68,8 @@ class _MyPainter extends CustomPainter {
     path.lineTo(150, 50);
     path.moveTo(50, 100);
     path.lineTo(150, 100);
+    //添加子path
+//    path.addPolygon(points, close)
     painter
       ..color = Colors.red
       ..isAntiAlias = true

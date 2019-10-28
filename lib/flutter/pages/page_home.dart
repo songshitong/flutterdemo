@@ -81,6 +81,7 @@ import 'dart:ui' as ui;
 import 'beautiful/circle_to_rectangle.dart';
 import 'beautiful/drops.dart';
 import 'beautiful/image_preview.dart';
+import 'beautiful/model3d/3d_widget.dart';
 import 'beautiful/reorder_list.dart';
 import 'beautiful/shimmer_wiget.dart';
 import 'custom_popup_page.dart';
@@ -941,6 +942,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   }));
                 },
                 child: Text("仿drops应用")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return Model3DPage();
+                  }));
+                },
+                child: Text("加载3D模型")),
             Text("测试第三方包 ----------------------- "),
             FlatButton(
                 onPressed: () {

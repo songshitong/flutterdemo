@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/reorder_list.dart';
 
+import '../CheckBox.dart';
+
 ///SingleChildScrollView 嵌套 ListView 或listView嵌套ListView 不滚动的问题，禁用内部listview的滚动/内部primary设为false(发生滚动的是外部，使用NotificationListener监听)
 class ListViewPage extends StatefulWidget {
   @override
@@ -40,6 +42,9 @@ class ListViewPageState extends State<ListViewPage> {
 //         (！！！比如在column放一个无限长度的list报错，column是有限的)
 //    addAutomaticKeepAlives：该属性表示是否将列表项（子widget）包裹在AutomaticKeepAlive widget中；
 //         典型地，在一个懒加载列表中，如果将列表项包裹在AutomaticKeepAlive中，在该列表项滑出视口时该列表项不会被GC，它会使用KeepAliveNotification来保存其状态。如果列表项自己维护其KeepAlive状态，那么此参数必须置为false。
+//           在确定不需要listview维持状态或者由其它维持状态时，关闭此选项可以提高性能
+//           子item要实现AutomaticKeepAliveClientMixin，来通知触发
+
 //    addRepaintBoundaries：默认true 该属性表示是否将列表项（子widget）包裹在RepaintBoundary中。
 //         当可滚动widget滚动时，将列表项包裹在RepaintBoundary中可以避免列表项重绘，但是当列表项重绘的开销非常小（如一个颜色块，或者一个较短的文本）时，不添加RepaintBoundary反而会更高效。和addAutomaticKeepAlive一样，如果列表项自己维护其KeepAlive状态，那么此参数必须置为false
     return Scaffold(
@@ -176,10 +181,41 @@ class ListViewPageState extends State<ListViewPage> {
               childrenDelegate: SliverChildBuilderDelegate((context, index) {
                 return Text("custom");
               }, childCount: 10),
+            ),
+            SizedBox(
+              height: 500,
+              child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: 100,
+                  addAutomaticKeepAlives: true,
+                  itemBuilder: (context, index) {
+                    return AliveListItem();
+                  }),
             )
           ],
         ),
       ),
     );
   }
+}
+
+class AliveListItem extends StatefulWidget {
+  BuildContext context;
+  int index;
+
+  AliveListItem({this.context, this.index});
+
+  @override
+  _AliveListItemState createState() => _AliveListItemState();
+}
+
+class _AliveListItemState extends State<AliveListItem> with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return AliveCheckbox(value: false, onChange: (active) {});
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

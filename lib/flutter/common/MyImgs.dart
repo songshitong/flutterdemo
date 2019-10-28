@@ -8,4 +8,6 @@ class MyImgs {
   static const EARRINGS = "lib/img/earrings.webp";
   static const LIKEGIF = "lib/img/like_anim.gif";
   static const SANTAIZI = "lib/img/santaizi.gif";
+  static const BBMODEL = "lib/img/bb.obj";
+  static const NVPOSEMODEL = "lib/img/NVpose.obj";
 }

@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+///checkBOx
+///
+/// 如何保持状态
+/// 单独封装一个stateFulWidget
+/// 在listview中使用MAP或list保持状态
+/// 在listView中使用AutomaticKeepAlive属性，原理KeepAlive
 class CheckBoxPage extends StatefulWidget {
   @override
   _CheckBoxPageState createState() => _CheckBoxPageState();
@@ -37,5 +43,36 @@ class _CheckBoxPageState extends State<CheckBoxPage> {
         ],
       ),
     );
+  }
+}
+
+class AliveCheckbox extends StatefulWidget {
+  ValueChanged<bool> onChange;
+  bool value;
+
+  AliveCheckbox({@required this.onChange, this.value});
+
+  @override
+  _AliveCheckboxState createState() => _AliveCheckboxState();
+}
+
+class _AliveCheckboxState extends State<AliveCheckbox> {
+  bool active;
+  @override
+  void initState() {
+    active = widget.value;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Checkbox(
+        value: active,
+        onChanged: (result) {
+          setState(() {
+            if (null != widget.onChange) widget.onChange(result);
+            active = result;
+          });
+        });
   }
 }

@@ -30,10 +30,25 @@ class WebviewPage extends StatefulWidget {
 const String kNavigationExamplePage = '''
 <!DOCTYPE html>  
 <html>  
+<head>
+<script type="text/javascript">
+    window.onload= function(){
+      alert("window load");
+    }
+    alert("javascript start");
+    const input = document.querySelector('input');
+    input.addEventListener('input', function(e){
+       alert("input ======");
+       alert(e.srcElement.value);
+    });
+</script>
+</head>
+
 <body>
 <h1>Test Scheme</h1> 
 <!--手动点击跳转-->
 <a href="sstdemo://www.sstdemo.com/mypath?key=mykey">Click to AndroidDemo</a>
+<input type="file" name="pic" id="pic" accept="image/gif, image/jpeg"  />
 </body>  
 </html>
 ''';
@@ -70,7 +85,9 @@ class _WebviewPageState extends State<WebviewPage> {
       "hilo--水果忍者": "http://g.alicdn.com/tmapp/hilodemos/3.0.7/fruit-ninja/index.html",
       "白鹭--守卫我的塔": "http://dev.egret.com//cn/article/index/id/1074",
       "白鹭--密室逃脱": "http://dev.egret.com//cn/article/index/id/891",
-      "cocos star-catcher": "http://fbdemos.leanapp.cn/star-catcher/"
+      "cocos star-catcher": "http://fbdemos.leanapp.cn/star-catcher/",
+      "pdf":
+          "http://storage.jd.com/eicore-fm.jd.com/011001900411-61816050.pdf?Expires=2516350040&AccessKey=bfac05320eaf11cc80cf1823e4fb87d98523fc94&Signature=3YPHQZPL%2F%2FzI3l0CgV0zLYTdib0%3D"
     };
     url = urlSources["baidu"];
   }
@@ -117,6 +134,7 @@ class _WebviewPageState extends State<WebviewPage> {
               });
             },
             javascriptMode: JavascriptMode.unrestricted,
+            initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
             navigationDelegate: (request) {
               var url = request.url;
               print("navigationDelegate url is $url");
