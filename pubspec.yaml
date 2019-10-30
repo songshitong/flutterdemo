@@ -28,7 +28,12 @@ dependencies:
   #国际化加翻译
   intl: ^0.16.0
   #webview
-  webview_flutter: ^0.3.14+1
+#  webview_flutter: ^0.3.14+1
+  webview_flutter:
+    git:
+      url: https://github.com/songshitong/flutter-plugins.git
+      path: packages/webview_flutter
+      ref: feature/fix_choose_file
   #视频播放
   video_player: ^0.10.0+8
   #android intent

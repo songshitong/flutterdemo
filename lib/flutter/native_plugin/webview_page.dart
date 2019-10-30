@@ -34,21 +34,74 @@ const String kNavigationExamplePage = '''
 <script type="text/javascript">
     window.onload= function(){
       alert("window load");
+      const input = document.getElementById('pic');
+      input.addEventListener('input', function(e){
+         console.log("input ======");
+         console.log(e.srcElement.value);
+      });
     }
-    alert("javascript start");
-    const input = document.querySelector('input');
-    input.addEventListener('input', function(e){
-       alert("input ======");
-       alert(e.srcElement.value);
-    });
+  
+  function showImage(){
+      var localImg = getPath('pic');
+      console.log("localImg  "+localImg);
+      document.getElementById('imgShow').src =localImg ;
+    }
+  function showVideo(){
+      console.log("before "+document.getElementById('video').value);
+      var localVideo = getPath('video');
+      console.log("localVideo  "+localVideo);
+      document.getElementById('videoShow').src =localVideo ;
+  }
+    
+  function getPath(id) {
+		var imgURL = "";
+		var node=document.getElementById(id);
+		try{
+			var file = null;
+			if(node.files && node.files[0] ){
+				file = node.files[0];
+			}else if(node.files && node.files.item(0)) {
+				file = node.files.item(0);
+			}
+			//Firefox 因安全性问题已无法直接通过input[file].value 获取完整的文件路径
+			try{
+				//Firefox7.0
+				imgURL =  file.getAsDataURL();
+				//alert("//Firefox7.0"+imgRUL);
+			}catch(e){
+				//Firefox8.0以上
+				imgURL = window.URL.createObjectURL(file);
+				//alert("//Firefox8.0以上"+imgRUL);
+			}
+		}catch(e){      //这里不知道怎么处理了，如果是遨游的话会报这个异常
+			//支持html5的浏览器,比如高版本的firefox、chrome、ie10
+			if (node.files && node.files[0]) {
+				var reader = new FileReader();
+				reader.onload = function (e) {
+					imgURL = e.target.result;
+				};
+				reader.readAsDataURL(node.files[0]);
+			}
+		}
+		return imgURL;
+	}
+    
 </script>
 </head>
 
 <body>
 <h1>Test Scheme</h1> 
 <!--手动点击跳转-->
-<a href="sstdemo://www.sstdemo.com/mypath?key=mykey">Click to AndroidDemo</a>
-<input type="file" name="pic" id="pic" accept="image/gif, image/jpeg"  />
+<div><a href="sstdemo://www.sstdemo.com/mypath?key=mykey">Click to AndroidDemo</a></div>
+<div><input type="file" name="pic" id="pic" accept="image/*" style="margin-top:10px"/>image</input></div>
+<div><input type="file" name="video" id="video" accept="video/*" style="margin-top:10px">video</input></div>
+<div><button onclick="showImage()" style="margin-top:10px;display:block;"/>showImage</button></div>
+<div><button onclick="showVideo()" style="margin-top:10px;display:block;"/>showVideo</button></div>
+
+<div><img src="blob:null/80ce1466-f18a-4f1c-a9b7-b829f2306975" id="imgShow" style="margin-top:10px;width: 200px; height: 100px; display:block;"></div>
+
+<div><video controls autoplay loop src="http://vfx.mtime.cn/Video/2017/03/31/mp4/170331093811717750.mp4" id="videoShow" style="margin-top:10px;width: 200px; height: 100px; display:block;"></div>
+
 </body>  
 </html>
 ''';
@@ -58,22 +111,14 @@ class _WebviewPageState extends State<WebviewPage> {
   Map<String, String> urlSources = {};
   bool progressVisible = true;
   final Completer<WebViewController> _controller = Completer<WebViewController>();
+  //缓存HTML ，图片，视频，然后加载本地页面及图片，视频
+  Map<String, String> replaceActions = {"load": "加载页面", "cache": "缓存到本地", "loadCache": "加载本地缓存"};
   @override
   void initState() {
     super.initState();
     final String contentBase64 = base64Encode(const Utf8Encoder().convert(kNavigationExamplePage));
-    DefaultAssetBundle.of(context).loadString("lib/game/flappybird/index.html").then((result) {
-      print("flappybird/index.html $result");
-      var flappyBase64 = "data:text/html;base64,${base64Encode(const Utf8Encoder().convert(result))}";
-      var flappyUri =
-          Uri.dataFromString(result, mimeType: 'text/html', encoding: Encoding.getByName('utf-8')).toString();
-      setState(() {
-        _controller.future.then((controller) {
-          controller.loadUrl(flappyUri);
-        });
-      });
-    });
     urlSources = {
+      "localFile": "localFile",
       "baidu": "https://www.baidu.com",
       "flutter": "https://flutter.dev",
       "weibo": "https://www.weibo.com",
@@ -89,7 +134,7 @@ class _WebviewPageState extends State<WebviewPage> {
       "pdf":
           "http://storage.jd.com/eicore-fm.jd.com/011001900411-61816050.pdf?Expires=2516350040&AccessKey=bfac05320eaf11cc80cf1823e4fb87d98523fc94&Signature=3YPHQZPL%2F%2FzI3l0CgV0zLYTdib0%3D"
     };
-    url = urlSources["baidu"];
+    url = urlSources["AndroidDemo"];
   }
 
   @override
@@ -109,13 +154,42 @@ class _WebviewPageState extends State<WebviewPage> {
             }),
             onSelected: (key) {
               url = urlSources[key];
-              _controller.future.then((controller) {
-                controller.loadUrl(url);
-              });
-              setState(() {
-                progressVisible = true;
-              });
+              if (url == "localFile") {
+                //加载base64
+                DefaultAssetBundle.of(context).loadString("lib/game/flappybird/index.html").then((result) {
+                  print("flappybird/index.html $result");
+                  //todo ios/android 加载不出来
+                  var flappyBase64 = "data:text/html;base64,${base64Encode(const Utf8Encoder().convert(result))}";
+                  var flappyUri =
+                      Uri.dataFromString(result, mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))
+                          .toString();
+                  url = flappyUri;
+                  _controller.future.then((controller) {
+                    controller.loadUrl(url);
+                    setState(() {
+                      progressVisible = true;
+                    });
+                  });
+                });
+              } else {
+                _controller.future.then((controller) {
+                  controller.loadUrl(url);
+                  setState(() {
+                    progressVisible = true;
+                  });
+                });
+              }
             },
+          ),
+          PopupMenuButton(
+            itemBuilder: (BuildContext context) => List<PopupMenuItem<String>>.generate(replaceActions.length, (index) {
+              var key = replaceActions.keys.elementAt(index);
+              return PopupMenuItem(
+                child: Text(key),
+                value: key,
+              );
+            }),
+            onSelected: (key) {},
           )
         ],
       ),
@@ -124,8 +198,8 @@ class _WebviewPageState extends State<WebviewPage> {
           WebView(
             initialUrl: url,
             onWebViewCreated: (viewController) {
-              print("webview created =====================");
               _controller.complete(viewController);
+              print("webview created =====================");
             },
             onPageFinished: (url) {
               print("page  load finish ========= url is $url  initialUrl ${this.url}");
@@ -134,7 +208,6 @@ class _WebviewPageState extends State<WebviewPage> {
               });
             },
             javascriptMode: JavascriptMode.unrestricted,
-            initialMediaPlaybackPolicy: AutoMediaPlaybackPolicy.always_allow,
             navigationDelegate: (request) {
               var url = request.url;
               print("navigationDelegate url is $url");

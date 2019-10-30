@@ -25,13 +25,25 @@ Git依赖
          git:
            url: git://github.com/icepy/plugin1.git
            path: packages/url
-           ref: 0.0.1/branch/commit/tag   制定版本/分支/提交/tag
-       transmogrify:   制定源
+           ref: 0.0.1/branch/commit/tag   制定版本/分支/提交/tag      feature/fix_choose_file
+       transmogrify:   制定源，自己的服务器
            hosted:
              name: transmogrify
              url: http://some-package-server.com
            version: ^1.0.0
 
+dev_dependencies 和dependencies
+开发依赖项与常规依赖项的区别在于，您依赖的软件包的开发依赖项将被忽略
+dev_dependencies:
+  test: '>=0.5.0 <0.12.0'
+dev_dependencies只对当前可见，对依赖于当前项目的不可见
+
+dependency_overrides 用于测试，覆盖其他依赖
+dependencies:
+  transmogrify: ^1.2.0
+dependency_overrides:
+  transmogrify:
+    path: ../transmogrify_patch/
 
 开发一个自己的包
    root directory
