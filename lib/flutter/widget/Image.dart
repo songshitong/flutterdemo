@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -53,9 +54,12 @@ class _ImagePageState extends State<ImagePage> {
         actions: <Widget>[
           RaisedButton(
             onPressed: () {
-              ImagePage.getImage(MyImgs.JINX).then((image) async {
-                image.toByteData().then((byteData) {
-                  imgList = byteData.buffer.asUint8List();
+              ImagePage.getImage(MyImgs.SANTAIZI).then((image) async {
+                //TODO 图片格式
+                //
+                image.toByteData(format: ImageByteFormat.png).then((byteData) {
+                  imgList = byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
+                  print("after getImage imgList $imgList");
                   setState(() {});
                 });
               }).catchError((e) {
@@ -74,6 +78,7 @@ class _ImagePageState extends State<ImagePage> {
               width: MediaQuery.of(context).size.width,
               child: imgList != null ? Image.memory(imgList, gaplessPlayback: true) : Container(),
             ),
+            Image.asset(MyImgs.SANTAIZI),
             Image.network(ImagePage.url),
             Image.asset(
               MyImgs.TEST,
