@@ -1,12 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutterdemo/flutter/common/SingleLonData.dart';
+import 'package:flutterdemo/flutter/common/http_util.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:android_intent/android_intent.dart';
 import 'package:platform/platform.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:html/parser.dart' show parse;
 
 //ios 配置 Opt-in to the embedded views preview by adding a boolean property to the app's Info.plist file with the key
 // io.flutter.embedded_views_preview and the value YES
@@ -22,12 +29,22 @@ import 'package:url_launcher/url_launcher.dart';
 //    </array>
 
 //android 配置manifest->intent filter->data->scheme
+
+///img 加载图片
+///      <img src="https://i.imgur.com/wxaJsXF.png" alt="web-img1">
+//      <img src="file:/Users/Faisal/Projects/Flutter_Apps/flutter_app/assets/f.png" alt="web-img2">
+//      <img src="file:///Users/Faisal/Projects/Flutter_Apps/flutter_app/assets/f.png" alt="web-img3">
+//      <img src="file:f.png" alt="web-img4">
+//      <img src="file:///storage/assets/f.png" alt="img5">
+//      <img src="file:///android_asset/flutter_assets/assets/f.png" alt="web-img6">
+//      <img src="/Users/Faisal/Projects/Flutter_Apps/flutter_app/assets/f.png" alt="web-img6">
 class WebviewPage extends StatefulWidget {
   @override
   _WebviewPageState createState() => _WebviewPageState();
 }
 
-const String kNavigationExamplePage = '''
+var appDocDir = SingleLonData().appDocDir;
+String kNavigationExamplePage = '''
 <!DOCTYPE html>  
 <html>  
 <head>
@@ -94,31 +111,42 @@ const String kNavigationExamplePage = '''
 <!--手动点击跳转-->
 <div><a href="sstdemo://www.sstdemo.com/mypath?key=mykey">Click to AndroidDemo</a></div>
 <div><input type="file" name="pic" id="pic" accept="image/*" style="margin-top:10px"/>image</input></div>
-<div><input type="file" name="video" id="video" accept="video/*" style="margin-top:10px">video</input></div>
+<div><input type="file" name="video" id="video" accept="video/mp4" style="margin-top:10px">video</input></div>
 <div><button onclick="showImage()" style="margin-top:10px;display:block;"/>showImage</button></div>
 <div><button onclick="showVideo()" style="margin-top:10px;display:block;"/>showVideo</button></div>
 
-<div><img src="blob:null/80ce1466-f18a-4f1c-a9b7-b829f2306975" id="imgShow" style="margin-top:10px;width: 200px; height: 100px; display:block;"></div>
+<div><img src="http://depot.nipic.com/file/20150423/20829447_16153273773.jpg" id="imgShow" style="margin-top:10px;width: 200px; height: 100px; display:block;"></div>
+<div><video controls autoplay  src="http://vfx.mtime.cn/Video/2017/03/31/mp4/170331093811717750.mp4" id="videoShow" style="margin-top:10px;width: 200px; height: 100px; display:block;"></div>
 
-<div><video controls autoplay loop src="http://vfx.mtime.cn/Video/2017/03/31/mp4/170331093811717750.mp4" id="videoShow" style="margin-top:10px;width: 200px; height: 100px; display:block;"></div>
 
 </body>  
 </html>
 ''';
 
+//file:///$appDocDir/20829447_16153273773.jpg
+//file:///data/user/0/com.example.flutterdemo/app_flutter/20829447_16153273773.jpg
+//http://depot.nipic.com/file/20150423/20829447_16153273773.jpg
 class _WebviewPageState extends State<WebviewPage> {
   var url = "";
   Map<String, String> urlSources = {};
   bool progressVisible = true;
   final Completer<WebViewController> _controller = Completer<WebViewController>();
+  var localHtml = SingleLonData().appDocDir + "/localHtml.html";
   //缓存HTML ，图片，视频，然后加载本地页面及图片，视频
   Map<String, String> replaceActions = {"load": "加载页面", "cache": "缓存到本地", "loadCache": "加载本地缓存"};
+  var saveFile;
+  var videoFile;
+
   @override
   void initState() {
     super.initState();
     final String contentBase64 = base64Encode(const Utf8Encoder().convert(kNavigationExamplePage));
+
+    ///加载base64不会自动链接到本地资源，直接加载本地HTML可以？？
+    ///webview shouldInterceptRequest直接拦截file协议，将HTML读作资源展示，展示HTML源码，pdf的展示可以吗，其他资源展示，利用原生
+    ///解析，转换为web展示的资源可以吗
     urlSources = {
-      "localFile": "localFile",
+      "localFile": "file:///$localHtml",
       "baidu": "https://www.baidu.com",
       "flutter": "https://flutter.dev",
       "weibo": "https://www.weibo.com",
@@ -134,7 +162,12 @@ class _WebviewPageState extends State<WebviewPage> {
       "pdf":
           "http://storage.jd.com/eicore-fm.jd.com/011001900411-61816050.pdf?Expires=2516350040&AccessKey=bfac05320eaf11cc80cf1823e4fb87d98523fc94&Signature=3YPHQZPL%2F%2FzI3l0CgV0zLYTdib0%3D"
     };
-    url = urlSources["AndroidDemo"];
+    //直接加载本地，先判断文件存在不
+    if (File(localHtml).existsSync()) {
+      url = urlSources["localFile"];
+    } else {
+      url = urlSources["AndroidDemo"];
+    }
   }
 
   @override
@@ -156,9 +189,12 @@ class _WebviewPageState extends State<WebviewPage> {
               url = urlSources[key];
               if (url == "localFile") {
                 //加载base64
-                DefaultAssetBundle.of(context).loadString("lib/game/flappybird/index.html").then((result) {
+
+                rootBundle.loadString("lib/game/flappybird/index.html").then((result) {
                   print("flappybird/index.html $result");
-                  //todo ios/android 加载不出来
+                  //通过<link rel=stylesheet href=styles/main.css>加载的不显示
+                  //通过<style>或<script>加载的可以显示
+                  //base64+file://无法加载file
                   var flappyBase64 = "data:text/html;base64,${base64Encode(const Utf8Encoder().convert(result))}";
                   var flappyUri =
                       Uri.dataFromString(result, mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))
@@ -189,31 +225,116 @@ class _WebviewPageState extends State<WebviewPage> {
                 value: key,
               );
             }),
-            onSelected: (key) {},
+            onSelected: (key) {
+              if (key == "load") {
+                url = urlSources["AndroidDemo"];
+                _controller.future.then((controller) {
+                  controller.loadUrl(url);
+                  setState(() {
+                    progressVisible = true;
+                  });
+                });
+              } else if (key == "cache") {
+                //体取网页中链接
+                var document = parse(kNavigationExamplePage);
+                var imgElements = document.querySelectorAll("img");
+                var newString;
+                imgElements.forEach((e) {
+                  var url = e.attributes["src"];
+                  print("document img url  $url ");
+                  //下载存储
+                  var temp = url.split(".");
+                  var suffix = temp.last;
+                  var name = temp[temp.length - 2].split("/").last;
+                  saveFile = SingleLonData().appDocDir + "/" + name + "." + suffix;
+                  print("img name $name  saveFile $saveFile");
+
+                  //是否对同一图片重复下载？，下载失败？
+                  HttpUtil.downloadFile(saveFile, url);
+                  newString = kNavigationExamplePage.replaceAll(url, saveFile);
+//                  File file = new File(localHtml);
+//                  if (!file.existsSync()) {
+//                    file.createSync();
+//                  }
+//                  file.writeAsString(newString);
+                });
+
+                var videoElements = document.querySelectorAll("video");
+                videoElements.forEach((e) {
+                  var url = e.attributes["src"];
+                  print("document video url  $url ");
+                  //下载存储
+                  var temp = url.split(".");
+                  var suffix = temp.last;
+                  var name = temp[temp.length - 2].split("/").last;
+                  videoFile = SingleLonData().appDocDir + "/" + name + "." + suffix;
+                  print("img name $name  saveFile $videoFile");
+
+                  //是否对同一视频重复下载？，下载失败？
+                  HttpUtil.downloadFile(videoFile, url);
+                  newString = newString.replaceAll(url, videoFile);
+                  File file = new File(localHtml);
+                  if (!file.existsSync()) {
+                    file.createSync();
+                  }
+                  file.writeAsString(newString);
+                });
+              } else if (key == "loadCache") {
+                _controller.future.then((controller) {
+                  var fileString = File(localHtml).readAsStringSync();
+                  var imgBase64 = File(saveFile).readAsBytesSync();
+                  var videoBase64 = File(videoFile).readAsBytesSync();
+
+                  //将本地URL替换为base64
+                  fileString = fileString.replaceAll(saveFile, "data:text/image;base64,${base64Encode(imgBase64)}");
+                  fileString = fileString.replaceAll(videoFile, "data:video/mp4;base64,${base64Encode(videoBase64)}");
+                  //ios 可以播放video base64 但是视频转为base64需要消耗时间
+                  //Android 播放video base64 有问题
+                  print(
+                      "img base64 " + "data:text/image;base64,${base64Encode(const Utf8Encoder().convert(saveFile))}");
+
+                  var base64 = "data:text/html;base64,${base64Encode(const Utf8Encoder().convert(fileString))}";
+                  var localUri =
+                      Uri.dataFromString(fileString, mimeType: 'text/html', encoding: Encoding.getByName('utf-8'))
+                          .toString();
+                  controller.loadUrl(localUri);
+                  setState(() {
+                    progressVisible = true;
+                  });
+                });
+              }
+            },
           )
         ],
       ),
       body: Stack(
         children: <Widget>[
-          WebView(
-            initialUrl: url,
-            onWebViewCreated: (viewController) {
-              _controller.complete(viewController);
-              print("webview created =====================");
+          GestureDetector(
+            onHorizontalDragDown: (downDetail) {
+              print("GestureDetector down ");
             },
-            onPageFinished: (url) {
-              print("page  load finish ========= url is $url  initialUrl ${this.url}");
-              setState(() {
-                progressVisible = false;
-              });
+            onHorizontalDragUpdate: (updateDetail) {
+              print("GestureDetector update ");
             },
-            javascriptMode: JavascriptMode.unrestricted,
-            navigationDelegate: (request) {
-              var url = request.url;
-              print("navigationDelegate url is $url");
-              if (url.startsWith("sstdemo://www.sstdemo.com")) {
-                //对webview的url进行拦截，否侧无法识别自定义scheme
-                // 使用AndroidIntent拉起
+            child: WebView(
+              initialUrl: url,
+              onWebViewCreated: (viewController) {
+                _controller.complete(viewController);
+                print("webview created =====================");
+              },
+              onPageFinished: (url) {
+                print("page  load finish ========= url is $url  initialUrl ${this.url}");
+                setState(() {
+                  progressVisible = false;
+                });
+              },
+              javascriptMode: JavascriptMode.unrestricted,
+              navigationDelegate: (request) {
+                var url = request.url;
+                print("navigationDelegate url is $url");
+                if (url.startsWith("sstdemo://www.sstdemo.com")) {
+                  //对webview的url进行拦截，否侧无法识别自定义scheme
+                  // 使用AndroidIntent拉起
 //                if (LocalPlatform().isAndroid) {
 //                  AndroidIntent intent = AndroidIntent(
 //                    action: 'action_view',
@@ -224,20 +345,48 @@ class _WebviewPageState extends State<WebviewPage> {
 //                    print("intent launch errr === " + e.toString());
 //                  });
 //                }
-                //使用 url launcher 拉起
-                canLaunch(url).then((canLaunch) {
-                  if (canLaunch) {
-                    print('canLaunch  can launch $url');
-                    launch(url);
-                  } else {
-                    print('canLaunch  Could not launch $url');
-                  }
-                });
-                return NavigationDecision.prevent;
-              } else {
-                return NavigationDecision.navigate;
-              }
-            },
+                  //使用 url launcher 拉起
+                  canLaunch(url).then((canLaunch) {
+                    if (canLaunch) {
+                      print('canLaunch  can launch $url');
+                      launch(url);
+                    } else {
+                      print('canLaunch  Could not launch $url');
+                    }
+                  });
+                  return NavigationDecision.prevent;
+                } else {
+                  return NavigationDecision.navigate;
+                }
+              },
+              gestureRecognizers: Set()
+                ..add(Factory(() {
+                  var x;
+                  return HorizontalDragGestureRecognizer()
+                    ..onDown = (downDetail) {
+                      print("ondown  ===== ");
+                      x = downDetail.globalPosition.dx;
+                    }
+                    ..onUpdate = (updateDetail) {
+                      print("onupdate =====");
+                      if (updateDetail.globalPosition.dx - x > 100) {
+                        _controller.future.then((controller) async {
+                          final go = await controller.canGoBack();
+                          print("controller ==== go back $go ");
+                          if (go) {
+                            controller.goBack();
+                          }
+                        });
+                      }
+                    }
+                    ..onEnd = (endDetail) {
+                      print("onEnd  ===== ");
+                    }
+                    ..onCancel = () {
+                      print("onCancel  ===== ");
+                    };
+                })),
+            ),
           ),
           Visibility(visible: progressVisible, child: SizedBox(height: 3, child: LinearProgressIndicator()))
         ],

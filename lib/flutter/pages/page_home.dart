@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutterdemo/flutter/common/SingleLonData.dart';
 import 'package:flutterdemo/flutter/common/Style.dart';
 import 'package:flutterdemo/flutter/native_plugin/ali/push.dart';
 import 'package:flutterdemo/flutter/native_plugin/ffmpeg/ffmpeg_page.dart';
@@ -15,6 +16,7 @@ import 'package:flutterdemo/flutter/native_plugin/video/video_player.dart';
 import 'package:flutterdemo/flutter/native_plugin/webview_page.dart';
 import 'package:flutterdemo/flutter/packages/annotationroute/annotation_route.dart';
 import 'package:flutterdemo/flutter/packages/fish_redux/fish_redux_page.dart';
+import 'package:flutterdemo/flutter/packages/provider/providertest.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/bottom_appbar.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/fold_cell.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/gallery/sliver_section.dart';
@@ -75,6 +77,7 @@ import 'package:flutterdemo/flutter/widget/textfield.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutterdemo/main.dart';
 import 'package:grpc/service_api.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -87,6 +90,7 @@ import 'beautiful/shimmer_wiget.dart';
 import 'custom_popup_page.dart';
 import 'principle/widget_update.dart';
 
+//todo 重构路由 支持搜索（大小写模糊），支持滚动到底部，滚动到顶部
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
@@ -100,6 +104,14 @@ class _HomePageState extends State<HomePage> {
   Color color = Colors.amber;
   @override
   void initState() {
+    getTemporaryDirectory().then((tempPath) {
+      SingleLonData().tempPath = tempPath.path;
+      print("tempPath.path ${tempPath.path}");
+    });
+    getApplicationDocumentsDirectory().then((appDocDir) {
+      SingleLonData().appDocDir = appDocDir.path;
+      print("appDocDir.path ${appDocDir.path}");
+    });
     super.initState();
   }
 
@@ -113,7 +125,6 @@ class _HomePageState extends State<HomePage> {
       androidTheme = ThemeData(
           primaryColor: color,
           brightness: isDark ? Brightness.dark : Brightness.light,
-
           //设置全局的页面切换效果 ios 左右  Android默认上下
           pageTransitionsTheme: PageTransitionsTheme(builders: {
             TargetPlatform.android: CupertinoPageTransitionsBuilder(),
@@ -152,6 +163,18 @@ class _HomePageState extends State<HomePage> {
             darkTheme: androidTheme,
             themeMode: ThemeMode.dark,
             navigatorObservers: [MNavigatorObserber()],
+//            onGenerateRoute: (RouteSettings settings) {
+//                可以对路由拦截处理
+//              WidgetBuilder builder;
+//              if (settings.name == '/') {
+//                builder = (BuildContext context) => new ArticleListScreen();
+//              } else {
+//                String param = settings.name.split('/')[2];
+//                builder = (BuildContext context) => new NewArticle(param);
+//              }
+//
+//              return new MaterialPageRoute(builder: builder, settings: settings);
+//            },
             home: RepaintBoundary(
               child: Home(change: () {
                 color = Colors.green;
@@ -685,10 +708,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             FlatButton(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return SafeAreaPage();
+                    return SafeAreaAndMediaQueryPage();
                   }));
                 },
-                child: Text("SafeArea Page")),
+                child: Text("SafeArea MediaQuery")),
             FlatButton(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -978,6 +1001,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   }));
                 },
                 child: Text("高德地图")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return ProviderTest();
+                  }));
+                },
+                child: Text("provider 测试")),
 //            FlatButton(
 //                key: Key("list_last"),
 //                onPressed: () {

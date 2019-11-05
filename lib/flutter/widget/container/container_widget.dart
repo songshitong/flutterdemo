@@ -38,7 +38,7 @@ class ContainerPageState extends State<ContainerPage> {
               ),
             ),
           ),
-//          inkwell 在container等不透明控件下面没有水波效果 用ink代替container
+//          inkwell 在container等不透明控件下面没有水波效果 用ink代替container   container的margin不能为负数，存在校验
           Container(
             margin: EdgeInsets.only(top: 50.0, left: 120.0),
             //容器外补白

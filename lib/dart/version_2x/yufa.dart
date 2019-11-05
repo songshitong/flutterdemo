@@ -692,7 +692,7 @@ greetBob(Personn person) => person.greet('bob');
 //无法显示的初始化一个枚举类型
 //Using enums
 //使用 enum 关键字来定义枚举类型：
-enum Color { red, green, blue }
+enum Colorr { red, green, blue }
 
 //Adding features to a class: mixins（为类添加新的功能）
 //Mixins 是一种在多类继承中重用 一个类代码的方法。
@@ -729,10 +729,10 @@ abstract class Musical {
 //Static variables（静态变量）
 //静态变量对于类级别的状态是 非常有用的
 //静态变量在第一次使用的时候才被初始化。
-class Colorr {
-  static const red = const Colorr('red'); // A constant static variable.
+class Colorrr {
+  static const red = const Colorrr('red'); // A constant static variable.
   final String name; // An instance variable.
-  const Colorr(this.name); // A constant constructor.
+  const Colorrr(this.name); // A constant constructor.
 }
 
 //main() {
@@ -949,7 +949,7 @@ class Llama {
 
   /// Exercises your llama with an [activity] for
   /// [timeLimit] minutes.
-  void exercise(Color activity, int timeLimit) {
+  void exercise(Colorr activity, int timeLimit) {
     // ...
   }
 }

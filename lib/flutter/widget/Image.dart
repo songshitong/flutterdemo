@@ -2,20 +2,79 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutterdemo/dart/version_2x/yufa.dart';
 import 'package:flutterdemo/flutter/common/MyImgs.dart';
+import 'dart:ui' as ui;
 
-class ImagePage extends StatelessWidget {
+class ImagePage extends StatefulWidget {
   static const url = "https://img.alicdn.com/imgextra/i2/2053469401/O1CN01HnPAtY2JJhyZa3MFe_!!2053469401.jpg";
+
+  ImagePage();
+
+  @override
+  _ImagePageState createState() => _ImagePageState();
+
+  static Future<ui.Image> getImage(String asset) async {
+    ByteData data = await rootBundle.load(asset);
+//    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+//    ui.FrameInfo fi = await codec.getNextFrame();
+    var image;
+//      image = fi.image;
+//    ui.decodeImageFromList(data.buffer.asUint8List(), (image) {
+//      //对instantiateImageCodec和getNextFrame的包装
+//    });
+    //image decoder 对instantiateImageCodec和getNextFrame的包装
+    print(" getImage ${data.buffer.asUint8List()}");
+    //todo 和Image.memory走相同的流程，然后解析失败？？ 能有和引擎一起debug
+    image = await decodeImageFromList(data.buffer.asUint8List());
+    return image;
+  }
+}
+
+class _ImagePageState extends State<ImagePage> {
+  Uint8List imgList;
+  @override
+  void initState() {
+    super.initState();
+    rootBundle.load(MyImgs.JINX).then((data) {
+      setState(() {
+        imgList = data.buffer.asUint8List();
+        print("initState imgList $imgList");
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('image'),
+        actions: <Widget>[
+          RaisedButton(
+            onPressed: () {
+              ImagePage.getImage(MyImgs.JINX).then((image) async {
+                image.toByteData().then((byteData) {
+                  imgList = byteData.buffer.asUint8List();
+                  setState(() {});
+                });
+              }).catchError((e) {
+                print("getImage error ${e.toString()}");
+              });
+            },
+            child: Text("测试getImage"),
+          )
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            Image.network(url),
+            Container(
+              height: 100,
+              width: MediaQuery.of(context).size.width,
+              child: imgList != null ? Image.memory(imgList, gaplessPlayback: true) : Container(),
+            ),
+            Image.network(ImagePage.url),
             Image.asset(
               MyImgs.TEST,
               height:

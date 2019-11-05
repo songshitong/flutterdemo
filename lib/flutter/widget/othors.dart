@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-//todo mediaquery  获取size    window.physicalSize.width / window.devicePixelRatio;不可靠，release mode可能获取不到
 // todo IntrinsicHeight
 //todo 自定义scrollview  listview(横竖布局)
 //todo StatefulBuilder  Builder
@@ -119,18 +118,9 @@ import 'package:flutter/material.dart';
 
 //hasDrawer scaffold中了解关于context的用法
 
-//static Future<ui.Image> getImage(String asset) async {
-//ByteData data = await rootBundle.load(asset);
-//ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
-//ui.FrameInfo fi = await codec.getNextFrame();
-//return fi.image;
-//}
-
 //todo SingleTickerProviderStateMixin 原理 与 controller的关系  controller内部实例化了ticker
 
 //todo ServicesBinding 中的BinaryMessenger 消息传递
-//todo globlekey的应用 Currently the key is recreated every time _LoginState is rebuilt, which defeats it's purpose.
-//     https://github.com/flutter/flutter/issues/20042 声明为static final
 
 //TODO 查看constranlayout源码进行改造
 //https://blog.csdn.net/m0_37667770/article/details/100557072 动画 基础，一个view，两个view，多个view
@@ -148,8 +138,11 @@ import 'package:flutter/material.dart';
 // 重叠(重叠谁在上，谁在下)，是否可以更改子的绘制顺序，
 //  相对布局  一个元素与另一个的对齐关系    使用水平竖直排列是否可以完成
 
-//todo 加载3d模型 https://blog.csdn.net/m0_37667770/article/details/81042916#comments
-
+//安装
+//flutter_downloader: ^1.3.2
+//install_plugin: ^2.0.0
+// app查询版本
+//http://itunes.apple.com/cn/lookup?id=APPID
 void main() {
   Visibility(
     child: LayoutBuilder(builder: null),

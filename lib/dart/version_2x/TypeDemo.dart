@@ -51,6 +51,12 @@ void main() {
   String a5str = a5[4];
   print("a5str is $a5str");
 
+  //正则匹配  不建议用正则匹配HTML，使用htmlparser
+  var videoRegExp = RegExp(r'''<video[^>]+src="([^">]+)"''');
+  for (var match in videoRegExp.allMatches("ssssssadfasfdafasfdaf")) {
+    print(" match ${match.group(0)}");
+  }
+
   ///引用传递 指向实际内容的地址
   String aTest = "i am a";
   String bTest = aTest;

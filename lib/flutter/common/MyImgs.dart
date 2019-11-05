@@ -1,3 +1,4 @@
+///加载asset DefaultAssetBundle和rootBundle都可以
 class MyImgs {
   static const TEST = "lib/img/test.webp";
   static const JINX = "lib/img/jinx.webp";

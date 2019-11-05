@@ -17,6 +17,10 @@ class Student extends People {
     print(" student hello ");
   }
 
+  Student getParent() {
+    return StudentA();
+  }
+
   @override
   ContentB getContent() {
     return ContentB();
@@ -36,6 +40,11 @@ class Robot implements People {
     print("robot hello ");
     return null;
   }
+
+//  StudentA getA() {
+////    父类不能替代子类 强转也不行
+//    return Student() as StudentA;
+//  }
 
   @override
   ContentA getContent() {
@@ -63,6 +72,14 @@ void main() {
 
   ///如果一个对象是不会改变的，你可以讲这些对象创建为编译时常量。定义cost构造函数，而且要确保所有的常量都是final的
   var robot1 = const ImmutablePoint(1, 1);
+
+  //
+//  var student = Robot().getA();
+//  print("sudent $student");
+
+  //子类可以替代父类
+  var studentChild = Student().getParent();
+  print("studentChild $studentChild");
 }
 
 class ImmutablePoint {

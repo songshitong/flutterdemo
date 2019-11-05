@@ -7,7 +7,11 @@ import 'package:flutter/material.dart';
 
 //    指定[最minimum]填充时，最小填或将应用安全区域填充充越大
 // 原理实现  MediaQuery.of(context).padding 和Padding 和MediaQuery.removePadding
-class SafeAreaPage extends StatelessWidget {
+
+// window.physicalSize.width / window.devicePixelRatio;不可靠，release mode可能获取不到
+
+///MediaQuery 建立子树用来查询给定的[MediaQueryData]
+class SafeAreaAndMediaQueryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

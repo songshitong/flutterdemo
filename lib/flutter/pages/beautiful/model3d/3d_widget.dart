@@ -12,6 +12,7 @@ import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math.dart' show Vector3;
 import 'package:vector_math/vector_math.dart' as V;
 
+//https://blog.csdn.net/m0_37667770/article/details/81042916#comments
 class Model3DPage extends StatefulWidget {
   @override
   _Model3DPageState createState() => _Model3DPageState();
