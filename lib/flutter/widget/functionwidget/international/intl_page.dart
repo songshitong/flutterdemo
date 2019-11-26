@@ -98,6 +98,19 @@ class ContentBody extends StatelessWidget {
               onPressed: callback,
               child: Text("改变标题语言"),
             ),
+            TextField(
+              decoration: InputDecoration(hintText: "i am hint text"),
+              //改变语言后，焦点与hint text对齐
+              style: TextStyle(textBaseline: TextBaseline.alphabetic),
+            ),
+            //一个页面有多个textfield崩溃
+            //https://github.com/flutter/flutter/pull/44029  查看官方修复
+            //https://github.com/flutter/flutter/issues/40118
+            TextField(
+              decoration: InputDecoration(hintText: "${DemoLocalizations.of(context).title}"),
+              //改变语言后，焦点与hint text对齐
+              style: TextStyle(textBaseline: TextBaseline.alphabetic),
+            )
           ],
         ),
       ),

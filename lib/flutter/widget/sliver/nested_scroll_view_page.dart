@@ -10,7 +10,7 @@ class NestedPage extends StatefulWidget {
 }
 
 class _NestedPageState extends State<NestedPage> {
-  var _tabs = ["a", "b", "c", "d"];
+  var _tabs = ["a", "b", "c", "d", "e", "f"];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,8 +46,10 @@ class _NestedPageState extends State<NestedPage> {
                   // scroll views.
                   forceElevated: innerBoxIsScrolled,
                   bottom: TabBar(
+                    indicatorWeight: 0.1,
                     // These are the widgets to put in each tab in the tab bar.
                     tabs: _tabs.map((String name) => Tab(text: name)).toList(),
+                    isScrollable: true, //是按比例布局还是可滚动
                   ),
                 ),
               ),

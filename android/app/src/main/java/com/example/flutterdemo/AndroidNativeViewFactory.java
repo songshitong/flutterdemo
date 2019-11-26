@@ -24,4 +24,6 @@ public class AndroidNativeViewFactory extends PlatformViewFactory {
 //        args是由Flutter传过来的自定义参数
         return new AndroidNativeView(context, (Map<String, Object>) args,messenger,i);
     }
+
+
 }

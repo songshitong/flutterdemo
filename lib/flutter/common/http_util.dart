@@ -5,14 +5,12 @@ import 'dart:typed_data';
 
 ///代码来自 https://medium.com/@petehouston/download-files-in-dart-4f382f86a9f9
 class HttpUtil {
-  static Future getUrl(String url) {
+  static Future getUrl(String url) async {
     HttpClient client = new HttpClient();
-    client.getUrl(Uri.parse(url)).then((HttpClientRequest request) {
-      return request.close();
-    }).then((HttpClientResponse response) {
-      response.transform(utf8.decoder).listen((contents) {
-        return contents;
-      });
+    HttpClientRequest request = await client.getUrl(Uri.parse(url));
+    HttpClientResponse response = await request.close();
+    response.transform(utf8.decoder).listen((contents) {
+      return Future.value(contents);
     });
   }
 

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutterdemo/flutter/common/SingleLonData.dart';
 import 'package:flutterdemo/flutter/common/Style.dart';
 import 'package:flutterdemo/flutter/native_plugin/ali/push.dart';
@@ -42,7 +43,10 @@ import 'package:flutterdemo/flutter/widget/customwidget/buttom_btn.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/capture_screen.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/path.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/scroll_physics.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/appbar_test.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/blur.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/borders_about.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/bottom_navigator.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/clip_widget.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/dismissible.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/draggable_page.dart';
@@ -53,8 +57,11 @@ import 'package:flutterdemo/flutter/widget/functionwidget/event_dispatch/pointer
 import 'package:flutterdemo/flutter/widget/functionwidget/futurebuilder.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/inherited_widget.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/international/intl_page.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/refresh_indicator.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/safe_area.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/table_cell.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/theme_demo.dart';
+import 'package:flutterdemo/flutter/widget/functionwidget/visibility_test.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/will_pop_scope.dart';
 import 'package:flutterdemo/flutter/widget/layout/flex.dart';
 import 'package:flutterdemo/flutter/widget/layout/indexed_stack.dart';
@@ -63,6 +70,7 @@ import 'package:flutterdemo/flutter/widget/layout/stack.dart';
 import 'package:flutterdemo/flutter/widget/layout/wrap_flow.dart';
 import 'package:flutterdemo/flutter/widget/nativ/native_chat.dart';
 import 'package:flutterdemo/flutter/widget/nativ/native_view_to_widget.dart';
+import 'package:flutterdemo/flutter/widget/radio_page.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/customscrollview.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/grid_view.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/list_view.dart';
@@ -96,9 +104,18 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
+extension WidgetPadding on Widget {
+  Widget paddingAll(double padding) => Padding(padding: EdgeInsets.all(padding), child: this);
+}
+
 class _HomePageState extends State<HomePage> {
   ///切换主题
   bool isDark = false;
+  final locals = [
+    const Locale('zh', 'CN'),
+    const Locale('en', 'US'), // 美国英语
+  ];
+  var localeIndex = 0;
 
   ///切换颜色
   Color color = Colors.amber;
@@ -112,6 +129,7 @@ class _HomePageState extends State<HomePage> {
       SingleLonData().appDocDir = appDocDir.path;
       print("appDocDir.path ${appDocDir.path}");
     });
+    print("language ${WidgetsBinding.instance.window.locales} ====");
     super.initState();
   }
 
@@ -120,10 +138,13 @@ class _HomePageState extends State<HomePage> {
     var defaultPlatform = defaultTargetPlatform;
     var androidTheme = ThemeData.light();
 
+    //https://www.w3schools.com/colors/colors_picker.asp 根据主色自动生成色系
     ///Android变色
     if (defaultPlatform == TargetPlatform.android) {
       androidTheme = ThemeData(
           primaryColor: color,
+          //设置长按提示 设置位置，文字设置重写CustomLocalizations,showDuration长按结束停留的时间，消失？设置位移遮挡吧
+          tooltipTheme: TooltipThemeData(showDuration: Duration.zero),
           brightness: isDark ? Brightness.dark : Brightness.light,
           //设置全局的页面切换效果 ios 左右  Android默认上下
           pageTransitionsTheme: PageTransitionsTheme(builders: {
@@ -160,6 +181,24 @@ class _HomePageState extends State<HomePage> {
         child: MaterialApp(
             title: "flutter",
             theme: androidTheme,
+            //设置支持的语言
+            supportedLocales: locals,
+            //手动指定locale
+            locale: locals[localeIndex],
+            localizationsDelegates: <LocalizationsDelegate>[
+              // 本地化的代理类
+              GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate,
+              CustomLocalizations.delegate
+            ],
+            localeListResolutionCallback: (locales, supportedLocales) {
+              //监听语言改变
+              print("localeListResolutionCallback locales $locales supportedLocales $supportedLocales");
+            },
+            localeResolutionCallback: (locale, supportedLocales) {
+              //监听语言改变
+//        如果locale为null，则表示Flutter未能获取到设备的Locale信息，所以我们在使用locale之前一定要先判空
+              print("localeResolutionCallback locale $locale supportedLocales $supportedLocales");
+            },
             darkTheme: androidTheme,
             themeMode: ThemeMode.dark,
             navigatorObservers: [MNavigatorObserber()],
@@ -176,21 +215,67 @@ class _HomePageState extends State<HomePage> {
 //              return new MaterialPageRoute(builder: builder, settings: settings);
 //            },
             home: RepaintBoundary(
-              child: Home(change: () {
-                color = Colors.green;
-                setState(() {});
-              }, reset: () {
-                color = Colors.amber;
-                setState(() {});
-              }, themeChange: () {
-                setState(() {
-                  isDark = !isDark;
-                });
-              }),
+              child: Home(
+                change: () {
+                  color = Colors.green;
+                  setState(() {});
+                },
+                reset: () {
+                  color = Colors.amber;
+                  setState(() {});
+                },
+                themeChange: () {
+                  setState(() {
+                    isDark = !isDark;
+                  });
+                },
+                localeChange: () {
+                  setState(() {
+                    localeIndex = localeIndex == 0 ? 1 : 0;
+                  });
+                },
+              ),
             )),
       ),
     );
   }
+}
+
+///使用定义的语言 MaterialLocalizations.of(context).backButtonTooltip
+class CustomLocalizations extends DefaultMaterialLocalizations {
+  CustomLocalizations(this.locale) {
+    print("CustomLocalizations init locale ${locale.toString()}");
+  }
+  Locale locale;
+  @override
+  String get backButtonTooltip => locale.languageCode == "zh" ? "我是返回键" : "i am back";
+
+  static final LocalizationsDelegate<CustomLocalizations> delegate = _MaterialLocalizationsDelegate("");
+  static Future<CustomLocalizations> load(Locale locale) {
+    return SynchronousFuture<CustomLocalizations>(CustomLocalizations(locale));
+  }
+}
+
+class _MaterialLocalizationsDelegate extends LocalizationsDelegate<CustomLocalizations> {
+  static const locals = ['en', 'zh'];
+  String jsonData;
+  _MaterialLocalizationsDelegate(this.jsonData);
+
+  @override
+  bool isSupported(Locale locale) {
+    final isSupport = locals.contains(locale.languageCode);
+    print("_MaterialLocalizationsDelegate isSupported $isSupport");
+    return isSupport;
+  }
+
+  @override
+  Future<CustomLocalizations> load(Locale locale) => CustomLocalizations.load(locale);
+
+  @override
+  bool shouldReload(_MaterialLocalizationsDelegate old) => false;
+
+  @override
+  String toString() => 'DefaultMaterialLocalizations.delegate(en_US)';
 }
 
 ///监听页面进入，离开
@@ -220,7 +305,8 @@ class Home extends StatefulWidget {
   VoidCallback change;
   VoidCallback reset;
   VoidCallback themeChange;
-  Home({this.change, this.reset, this.themeChange});
+  VoidCallback localeChange;
+  Home({this.change, this.reset, this.themeChange, this.localeChange});
 
   @override
   _HomeState createState() => _HomeState();
@@ -238,6 +324,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   var radius = 25;
   AnimationController _controller;
   Animation<double> clampAnimation;
+  final strChangeLocale = "改变语言";
+  final strResetColor = "颜色reset";
+  final strChangeColor = "换色";
+  final strChangeTheme = "主题切换";
+
+  final strLocale = "改变语言";
+
+  var menuType = "改变语言";
 //  int count = 0;
   @override
   void initState() {
@@ -399,24 +493,30 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("flutter"),
+//        title: Text("flutter"),
         actions: <Widget>[
-          FlatButton(
-            onPressed: () {
-              widget.change();
-            },
-            child: Text("换色"),
-          ),
-          FlatButton(
-            onPressed: () {
-              widget.reset();
-            },
-            child: Text("颜色reset"),
-          ),
-          FlatButton(
-            onPressed: widget.themeChange,
-            child: Text("主题切换"),
-          ),
+          DropdownButton(
+              hint: Text(menuType),
+              items: [
+                DropdownMenuItem(child: Text(strChangeLocale), value: strChangeLocale),
+                DropdownMenuItem(child: Text(strChangeColor), value: strChangeColor),
+                DropdownMenuItem(child: Text(strResetColor), value: strResetColor),
+                DropdownMenuItem(child: Text(strChangeTheme), value: strChangeTheme)
+              ],
+              onChanged: (value) {
+                setState(() {
+                  menuType = value;
+                });
+                if (value == strChangeLocale) {
+                  widget.localeChange();
+                } else if (value == strChangeColor) {
+                  widget.change();
+                } else if (value == strResetColor) {
+                  widget.reset();
+                } else if (value == strChangeTheme) {
+                  widget.themeChange();
+                }
+              }),
           FlatButton(
               onPressed: () {
                 showMenu(context: context, position: RelativeRect.fill, items: [
@@ -459,6 +559,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               child: Text("全局浮窗"))
         ],
       ),
+      //selectstyle 在ontap设置后生效
+      //padding是计算字体和icon知道的
+      //替换为cupertino或自己写
       bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Colors.deepPurple,
           currentIndex: 0,
@@ -480,6 +583,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         key: Key("long_list"),
         child: Column(
           children: <Widget>[
+            Text("dart extension").paddingAll(20),
+            Text("${MaterialLocalizations.of(context).backButtonTooltip}"),
             FlatButton(
                 key: Key("FlatButton"),
                 onPressed: () {
@@ -747,6 +852,55 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   }));
                 },
                 child: Text("Drawer 侧边栏 ")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return VisibilityTestPage();
+                  }));
+                },
+                child: Text("visibility")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return AppbarPage();
+                  }));
+                },
+                child: Text("AppbarPage")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return DecorationAndBorders();
+                  }));
+                },
+                child: Text("各种decoration和borders")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return TablePage();
+                  }));
+                },
+                child: Text("Table 表格")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return BottomNavigatorTest();
+                  }));
+                },
+                child: Text("bottom naviagtor")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return RadioPage();
+                  }));
+                },
+                child: Text("radio page")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return RefreshPage();
+                  }));
+                },
+                child: Text("refresh page")),
             Text("事件处理---------------"),
             FlatButton(
                 onPressed: () {

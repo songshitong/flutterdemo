@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 ///共享动画
 //todo 自定义共享动画  createRectTween
+// 同一颗书上不能存在多个相同tag的hero,也不能改变tag共用一个hero
 class HeroPage extends StatefulWidget {
   @override
   _HeroPageState createState() => _HeroPageState();

@@ -50,7 +50,7 @@ class AliveCheckbox extends StatefulWidget {
   ValueChanged<bool> onChange;
   bool value;
 
-  AliveCheckbox({@required this.onChange, this.value});
+  AliveCheckbox({@required this.onChange, this.value = false});
 
   @override
   _AliveCheckboxState createState() => _AliveCheckboxState();

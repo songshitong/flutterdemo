@@ -13,7 +13,10 @@ import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
 
+
+//todo FlutterPlugin干嘛用的 webview_plugin用到了
 public class MainActivity extends FlutterActivity {
   private static final String CHANNEL = "samples.flutter.io/battery";
   Context context;
@@ -23,7 +26,6 @@ public class MainActivity extends FlutterActivity {
     context = this;
     //注册自己的原生控件
     AndroidNativeViewFlutterPlugin.registerWith(this);
-    Bitmap b;
     GeneratedPluginRegistrant.registerWith(this);
 //    1创建MethodChannel并设置一个MethodCallHandler。确保使用和Flutter客户端中使用的通道名称相同的名称。
 //    2我们需要处理平台方法名为getBatteryLevel的调用消息，所以我们需要先在call参数判断调用的方法是否为getBatteryLevel。

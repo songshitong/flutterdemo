@@ -6,6 +6,7 @@ class TextfieldPage extends StatefulWidget {
   _TextfieldPageState createState() => _TextfieldPageState();
 }
 
+//todo ToolbarOptions
 class _TextfieldPageState extends State<TextfieldPage> {
   FocusNode fn;
   TextEditingController controller;
@@ -31,6 +32,10 @@ class _TextfieldPageState extends State<TextfieldPage> {
     });
   }
 
+  ///todo EditableTextState.requestKeyboard()
+  ///todo RawKeyboardListener
+  ///
+  ///TODO 监听软键盘的完成后是否会造成自己代码的重绘，此时数据改变会自动重绘布局
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +68,7 @@ class _TextfieldPageState extends State<TextfieldPage> {
                 print('onchanged str $str');
               },
               style: TextStyle(color: Colors.purple), //字体样式
-              textAlign: TextAlign.end, // 文字对齐
+              textAlign: TextAlign.end, // 文字对齐 center  hinttext一样生效
               textDirection: TextDirection.rtl, //文字书写方向，从右到左
               maxLines: 3,
               decoration: InputDecoration(
@@ -123,7 +128,7 @@ class _TextfieldPageState extends State<TextfieldPage> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              maxLength: 5, //输入框 maxlenth 后会出现计数，可以用inputformatter来限制长度不占空间
+              maxLength: 5, //输入框 maxlenth 后会出现计数，可以用inputformatter来代替然后限制长度不占空间
               decoration: InputDecoration(
                   counterText: "counter：", //计数文字
                   //semanticCounterText If provided, this replaces the semantic label of the [counterText].
@@ -165,7 +170,7 @@ class _TextfieldPageState extends State<TextfieldPage> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               decoration: InputDecoration(
-                  ////减少按高度 当嵌入添加的容器中时，非常有用
+                  ////减少按高度 当嵌入添加的容器中时，非常有用 , TODO 设置textfield高度，isDense的效果
                   isDense: true,
                   filled: true,
                   fillColor: Colors.black26,

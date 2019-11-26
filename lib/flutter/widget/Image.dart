@@ -27,8 +27,12 @@ class ImagePage extends StatefulWidget {
 //    });
     //image decoder 对instantiateImageCodec和getNextFrame的包装
     print(" getImage ${data.buffer.asUint8List()}");
-    //todo 和Image.memory走相同的流程，然后解析失败？？ 能有和引擎一起debug
+    // 和Image.memory走相同的流程，然后解析失败？？ 能有和引擎一起debug，需要设置图片格式ImageByteFormat.png
     image = await decodeImageFromList(data.buffer.asUint8List());
+
+    //包装与不包装的区别
+    // 包装直接拿到ui.Iamge,其中gif只包含第一帧的信息，通过Image.memory图片加载需要转码
+    // 不包装可以拿到ui.FrameInfo，通过RawIamge加载，不用转码
     return image;
   }
 }
@@ -55,7 +59,7 @@ class _ImagePageState extends State<ImagePage> {
           RaisedButton(
             onPressed: () {
               ImagePage.getImage(MyImgs.SANTAIZI).then((image) async {
-                //TODO 图片格式
+                //TODO 图片格式 RawImage
                 //
                 image.toByteData(format: ImageByteFormat.png).then((byteData) {
                   imgList = byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);

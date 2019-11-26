@@ -10,7 +10,12 @@ import 'package:flutter/material.dart';
 
 // window.physicalSize.width / window.devicePixelRatio;不可靠，release mode可能获取不到
 
-///MediaQuery 建立子树用来查询给定的[MediaQueryData]
+///MediaQuery 建立子树用来查询给定的[MediaQueryData] 常见的大小，屏幕上下刘海等都能拿到
+/// mediaquery.of(contexy) 不能再inistate之前调用，可以监听addPostFrameCallback第一帧,或didChangeDependences
+/// final MediaQueryData mediaQueryData = MediaQuery.of(context);
+///    final double statusBarHeight = mediaQueryData.padding.top;
+///    final double screenHeight = mediaQueryData.size.height;
+///    final double appBarMaxHeight = screenHeight - statusBarHeight;
 class SafeAreaAndMediaQueryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

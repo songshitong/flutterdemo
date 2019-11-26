@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:rammus/rammus.dart' as rammus;
 
+//TODO 网络慢的情况的下，初始化是否会阻塞ui，放到isolate??
+//如何模拟弱网环境
+//https://www.zhihu.com/question/29128847
+//https://blog.csdn.net/qq_28351609/article/details/84568422
+//https://juejin.im/entry/5c467e1e518825551e28734e
+//https://www.infoq.cn/article/pQmLUECekW*DsymqbGvy
+//http://www.debugger.wiki/article/html/1555646400461622
 /// 阿里推送
 ///
 class PushPage extends StatefulWidget {

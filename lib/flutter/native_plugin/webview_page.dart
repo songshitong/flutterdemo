@@ -38,6 +38,8 @@ import 'package:html/parser.dart' show parse;
 //      <img src="file:///storage/assets/f.png" alt="img5">
 //      <img src="file:///android_asset/flutter_assets/assets/f.png" alt="web-img6">
 //      <img src="/Users/Faisal/Projects/Flutter_Apps/flutter_app/assets/f.png" alt="web-img6">
+
+//改变webview的高度，js获取的高度是否有问题   document获取高度和div获取高度的区别
 class WebviewPage extends StatefulWidget {
   @override
   _WebviewPageState createState() => _WebviewPageState();
@@ -123,6 +125,17 @@ String kNavigationExamplePage = '''
 </html>
 ''';
 
+String tag =
+    '''<h1 style="text-align: center;"><img src="https://cdn.duitang.com/uploads/item/201601/15/20160115155749_BQ3Vk.jpeg" alt="" width="500" height="500" /></h1>
+<h1 style="text-align: center;">&nbsp;</h1>
+<h1 style="text-align: center;">Welcome to the TinyMCE demo!</h1>
+<p style="text-align: center; font-size: 15px;"><img title="Logo" src="favicon.ico" alt="Logo" width="100" height="100" /></p>
+<ul>
+<li>Our <a href="https://www.tiny.cloud/docs/" target="_blank" rel="noopener">documentation</a> is a great resource for learning how to configure TinyMCE.</li>
+<li>Have a specific question? Visit the <a href="https://community.tinymce.com/forum/">Community Forum</a>.</li>
+<li>We also offer enterprise grade support as part of <a href="https://tinymce.com/pricing">TinyMCE premium subscriptions</a>.</li>
+</ul>''';
+
 //file:///$appDocDir/20829447_16153273773.jpg
 //file:///data/user/0/com.example.flutterdemo/app_flutter/20829447_16153273773.jpg
 //http://depot.nipic.com/file/20150423/20829447_16153273773.jpg
@@ -160,7 +173,9 @@ class _WebviewPageState extends State<WebviewPage> {
       "白鹭--密室逃脱": "http://dev.egret.com//cn/article/index/id/891",
       "cocos star-catcher": "http://fbdemos.leanapp.cn/star-catcher/",
       "pdf":
-          "http://storage.jd.com/eicore-fm.jd.com/011001900411-61816050.pdf?Expires=2516350040&AccessKey=bfac05320eaf11cc80cf1823e4fb87d98523fc94&Signature=3YPHQZPL%2F%2FzI3l0CgV0zLYTdib0%3D"
+          "http://storage.jd.com/eicore-fm.jd.com/011001900411-61816050.pdf?Expires=2516350040&AccessKey=bfac05320eaf11cc80cf1823e4fb87d98523fc94&Signature=3YPHQZPL%2F%2FzI3l0CgV0zLYTdib0%3D",
+      "全景新闻": "http://vr.ce.cn/tyvr/lh/20180305/bztd2/",
+      "html5test": "https://html5test.com"
     };
     //直接加载本地，先判断文件存在不
     if (File(localHtml).existsSync()) {

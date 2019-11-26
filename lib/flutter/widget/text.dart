@@ -60,7 +60,7 @@ class TextPage extends StatelessWidget {
                 inherit: true,
                 color: Colors.blue, //颜色   和foreground只能设置一个
                 fontSize: 18.0, //字体大小
-                height: 1.2, //该属性用于指定行高，但它并不是一个绝对值，而是一个因子，具体的行高等于fontSize*height
+                height: 1.2, //该属性用于指定行高，但它并不是一个绝对值，而是一个因子，具体的行高等于fontSize*height,行高，行间距
                 fontFamily: "Courier", //字体集
                 background: new Paint()..color = Colors.yellow, //背景
                 decoration: TextDecoration.underline, //下划线

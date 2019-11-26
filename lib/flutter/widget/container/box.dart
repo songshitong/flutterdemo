@@ -26,9 +26,10 @@ class BoxPage extends StatelessWidget {
         children: <Widget>[
           ConstrainedBox(
             constraints: BoxConstraints(
-                minWidth: double.infinity, //宽度尽可能大
-                minHeight: 50.0 //最小高度为50像素
-                ),
+              minWidth: double.infinity, //宽度尽可能大
+              minHeight: 50.0, //最小高度为50像素
+              maxHeight: 100, //最大100，最小50  在这之间的高度，根据内容自适应高度
+            ),
             child: Container(height: 5.0, child: redBox),
           ),
           ConstrainedBox(

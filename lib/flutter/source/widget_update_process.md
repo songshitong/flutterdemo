@@ -1,3 +1,21 @@
+
+staful{
+  list{
+    item Bar(dataList)
+  }
+  setState{
+    dataList...
+  }
+}
+
+staful{
+  initStat{
+    todo  setstate后 initState不走
+  }
+}
+
+
+
 Widget ---->Element
 
 createElement()生成Element

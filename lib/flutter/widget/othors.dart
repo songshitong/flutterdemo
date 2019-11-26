@@ -1,76 +1,81 @@
 import 'package:flutter/material.dart';
 
 // todo IntrinsicHeight
-//todo 自定义scrollview  listview(横竖布局)
 //todo StatefulBuilder  Builder
 //todo align
 //todo  Material  制作material风格控件，使用主题，查看RaisedBtn  scaffold常用widget  material和sacafflod会将常用属性以inherit widget初始化到widget tree
-//buildcontext可从key获得     buildcontext 不能是pop的会报unsafe,
 
-//Navigator operation requested with a context that does not include a Navigator
-//It happens because you used a context that doesn't contain a Navigator instance as parent      发生在使用的context的父widget没有包含navigator
-// But this error can still happens when you use a context that is a parent of MaterialApp/WidgetApp  不能使用MaterialApp/WidgetApp的上下文
-//Navigator.of 的源码    所使用的context不能是顶层Widget的context，同时顶层Widget必须是StatefulWidget
-
-/// clip系列
 /// PageStorage
-/// 自定义overlay
-/// static show(BuildContext context, String msg) {
-//    var overlayState = Overlay.of(context);
-//    OverlayEntry overlayEntry;
-//    overlayEntry = new OverlayEntry(builder: (context) {
-//      return buildToastLayout(msg);
-//    });
-//    overlayState.insert(overlayEntry);
-//  }
-
-//todo Visibility 替代，动画，原理
 
 //todo widgets.puml的State 注释完善
 
-//StadiumBorder    BeveledRectangleBorder todo 各种border的使用
-//RelativeRect
+//InkResponse 非矩形的点击效果， 查看iOS的点击效果
+
 //AnimatedSize
-//ScopedModelDescendant
+//顶部变量 每次引入dart文件，顶部变量是否重新初始化
+
+// Navigator.maybePop(context); 自动返回上一层
+//showBottomSheet 点击外部不自动消失   showModalBottomSheet 可以
+
+//stack  中间滚动 底部固定(设置白色 Container不透明 ink透明 查看两者的图层显示)
+// 跟上一条一样，flatbutton 嵌套圆角container和ink
+
+//stack  singlescrollview  postion(bottom textfield)  出现键盘将bottom顶上去，为何singleScroll没有顶上去
+
+//Divider 使用
+
+//StatefulBuilder setState的用法
+
+//stful->stful    stful只initState一次      父类重建，怎么让子重建然后走init刷新从父类过来的数据
+
+//ValueChanged及相关文件的监听事件
+
+///透明区域可点击
+///HitTestBehavior.translucent
+
+///chip
+///
+///上拉刷新controller  http://flutter.link/2018/05/03/ListView%E4%B8%8B%E6%8B%89%E5%88%B7%E6%96%B0%E4%B8%8E%E5%8A%A0%E8%BD%BD%E6%9B%B4%E5%A4%9A/
+///
+/// 滚动停止
+/// new NotificationListener(
+//  child: new ListView(
+//    controller: _scrollController,
+//    children: ...
+//  ),
+//  onNotification: (t) {
+//    if (t is ScrollEndNotification) {
+//      print(_scrollController.position.pixels);
+//    }
+//  },
+//),
 
 ///获取大小   context.findeRenderObject也可以，但要在绘制完成
 ///globle.currentcontext.size
 ///widgetKey.currentContext.findRenderObject().semanticBounds.size
 ///widgetKey.currentContext.findRenderObject().paintBounds.size
 ///
+///
+///
 ///  获取全局的坐标  为什么可以强转为Renderbox   Renderbox定义了坐标体系
 ///  RenderBox box = widgetKey.currentContext.findRenderObject();
 //    Offset offset = box.localToGlobal(Offset.zero);
 //    Size size = box.size;
 
-///     监听绘制后    此时大小仍然在layout阶段确定
-///     WidgetsBinding.instance.addPostFrameCallback(_afterLayout);   WidgetsBinding  widget和flutter engine之间的胶水
-///
-/// app的生命周期监听   class _AppLifecycleReactorState extends State<AppLifecycleReactor> with WidgetsBindingObserver
-///
 ///
 /// 文字动画实现可以用Matrix4和Vector3，比较高级（这个在TabBar用上了）
 ///
 /// todo 线性插值
 ///
 ///todo layoutbuilder  实现根据constrains动态子布局，父固定-》constarins固定/充满屏-》类似gallery的多个产品
-///todo PreferredSize
-///
-/// mediaquery.of(contexy) 不能再inistate之前调用，可以监听addPostFrameCallback第一帧
-/// final MediaQueryData mediaQueryData = MediaQuery.of(context);
-//    final double statusBarHeight = mediaQueryData.padding.top;
-//    final double screenHeight = mediaQueryData.size.height;
-//    final double appBarMaxHeight = screenHeight - statusBarHeight;
 
+//todo 不同项目使用不同版本渠道的flutter
 //各种theme
 
 // function 是const吗  一个const构造器，接受一个function     class外面的是function，里面的是method???
-//ValueNotifier 各种listener
-//WidgetsBinding.instance.window.devicePixelRatio
 
 //SynchronousFuture
 //Completer
-//Opacity
 //AspectRatio
 //Texture
 
@@ -82,16 +87,15 @@ import 'package:flutter/material.dart';
 //TextTheme 字体主题之类的系统资源
 //查看foundation  import 'package:flutter/foundation.dart' as foundation;     foundation.defaultTargetPlatform
 
-//Table table cell
-
 //todo Material 控件
-//MaterialApp navigatorObsevrs 导航监听 监听全局页面进入和离开
 
 //TODO Matrix4.identity()
 //              ..translate(offsetX, offsetY)
 //              ..scale(scaleNum)    matrix 平移距离相同时，先平移后缩放，与先缩放后平移的效果不一样
 
 //TODO 分析图片加载结构，GIF一直播放？ 内存缓存机制 ，预加载机制，手写一个图片缓存，内存/磁盘
+//todo nestscrollwidget 解决冲突原理
+//todo 使用form做表单验证，登录？？多个框的验证失败
 
 ////曝光坑位Widget的context
 //
@@ -116,9 +120,8 @@ import 'package:flutter/material.dart';
 //final RevealedOffset offsetToRevealTop = viewport.getOffsetToReveal(childRenderObject, 0.0);
 //
 
-//hasDrawer scaffold中了解关于context的用法
-
 //todo SingleTickerProviderStateMixin 原理 与 controller的关系  controller内部实例化了ticker
+//TickerMode 控制子树的动画
 
 //todo ServicesBinding 中的BinaryMessenger 消息传递
 
@@ -137,6 +140,17 @@ import 'package:flutter/material.dart';
 //滚动是否支持？？（优先级很低，）
 // 重叠(重叠谁在上，谁在下)，是否可以更改子的绘制顺序，
 //  相对布局  一个元素与另一个的对齐关系    使用水平竖直排列是否可以完成
+
+//异常捕获
+//runZoned
+//FlutterError.onError   自定义flutter err 页面
+//Isolate.current.addErrorListener
+//sentry 官方插件
+
+//重写base state
+//abstract class BaseState<T extends StatefulWidget> extends State<T>
+
+//InkResponse
 
 //安装
 //flutter_downloader: ^1.3.2

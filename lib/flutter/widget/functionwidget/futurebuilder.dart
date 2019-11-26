@@ -1,6 +1,8 @@
 //todo FutureBuilder  避免重绘https://blog.csdn.net/u011272795/article/details/83010974
 import 'package:flutter/material.dart';
 
+//https://book.flutterchina.club/chapter7/futurebuilder_and_streambuilder.html
+//streambuilder
 class FutureBuilderPage extends StatefulWidget {
   @override
   _FutureBuilderPageState createState() => _FutureBuilderPageState();

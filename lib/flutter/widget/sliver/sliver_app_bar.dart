@@ -18,6 +18,8 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerPr
     return "$index";
   });
   GlobalKey centerKey = GlobalKey();
+  GlobalKey keyListHeight = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -67,6 +69,17 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerPr
               //不设置childcount 默认无限个
               return Text("SliverList $index");
             }, childCount: 40)),
+          ),
+          SliverList(
+            key: keyListHeight,
+            delegate: SliverChildListDelegate(List.generate(datas.length, (index) {
+              return GestureDetector(
+                  onTap: () {
+                    print("sliver list ontap");
+                    getHeightToIndex(index);
+                  },
+                  child: SizedBox(width: 50, height: 20, child: Text("all height sliver list $index")));
+            })),
           ),
           SliverGrid(
               //使用数量较少的情况
@@ -131,6 +144,30 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerPr
         ],
       ),
     );
+  }
+
+  double getHeightToIndex(int index) {
+    RenderSliverMultiBoxAdaptor renderObject =
+        keyListHeight.currentContext.findRenderObject() as RenderSliverMultiBoxAdaptor;
+    var child = renderObject.firstChild;
+    var allHeight = 0.0;
+    allHeight = renderObject.paintExtentOf(child);
+    print("firstChild allHeight $allHeight");
+    if (index > 0) {
+      //缺点在绘制完成后使用
+      //第0个已经取得高度了，所以进行判断
+      //不进行判断，while中childIndex一直大于0，此时获取的第一个高度为list的总高度
+      while ((child = renderObject.childAfter(child)) != null) {
+        allHeight += renderObject.paintExtentOf(child);
+        var childIndex = renderObject.indexOf(child);
+        if (childIndex == index) {
+          break;
+        }
+      }
+    }
+
+    print("index $index paintExtent $allHeight");
+    return allHeight;
   }
 }
 

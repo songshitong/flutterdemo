@@ -22,6 +22,7 @@ class StackPageState extends State<StackPage> {
 
     //有四个child，上面两个重叠，下面两个重叠，如果子的child会发生变化，最好将上下分为两个stack,便于控制整体大小，将相同的归为一类
 
+    //todo stack中有输入框，position设置top好还是设置bottom好，软键盘弹出，那一个能正常移动适应
     return Scaffold(
       appBar: AppBar(
         title: Text("stack"),

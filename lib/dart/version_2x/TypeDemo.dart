@@ -65,4 +65,8 @@ void main() {
 
   double db = 0.0;
   print("db==0 ${db == 0}");
+
+  bool flagA = false;
+  bool flagB = false;
+  print("flase&&flase ${flagA && flagB}");
 }

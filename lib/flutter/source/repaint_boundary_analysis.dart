@@ -29,6 +29,10 @@ class RepaintBoundaryAnalysis extends StatelessWidget {
     );
   }
 
+//  将滚动列表的widget显示，有可能只显示一半的情况
+//  Scrollable.ensureVisible(context);  原理寻找viewPort
+
+  //TODO 加入isolate 是否会卡主，是否卡loading？
   //使用repaintBoundary转为png图片
   //1 使用RepaintBoundary包裹要截图的图片,设置key为globalKey
   //2 RenderRepaintBoundary.toImage()

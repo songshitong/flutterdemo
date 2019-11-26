@@ -10,6 +10,8 @@ import 'package:flutterdemo/flutter/common/MyImgs.dart';
 ///
 /// 1 可以自定义item及进入动画
 /// 2 可以自定义指示器进切换动画
+/// 3 itemcount为0，默认不展示
+/// 4 itemcount为1不进行轮播
 ///
 class PageViewPage extends StatefulWidget {
   @override
@@ -30,29 +32,10 @@ class _PageViewPageState extends State<PageViewPage> {
               height: 200,
               child: MPageView.builder(
                 autoScroll: true,
-                itemCount: 5,
-                itemBuilder: (context, index, fractionPage) {
+                itemCount: 2,
+                itemBuilder: (context, index) {
 //                  print("build index item $index  controllerPage.floor() ${fractionPage.floor()}   ======== ");
-                  if (index == fractionPage.floor()) {
-                    //正在离开
-                    return Opacity(
-                      opacity: 1 - (fractionPage - index),
-                      child: Transform(
-                          transform: Matrix4.identity()..rotateX(fractionPage - index),
-                          child: Image.asset(MyImgs.JINX)),
-                    );
-                  } else if (index == fractionPage.floor() + 1) {
-                    //正在进入
-                    return Opacity(
-                      opacity: 1 - (index - fractionPage),
-                      child: Transform(
-                          transform: Matrix4.identity()..rotateX(fractionPage - index),
-                          child: Image.asset(MyImgs.JINX)),
-                    );
-                  } else {
-                    //离开
-                    return Opacity(opacity: 1, child: Image.asset(MyImgs.JINX));
-                  }
+                  return Image.asset(MyImgs.JINX);
                 },
                 indicatorBuilder: (context, index, fractionPage) {
                   return Padding(
@@ -73,16 +56,44 @@ class _PageViewPageState extends State<PageViewPage> {
   }
 }
 
-typedef MPageViewItemBuilder = Widget Function(BuildContext context, int index, double pageFraction);
+//todo pageview滑动，不显示时停止滚动
+typedef MPageViewItemBuilder = Widget Function(BuildContext context, int index);
+typedef MPageViewItemTransitionBuilder = Widget Function(
+    BuildContext context, int index, double pageFraction, Widget item);
+
 typedef MPageViewIndicatorBuilder = Widget Function(BuildContext context, int index, int pageIndex);
 
+///itemcount为0，默认不展示
 class MPageView extends StatefulWidget {
   MPageViewItemBuilder itemBuilder;
   MPageViewIndicatorBuilder indicatorBuilder;
+  MPageViewItemTransitionBuilder itemTransitionBuilder;
   int itemCount;
   bool autoScroll;
-
-  MPageView.builder({@required this.itemBuilder, this.indicatorBuilder, this.itemCount = 0, this.autoScroll = false})
+  double pageTime;
+  double indicatorBottom;
+  double indicatorTop;
+  double indicatorLeft;
+  double indicatorRight;
+  double indicatorRadius;
+  double indicatorSpace;
+  bool showIndicator;
+  PageController pageController;
+  MPageView.builder(
+      {@required this.itemBuilder,
+      this.indicatorBuilder,
+      this.itemTransitionBuilder,
+      this.itemCount = 0,
+      this.autoScroll = false,
+      this.pageTime = 3.0,
+      this.indicatorBottom,
+      this.indicatorTop,
+      this.indicatorLeft,
+      this.indicatorRight,
+      this.indicatorRadius = 5,
+      this.indicatorSpace = 5,
+      this.showIndicator = true,
+      this.pageController})
       : assert(itemBuilder != null),
         assert(itemCount != null);
 
@@ -90,6 +101,7 @@ class MPageView extends StatefulWidget {
   _MPageViewState createState() => _MPageViewState();
 }
 
+///todo controller.hasClients 判断controller绑定view
 class _MPageViewState extends State<MPageView> {
   PageController _controller = PageController();
   double controllerPage = 0.0;
@@ -98,13 +110,21 @@ class _MPageViewState extends State<MPageView> {
   @override
   void initState() {
     super.initState();
+    if (widget.pageController != null) {
+      _controller = widget.pageController;
+    }
     _controller.addListener(() {
       setState(() {
-//        print("_controller.page ${_controller.page}  _controller.page.toInt  ${_controller.page.toInt()}");
+        print(
+            "offset ${_controller.offset} _controller.page ${_controller.page}  _controller.page.toInt  ${_controller.page.toInt()}");
         controllerPage = _controller.page;
       });
     });
+  }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     WidgetsBinding.instance.addPostFrameCallback(postFrameCallback);
   }
 
@@ -120,7 +140,9 @@ class _MPageViewState extends State<MPageView> {
     if (null != _timer) {
       cancelTimer();
     }
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+    //一张图片不轮播
+    if (widget.itemCount == 1) return;
+    _timer = Timer.periodic(Duration(milliseconds: (widget.pageTime * 1000).toInt()), (timer) {
       int page = controllerPage.round() + 1;
       print("periodic page $page");
       _controller.animateToPage(page, duration: const Duration(milliseconds: 400), curve: Curves.easeInOut);
@@ -142,39 +164,122 @@ class _MPageViewState extends State<MPageView> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(alignment: Alignment.center, children: <Widget>[
-      Listener(
-        onPointerDown: (pointerDownEvent) {
-          print("onPointerDown ======");
-          cancelTimer();
-        },
-        onPointerUp: (pointerUpEvent) {
-          print("onPointerUp ======");
+    if (widget.itemCount == 0) {
+      return Container();
+    } else {
+      return Stack(alignment: Alignment.center, children: <Widget>[
+        widget.itemCount > 1
+            ? Listener(
+                onPointerDown: (pointerDownEvent) {
+                  print("onPointerDown ======");
+                  cancelTimer();
+                },
+                onPointerUp: (pointerUpEvent) {
+                  print("onPointerUp ======");
 
-          initTimer();
-        },
-        child: PageView.builder(
-          scrollDirection: Axis.horizontal,
-          controller: _controller,
-          itemBuilder: (context, index) {
-            return widget.itemBuilder(context, index % widget.itemCount, controllerPage);
-          },
+                  initTimer();
+                },
+                child: buildPageView(),
+              )
+            : buildPageView(),
+        Visibility(
+          visible: widget.showIndicator && widget.itemCount > 1,
+          child: Positioned(
+              bottom: widget.indicatorBottom,
+              top: widget.indicatorTop,
+              left: widget.indicatorLeft,
+              right: widget.indicatorRight,
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List<Widget>.generate(widget.itemCount, (index) {
+                    if (null != widget.indicatorBuilder) {
+                      return widget.indicatorBuilder(
+                          context, index % widget.itemCount, controllerPage.round() % widget.itemCount);
+                    } else {
+                      return DefaultIndicator(widget.indicatorSpace, widget.indicatorRadius, index % widget.itemCount,
+                          controllerPage, widget.itemCount);
+                    }
+                  }))),
+        )
+      ]);
+    }
+  }
 
-          ///不设置itemCount会无限滚动，设置后只能滚动固定大小
+  PageView buildPageView() {
+    return PageView.builder(
+      physics: widget.itemCount == 1 ? NeverScrollableScrollPhysics() : PageScrollPhysics(),
+      scrollDirection: Axis.horizontal,
+      controller: _controller,
+      itemBuilder: (context, index) {
+        final realIndex = index % widget.itemCount;
+        final fractionPage = controllerPage;
+        final item = widget.itemBuilder(context, realIndex);
+        if (null == widget.itemTransitionBuilder) {
+          return DefaultItemTransition(realIndex, fractionPage, item);
+        } else {
+          return widget.itemTransitionBuilder(context, realIndex, fractionPage, item);
+        }
+      },
+
+      ///不设置itemCount会无限滚动，设置后只能滚动固定大小
 //          itemCount: widget.itemCount,
-          onPageChanged: (current) {
-            print("onPageChanged current $current");
-          },
+      onPageChanged: (current) {
+        print("onPageChanged current $current");
+      },
+    );
+  }
+}
+
+class DefaultItemTransition extends StatelessWidget {
+  int index;
+  double fractionPage;
+  Widget item;
+
+  DefaultItemTransition(this.index, this.fractionPage, this.item);
+
+  @override
+  Widget build(BuildContext context) {
+    if (index == fractionPage.floor()) {
+      //正在离开
+      return Opacity(
+        opacity: 1 - (fractionPage - index),
+        child: Transform(transform: Matrix4.identity()..rotateX(fractionPage - index), child: item),
+      );
+    } else if (index == fractionPage.floor() + 1) {
+      //正在进入
+      return Opacity(
+        opacity: 1 - (index - fractionPage),
+        child: Transform(transform: Matrix4.identity()..rotateX(fractionPage - index), child: item),
+      );
+    } else {
+      //离开
+      return Opacity(opacity: 1, child: item);
+    }
+  }
+}
+
+class DefaultIndicator extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: indicatorSpace),
+      child: ClipOval(
+        child: Container(
+          width: indicatorRadius,
+          height: indicatorRadius,
+          color: fractionPage.round() % count == index ? Colors.white : Colors.grey,
         ),
       ),
-      Positioned(
-          bottom: 20,
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List<Widget>.generate(widget.itemCount, (index) {
-                return widget.indicatorBuilder(
-                    context, index % widget.itemCount, controllerPage.round() % widget.itemCount);
-              })))
-    ]);
+    );
   }
+
+  double indicatorSpace;
+  double indicatorRadius;
+  int index;
+  double fractionPage;
+  int count;
+  //todo 修改颜色
+  Color selectedColor;
+  Color unSelectedColor;
+  DefaultIndicator(this.indicatorSpace, this.indicatorRadius, this.index, this.fractionPage, this.count);
 }
