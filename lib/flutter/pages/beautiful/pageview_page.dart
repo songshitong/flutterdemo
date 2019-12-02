@@ -57,6 +57,7 @@ class _PageViewPageState extends State<PageViewPage> {
 }
 
 //todo pageview滑动，不显示时停止滚动
+/////todo  轮播图覆盖，滚动出可视区不滚动
 typedef MPageViewItemBuilder = Widget Function(BuildContext context, int index);
 typedef MPageViewItemTransitionBuilder = Widget Function(
     BuildContext context, int index, double pageFraction, Widget item);

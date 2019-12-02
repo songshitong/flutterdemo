@@ -185,6 +185,15 @@ class _WebviewPageState extends State<WebviewPage> {
     }
   }
 
+  ///webview获取内容高度后更新自己  使用js最多加载3000px然后崩溃   https://stackoverflow.com/questions/57651134/flutter-set-webview-height-as-wrap-content
+  ///onPageFinished: (some) async {
+  //                double height = double.parse(await _listController[index]
+  //                    .evaluateJavascript(
+  //                        "document.documentElement.scrollHeight;"));
+  //                setState(() {
+  //                  _heights[index] = height;
+  //                });
+  //              },
   @override
   Widget build(BuildContext context) {
     return Scaffold(

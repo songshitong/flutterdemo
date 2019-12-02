@@ -7,6 +7,7 @@ class TextfieldPage extends StatefulWidget {
 }
 
 //todo ToolbarOptions
+///todo TextCapitalization
 class _TextfieldPageState extends State<TextfieldPage> {
   FocusNode fn;
   TextEditingController controller;
@@ -36,6 +37,10 @@ class _TextfieldPageState extends State<TextfieldPage> {
   ///todo RawKeyboardListener
   ///
   ///TODO 监听软键盘的完成后是否会造成自己代码的重绘，此时数据改变会自动重绘布局
+  /// 重绘的话，build中的分页会重建？？
+  ///
+  ///
+  /// 控件跟随软键盘上移，scorllview ，stack设置top而不是bottom
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,7 +54,7 @@ class _TextfieldPageState extends State<TextfieldPage> {
           ),
           TextField(
             obscureText: true, // 是否用点替代文字，密码隐藏
-            keyboardType: TextInputType.number, //设置键盘类型
+            keyboardType: TextInputType.number, //设置键盘类型  text等
             textInputAction: TextInputAction.search, //键盘enter键的类型
             controller: controller,
           ),
@@ -128,7 +133,7 @@ class _TextfieldPageState extends State<TextfieldPage> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              maxLength: 5, //输入框 maxlenth 后会出现计数，可以用inputformatter来代替然后限制长度不占空间
+              maxLength: 5, //输入框 maxlenth 后会出现计数，可以用inputFormatters来代替然后限制长度不占空间
               decoration: InputDecoration(
                   counterText: "counter：", //计数文字
                   //semanticCounterText If provided, this replaces the semantic label of the [counterText].
@@ -154,6 +159,7 @@ class _TextfieldPageState extends State<TextfieldPage> {
               inputFormatters: [
                 LengthLimitingTextInputFormatter(5), // 长度限制为5
                 BlacklistingTextInputFormatter(RegExp("[0-9]")), //限制数字
+                WhitelistingTextInputFormatter(RegExp("[a-zA-Z]|[\u4e00-\u9fa5]|[0-9]")) //字母 汉字，数字
               ],
             ),
           ),

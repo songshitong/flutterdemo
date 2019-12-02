@@ -60,9 +60,12 @@ class _LoadMorePageState extends State<LoadMorePage> {
 }
 
 ///缺点必须滚动才能监听到
-///使用controller相同，基本上要求初始屏超过viewport，一般超过一屏发生滚动才可以
+///使用controller相同，基本上要求初始屏超过viewport，一般超过一屏发生滚动才可以  是不是初始化，可以加载全部，如果listview没有限制怎么办？？
 /// _scrollController.position.pixels ==
 //        _scrollController.position.maxScrollExtent
+
+/// list的itemcount>0 自动build,分页自动获取接口数据，数据更新，自动刷新页面
+/// itemcount=0, 初次加载没有build，手动调用接口，数据更新，刷新页面
 
 class LoadMoreNotification extends StatefulWidget {
   int maxCount;

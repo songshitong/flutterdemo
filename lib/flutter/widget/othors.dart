@@ -30,8 +30,14 @@ import 'package:flutter/material.dart';
 
 //ValueChanged及相关文件的监听事件
 
+///软键盘弹出  onMetricschange  MediaQuery的viewInset没有改变   使用MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+
 ///透明区域可点击
 ///HitTestBehavior.translucent
+///
+///
+/// customScroller view     SliverList 分页构建    SliverToBoxAdapter 一次把item Builder全部加载出来
+/// singlechildScroll  colunm  listview 不限制大小，一次性全部builder  BoxContrain,给listview进行限制
 
 ///chip
 ///
@@ -49,6 +55,8 @@ import 'package:flutter/material.dart';
 //    }
 //  },
 //),
+
+///push 返回值  pop传入
 
 ///获取大小   context.findeRenderObject也可以，但要在绘制完成
 ///globle.currentcontext.size
@@ -157,6 +165,17 @@ import 'package:flutter/material.dart';
 //install_plugin: ^2.0.0
 // app查询版本
 //http://itunes.apple.com/cn/lookup?id=APPID
+
+///状态管理
+/// 全局状态   永久不变/改变
+///
+/// 多页面状态  共享与销毁
+///
+/// 两个页面 共享对象可以直接修改   进入另一个页面，然后返回，返回的当前页面是否进入build方法，进入的话，build使用共享变量是否达到自动更新功能
+///  进入build发生重绘？？
+///
+///
+/// 网络接口   setsate  判断mounted
 void main() {
   Visibility(
     child: LayoutBuilder(builder: null),

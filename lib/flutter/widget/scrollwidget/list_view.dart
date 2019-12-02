@@ -468,6 +468,8 @@ class ListViewPageState extends State<ListViewPage> {
     return paintExtent;
   }
 
+  //TODO listview 设置itemcount 和不设置的初始化
+  //todo 获取第一个可见https://github.com/flutter/flutter/issues/19941
   double getPaintExtentOfIndex(GlobalKey key, int index) {
     RenderSliverMultiBoxAdaptor renderObject = key.currentContext.findRenderObject() as RenderSliverMultiBoxAdaptor;
     var child = renderObject.firstChild;

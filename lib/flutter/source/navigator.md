@@ -14,7 +14,7 @@ Navigator.of(context).push();
 
   实现方式
 
-​       1   MaterialApp可以设置一个navigatorKey，通过GloableKey的形式找到CurrentState也即是NavigatorState，然后执行跳转方法
+​       1   MaterialApp可以设置一个navigatorKey，通过GloableKey的形式设置navigatorKey找到CurrentState也即是NavigatorState，然后执行跳转方法
 
 ​       2  NavigatorObserver
 
