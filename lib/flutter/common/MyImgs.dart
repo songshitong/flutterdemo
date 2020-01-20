@@ -12,4 +12,7 @@ class MyImgs {
   static const SANTAIZI = "lib/img/santaizi.gif";
   static const BBMODEL = "lib/img/bb.obj";
   static const NVPOSEMODEL = "lib/img/NVpose.obj";
+  static const midouzi = "lib/img/midouzi.jpeg";
+  static const midouzi_cute = "lib/img/midouzi_cute.jpg";
+  static const midouzi_cute2 = "lib/img/midouzi_cute_2.jpeg";
 }

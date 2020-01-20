@@ -22,7 +22,7 @@ class StackPageState extends State<StackPage> {
 
     //有四个child，上面两个重叠，下面两个重叠，如果子的child会发生变化，最好将上下分为两个stack,便于控制整体大小，将相同的归为一类
 
-    //todo stack中有输入框，position设置top好还是设置bottom好，软键盘弹出，那一个能正常移动适应
+    //todo stack中有输入框，position设置top好，软键盘弹出，能正常移动适应,不要设置bottom
     return Scaffold(
       appBar: AppBar(
         title: Text("stack"),
@@ -89,12 +89,40 @@ class StackPageState extends State<StackPage> {
                   color: Colors.blue.shade200,
                   child: Text("哈哈哈"),
                 ),
-                // 充满
+                // 充满 此时stack充满父布局
                 Positioned.fill(
                     child: Text(
                   "fill",
                   textAlign: TextAlign.center,
-                ))
+                )),
+
+                ///stack 嵌套  stack默认充满父布局，stack嵌套时，父stack的大小不确定，子stack的position不能确定位置
+                ///  解决 使用container包裹或 positioned能确定大小，left+right或 left+width
+                ///  https://stackoverflow.com/questions/52936712/stack-inside-stack-in-flutter
+                Positioned(
+                  left: 50,
+                  top: 50,
+                  right: 50,
+                  bottom: 150,
+                  child: LayoutBuilder(
+                    builder: (context, contraints) {
+                      return Container(
+                        width: contraints.maxWidth,
+                        height: contraints.maxHeight,
+                        decoration: BoxDecoration(color: Colors.amber.withOpacity(0.5)),
+                        child: Stack(
+                          children: <Widget>[
+                            Positioned(
+                              child: Text("left 50 top 50"),
+                              left: 50,
+                              top: 50,
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                )
               ],
             ),
           ),

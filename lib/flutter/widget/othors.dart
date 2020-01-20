@@ -14,8 +14,12 @@ import 'package:flutter/material.dart';
 //AnimatedSize
 //顶部变量 每次引入dart文件，顶部变量是否重新初始化
 
-// Navigator.maybePop(context); 自动返回上一层
-//showBottomSheet 点击外部不自动消失   showModalBottomSheet 可以
+///Material inkwell 和ink 没有水波纹时，使用material包裹
+
+// Navigator.maybePop(context); 自动返回上一层            tooltip也可以做到
+//showBottomSheet 点击外部不自动消失   showModalBottom Sheet 可以
+
+///todo SliverLayoutBuilder layoutbuilder  Builder  StatefulBuilder  CustomSingleChildLayout
 
 //stack  中间滚动 底部固定(设置白色 Container不透明 ink透明 查看两者的图层显示)
 // 跟上一条一样，flatbutton 嵌套圆角container和ink
@@ -31,13 +35,17 @@ import 'package:flutter/material.dart';
 //ValueChanged及相关文件的监听事件
 
 ///软键盘弹出  onMetricschange  MediaQuery的viewInset没有改变   使用MediaQueryData.fromWindow(WidgetsBinding.instance.window);
+///
+///
+/// TODO 通过key找到state基本可以调用widget的state里面的方法，flutter框架的，第三方的都可以
 
 ///透明区域可点击
 ///HitTestBehavior.translucent
 ///
 ///
 /// customScroller view     SliverList 分页构建    SliverToBoxAdapter 一次把item Builder全部加载出来
-/// singlechildScroll  colunm  listview 不限制大小，一次性全部builder  BoxContrain,给listview进行限制
+/// singlechildScroll  colunm  listview 不限制大小，一次性全部builder  BoxContrain,给listview进行限制  是不是跟shrinkwrap有关，高度由内容决定
+/// https://github.com/flutter/flutter/issues/29214  使用CustomScroll with SliverList/SliverGrid替代可以吗
 
 ///chip
 ///
@@ -128,6 +136,15 @@ import 'package:flutter/material.dart';
 //final RevealedOffset offsetToRevealTop = viewport.getOffsetToReveal(childRenderObject, 0.0);
 //
 
+///todo  路由为什么会触发这个？？ 路由切换会触发build
+//didchangedependences   常见用法，旧的移除新的添加
+//void didUpdateWidget(VideoPlayer oldWidget) {
+//  super.didUpdateWidget(oldWidget);
+//  oldWidget.controller.removeListener(_listener);
+//  _textureId = widget.controller.textureId;
+//  widget.controller.addListener(_listener);
+//}
+
 //todo SingleTickerProviderStateMixin 原理 与 controller的关系  controller内部实例化了ticker
 //TickerMode 控制子树的动画
 
@@ -135,6 +152,11 @@ import 'package:flutter/material.dart';
 
 //TODO 查看constranlayout源码进行改造
 //https://blog.csdn.net/m0_37667770/article/details/100557072 动画 基础，一个view，两个view，多个view
+
+///stateful  deactive方法
+///
+/// dispose后 仍然有监听 markneedrebuild,setState然后出错
+/// https://github.com/flutter/flutter/issues/25047   标记dispose，true不进行setstate
 
 //一个易用的布局
 //居中  水平居中，竖直居中
@@ -160,11 +182,36 @@ import 'package:flutter/material.dart';
 
 //InkResponse
 
+//todo pageview 源码   没有item缓存   itembuilder每次调用？一次生成则可以复用？
+//tabbarview 源码
+
+///flutter 的build是在页面更新的时候调用，不是GPU的重绘，频繁build说明页面频繁build
+///
+/// TODO info: This class (or a class which this class inherits from) is marked as '@immutable', but one or more of its instance fields are not final: SearchWithResults.content (must_be_immutable at [gwadarpro] lib/pages/news/news_search.dart:221)
+///  查看flutter的指导规则
+///
+/// context.owner.debugbuilding 查看是否处于build状态
+
 //安装
 //flutter_downloader: ^1.3.2
 //install_plugin: ^2.0.0
 // app查询版本
 //http://itunes.apple.com/cn/lookup?id=APPID
+
+///Clipboard 剪切板  Clipboard.setData(ClipboardData(text: '复制到剪切板'))   Clipboard.getData(Clipboard.kTextPlain)
+
+//优化断网后获取到系统配置，联网后重新请求，网络波动，频繁断连网怎么解决
+///异步任务  异步队列怎么写
+///
+///
+///
+/// 代码规范 https://github.com/alibaba/flutter-go/blob/develop/Flutter_Go%20%E4%BB%A3%E7%A0%81%E5%BC%80%E5%8F%91%E8%A7%84%E8%8C%83.md
+///
+/// flutter 静态路由     动态路由--》不好操控，重用
+///
+/// factory todo factory原理
+///
+/// Overlay.of(context).context.findRenderObject()
 
 ///状态管理
 /// 全局状态   永久不变/改变
@@ -172,13 +219,65 @@ import 'package:flutter/material.dart';
 /// 多页面状态  共享与销毁
 ///
 /// 两个页面 共享对象可以直接修改   进入另一个页面，然后返回，返回的当前页面是否进入build方法，进入的话，build使用共享变量是否达到自动更新功能
-///  进入build发生重绘？？
+///  进入build发生重绘？？   GlobalKey的widget的不重绘，key.state.setState
 ///
 ///
 /// 网络接口   setsate  判断mounted
+///
+///
+/// TOdo  ffi
+///
+/// createBorderSide
+///
+///
+/// 页面间通信   父子      不同模块不同页面    同一页面多个级别
+///
+/// TODO APPbar源码   release模式，第一次mediaquery 拿不到数据
+///
+/// IntrinsicWidth
+///
+/// scrollable.ensurevisiable  RenderAbstractViewport
+///
+///
+/// https://book.flutterchina.club/chapter7/dailog.html  代码优化部分  context的范围
+///
+/// dialog 弹出后怎么判断当前是否消失，navigator   传入的context与builder的context      当前页有dialog即是当前页不是first
+/// dialog 管理 https://medium.com/flutter-community/manager-your-flutter-dialogs-with-a-dialog-manager-1e862529523a
+///
+/// PageStorageBucket
+///
+/// BackdropFilter
+///
+///
+/// 信号量   三个异步任务，信号量为3，没完成一个信号量减1，信号量为0全部异步任务完成。  信号量为0不能创建新的异步。iOS
+///
+/// 权限框架  后端的shrio ,angula, 权限模型的几个角色
+///
+/// Size.fromHeight(myAppBarHeight)
+///
+/// relase 模式下，mediaquery.of.size.view.padding 一开始为空，原生未进行回调，增加闪屏页
+///
+///
+/// MediaQuery.of(Constant().rootContext).padding.top  在didupdatewidget为0，使用根context
+///
+///     WidgetSpan(child: null) 富文本使用
 void main() {
   Visibility(
     child: LayoutBuilder(builder: null),
   );
   Colors.black.withOpacity(0.1);
+
+
+  ///ancestor
+//  widget.button.localToGlobal(Offset.zero, ancestor: widget.overlay),
+}
+
+///颜色转换
+/// 1 手动替换# 0xFF   int.parse(String); 不要radix
+/// 2
+/// Construct a color from a hex code string, of the format #RRGGBB.
+Color hexToColor(String code) {
+  ///todo 颜色渐变 通过lerp
+//  Color.lerp(a, b, t)
+  return new Color(int.parse(code.substring(1, 7), radix: 16) + 0xFF000000);
 }

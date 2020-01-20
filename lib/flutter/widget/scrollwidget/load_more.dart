@@ -141,3 +141,161 @@ class DefaultEndWidget extends StatelessWidget {
     return Text("end");
   }
 }
+
+///改良版   +通过list的itemcount设置，不操作list数据源，减少对后续数据源操作的影响
+///      是否加载更多通过监听滚动进度完成，而不是靠每次build触发，通过分页限制每次同时item build的数量
+class LoadMoreListWidget extends StatefulWidget {
+  int maxCount;
+  int itemCount;
+  Widget loadingWidget;
+  Widget endWidget;
+  ValueGetter<Future> loadData;
+  bool isInitData;
+  ScrollController loadListenController;
+  ScrollController listController;
+
+  VoidCallback onEnd;
+  VoidCallback onLoading;
+  bool isShowLoading;
+  Axis scrollDirection;
+  bool shrinkWrap;
+  ScrollPhysics physics;
+  IndexedWidgetBuilder itemBuilder;
+  bool isShowEndWidget;
+  LoadMoreListWidget(
+      {@required this.maxCount,
+      @required this.itemCount,
+      this.loadingWidget,
+      this.endWidget,
+      @required this.loadData,
+      this.isInitData = true,
+      @required this.loadListenController,
+      this.listController,
+      this.onEnd,
+      this.onLoading,
+      this.isShowLoading = true,
+      this.scrollDirection = Axis.vertical,
+      this.shrinkWrap = true,
+      this.physics = const AlwaysScrollableScrollPhysics(),
+      @required this.itemBuilder,
+      this.isShowEndWidget = true})
+      : assert(null != isShowLoading);
+
+  @override
+  _LoadMoreListWidgetState createState() => _LoadMoreListWidgetState();
+}
+
+class _LoadMoreListWidgetState extends State<LoadMoreListWidget> {
+  ///只有一个？
+  bool isStartListen = true;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isInitData) {
+      widget?.loadData();
+    }
+    if (null != widget.loadListenController && widget.loadListenController.hasClients) {
+      widget.loadListenController.addListener(() {
+        if (widget.loadListenController.position.pixels == widget.loadListenController.position.maxScrollExtent) {
+          print(
+              "widget.itemCount == widget.maxCount ${widget.itemCount} ${widget.maxCount} isStartListen $isStartListen");
+          if (widget.itemCount == widget.maxCount) {
+            //结束
+            if (null != widget.onEnd) {
+              widget.onEnd();
+            }
+            print("scorll on End ====");
+          } else if (widget.itemCount < widget.maxCount) {
+            if (!isStartListen) return;
+            if (null != widget?.onLoading) {
+              widget.onLoading();
+            }
+            isStartListen = false;
+            print("scorll on loading ====");
+            widget?.loadData().then((_) {
+              print("scorll on end ====");
+              //结束
+              isStartListen = true;
+              if (null != widget?.onLoading) {
+                widget.onLoading();
+              }
+            });
+          }
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+        itemCount: widget.itemCount > 0 ? widget.itemCount + 1 : 0,
+        scrollDirection: widget.scrollDirection,
+        shrinkWrap: widget.shrinkWrap,
+        physics: widget.physics,
+        controller: widget.listController,
+        itemBuilder: (context, index) {
+          if (index != widget.maxCount) {
+            if (index == widget.itemCount) {
+              //最后一个
+              return Visibility(visible: widget.isShowLoading, child: widget.loadingWidget ?? LoadDefaultIndicator());
+            } else {
+              return widget.itemBuilder(context, index);
+            }
+          } else {
+            ///endWidget
+            return Visibility(
+                visible: widget.isShowEndWidget,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: 50),
+                  child: widget.endWidget ?? DefaultLoadMoreEndWidget(),
+                ));
+          }
+        });
+  }
+}
+
+class DefaultLoadMoreEndWidget extends StatelessWidget {
+  ScrollController controller;
+
+  ///监听滚动，小于一屏不展示
+  bool isShowOnOverScreen;
+  DefaultLoadMoreEndWidget({this.controller, this.isShowOnOverScreen = true});
+
+  @override
+  Widget build(BuildContext context) {
+    var visible = true;
+    if (null != controller && isShowOnOverScreen && controller.position.pixels < MediaQuery.of(context).size.height) {
+      visible = false;
+    }
+    return Visibility(
+      visible: visible,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+            child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(
+                width: 200,
+                child: Divider(
+                  height: 9,
+                  color: Colors.black54,
+                )),
+            Text(
+              "    end    ",
+              style: TextStyle(color: Colors.black54),
+            ),
+            SizedBox(
+                width: 200,
+                child: Divider(
+                  height: 9,
+                  color: Colors.black87,
+                ))
+          ],
+        )),
+      ),
+    );
+  }
+}

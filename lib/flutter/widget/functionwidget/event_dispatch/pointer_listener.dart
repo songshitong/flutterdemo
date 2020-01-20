@@ -30,7 +30,7 @@ class _PointerListenerState extends State<PointerListener> {
         child: Column(
           children: <Widget>[
             Listener(
-              //translucent：当点击Widget透明区域时，可以对自身边界内及底部可视区域都进行命中测试，
+              //translucent：当点击Widget透明区域时，可以对自身边界内及底部可视区域都进行命中测试，   对透明区域的优化，方便点击
               // 这意味着点击顶部widget透明区域时，顶部widget和底部widget都可以接收到事件
 
               //opaque 在命中测试时，将当前Widget当成不透明处理(即使本身是透明的)，最终的效果相当于当前Widget的整个区域都是点击区域

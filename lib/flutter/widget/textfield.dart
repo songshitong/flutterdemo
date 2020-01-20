@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 class TextfieldPage extends StatefulWidget {
@@ -12,7 +14,7 @@ class _TextfieldPageState extends State<TextfieldPage> {
   FocusNode fn;
   TextEditingController controller;
   TextEditingController controllerFocus;
-
+  bool _mouseIsConnected;
   @override
   void initState() {
     super.initState();
@@ -31,9 +33,31 @@ class _TextfieldPageState extends State<TextfieldPage> {
     controller.addListener(() {
       print("textfield ${controller.text}");
     });
+
+    ///点击空白取消   Gesuredector包住scaffold hit 透明  foucus.request空node，点击后取消键盘  缺点必定取消键盘
+    ///
+    ///[Tooltip] 代码   点击外部区域取消键盘  TODO MouseRegion
+    _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
+    // Listen to see when a mouse is added.
+    RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChange);
+    // Listen to global pointer events so that we can hide a tooltip immediately
+    // if some other control is clicked on.
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
-  ///todo EditableTextState.requestKeyboard()
+  @override
+  void dispose() {
+    ///不移除监听，dispose后仍然存在监听
+    RendererBinding.instance.mouseTracker.removeListener(_handleMouseTrackerChange);
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+    super.dispose();
+  }
+
+  ///todo EditableTextState.requestKeyboard()     直接调用原生方法？？SystemChannels.textInput.invokeMethod('TextInput.hide'); SystemChannels.textInput.invokeMethod('TextInput.show');
+  ///转义焦点FocusScope.of(context).requestFocus(FocusNode()); 使键盘消失  textfield外层包裹布局作为focus落脚处
+  ///
+  /// 给键盘追加布局 当键盘出现时，追加的布局也显示
+  ///
   ///todo RawKeyboardListener
   ///
   ///TODO 监听软键盘的完成后是否会造成自己代码的重绘，此时数据改变会自动重绘布局
@@ -41,6 +65,11 @@ class _TextfieldPageState extends State<TextfieldPage> {
   ///
   ///
   /// 控件跟随软键盘上移，scorllview ，stack设置top而不是bottom
+  ///
+  /// 改变textfield的布局，最好更改同一个textfield，多个textfield的展示隐藏与焦点的获取和失焦引起键盘的一直显示和隐藏，导致没法输入
+  ///
+  ///
+  /// todo  TextEditingValue  控制光标位置
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,6 +105,8 @@ class _TextfieldPageState extends State<TextfieldPage> {
               textAlign: TextAlign.end, // 文字对齐 center  hinttext一样生效
               textDirection: TextDirection.rtl, //文字书写方向，从右到左
               maxLines: 3,
+
+              /// 当前显示区域的行数，超过滚动？
               decoration: InputDecoration(
                 hintMaxLines: 3, //设置hint最大行数
                 suffixText: "suffixtext", //右侧提醒文字
@@ -128,6 +159,13 @@ class _TextfieldPageState extends State<TextfieldPage> {
                     borderSide: BorderSide(style: BorderStyle.solid),
                     borderRadius: BorderRadius.all(Radius.circular(5))),
               ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(hintText: "数字键盘"),
             ),
           ),
           Padding(
@@ -198,5 +236,24 @@ class _TextfieldPageState extends State<TextfieldPage> {
         ]),
       ),
     );
+  }
+
+  void _handlePointerEvent(PointerEvent event) {
+    if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerDownEvent) {
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
+    }
+  }
+
+  void _handleMouseTrackerChange() {
+    if (!mounted) {
+      return;
+    }
+    final bool mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
+    if (mouseIsConnected != _mouseIsConnected) {
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
+      setState(() {
+        _mouseIsConnected = mouseIsConnected;
+      });
+    }
   }
 }

@@ -39,9 +39,9 @@ public class MainActivity extends FlutterActivity {
                 if (call.method.equals("getBatteryLevel")) {
                   int batteryLevel = getBatteryLevel();
                   if (batteryLevel != -1) {
-                    result.success(batteryLevel);
+                    result.success(batteryLevel);   ///进入flutter future.then
                   } else {
-                    result.error("UNAVAILABLE", "Battery level not available.", null);
+                    result.error("UNAVAILABLE", "Battery level not available.", null); ///进入flutter 的异常 future.catchErr
                   }
                 } else {
                   result.notImplemented();

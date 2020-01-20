@@ -15,10 +15,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   //阿里云
   String url4 =
       "https://out-20170629113118784-ottgas6dn7.oss-cn-shanghai.aliyuncs.com/sv/1b43e744-16aba3e7fd3/1b43e744-16aba3e7fd3.mp4";
+  String url5 = "http://49.4.5.50:25367/api/common/storage/news/fc7ed02293f8994f96242de1b2aae21e.mp4";
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.network(url4)
+    _controller = VideoPlayerController.network(url5)
       ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
         setState(() {});

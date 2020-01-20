@@ -424,7 +424,7 @@ class ListViewPageState extends State<ListViewPage> {
     return Future.value(result);
   }
 
-  //解决回调地狱
+  //解决回调地狱  todo context.visitelement
   Future<RenderObject> callbackHellVisitChildren(RenderObject obj) {
     var result;
     obj.visitChildren((render) {
@@ -468,7 +468,7 @@ class ListViewPageState extends State<ListViewPage> {
     return paintExtent;
   }
 
-  //TODO listview 设置itemcount 和不设置的初始化
+  //TODO listview 设置itemcount 和不设置的初始化 shrikwrap
   //todo 获取第一个可见https://github.com/flutter/flutter/issues/19941
   double getPaintExtentOfIndex(GlobalKey key, int index) {
     RenderSliverMultiBoxAdaptor renderObject = key.currentContext.findRenderObject() as RenderSliverMultiBoxAdaptor;

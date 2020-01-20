@@ -3,6 +3,10 @@ import 'package:flutter/services.dart';
 import 'dart:math' as Math;
 
 ///[SystemChrome] 控制操作系统图形界面的特定方面，它如何与应用程序交互
+///
+/// 横竖屏 切换后页面布局错乱，widgetsbing.instance.addpostFramecall(setState); 页面更新后重新刷新。
+/// SystemChrome.setPreferredOrientations(
+///        [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
 class SystemChromePage extends StatefulWidget {
   @override
   _SystemChromePageState createState() => _SystemChromePageState();

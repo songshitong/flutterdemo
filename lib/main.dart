@@ -1,10 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutterdemo/flutter/pages/page_home.dart';
-import 'package:path_provider/path_provider.dart';
 
 void main() {
   ///在runapp前调用插件，确保执行binary messenger

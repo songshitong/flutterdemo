@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 //TODO https://juejin.im/post/5b7ba79a6fb9a01a1826776b texture 原理
+
+//todo EventChannel.StreamHandler  事件监听
 class MethodChannelPage extends StatefulWidget {
   @override
   _MethodChannelPageState createState() => _MethodChannelPageState();

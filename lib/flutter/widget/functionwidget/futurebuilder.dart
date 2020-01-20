@@ -40,7 +40,7 @@ class _FutureBuilderPageState extends State<FutureBuilderPage> {
                   if (snapshot.hasError) //若_calculation执行出现异常
                     return new Text('Error: ${snapshot.error} data = ${snapshot.data}');
                   else //若_calculation执行正常完成
-                    return new Text('Result: ${snapshot.data} error = ${snapshot.error}');
+                    return NormalState(snapshot);
               }
             },
           ),
@@ -61,5 +61,27 @@ class _FutureBuilderPageState extends State<FutureBuilderPage> {
         return "3 秒后";
       });
     });
+  }
+}
+
+class NormalState extends StatefulWidget {
+  AsyncSnapshot snapshot;
+
+  NormalState(this.snapshot);
+
+  @override
+  _NormalStateState createState() => _NormalStateState();
+}
+
+class _NormalStateState extends State<NormalState> {
+  @override
+  void initState() {
+    print("_NormalStateState initState  ===========");
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Text('Result: ${widget.snapshot.data} error = ${widget.snapshot.error}');
   }
 }

@@ -21,6 +21,8 @@ class TextPage extends StatelessWidget {
       body: Column(
         children: <Widget>[
           ///todo 通过constrainBox 限制text的展示区域   maxheight double.infinity
+          ///
+          /// DefaultTextStyle 控制字体
           Text(
             " text " * 14,
             textAlign: TextAlign.right,

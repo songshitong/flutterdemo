@@ -10,6 +10,7 @@ SDK constraints  sdk限制
    sdk: '>=1.19.0 <3.0.0'     dart 版本在1.19.0和3.0.0之间
    flutter: ^0.1.2             flutter版本 0.1.2
 
+
 本地依赖
    dependencies:
      icepy:

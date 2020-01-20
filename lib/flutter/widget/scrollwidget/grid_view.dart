@@ -70,7 +70,8 @@ class GridViewPage extends StatelessWidget {
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: 5,
                 shrinkWrap: true,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+                gridDelegate:
+                    SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4, childAspectRatio: 1), //默认正方形,
                 itemBuilder: (context, index) {
                   return buildContainer("text$index");
                 })

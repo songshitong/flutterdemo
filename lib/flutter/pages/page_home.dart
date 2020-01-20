@@ -89,6 +89,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'beautiful/change_overlay.dart';
 import 'beautiful/circle_to_rectangle.dart';
 import 'beautiful/drops.dart';
 import 'beautiful/image_preview.dart';
@@ -104,9 +105,9 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-extension WidgetPadding on Widget {
-  Widget paddingAll(double padding) => Padding(padding: EdgeInsets.all(padding), child: this);
-}
+//extension WidgetPadding on Widget {
+//  Widget paddingAll(double padding) => Padding(padding: EdgeInsets.all(padding), child: this);
+//}
 
 class _HomePageState extends State<HomePage> {
   ///切换主题
@@ -191,7 +192,7 @@ class _HomePageState extends State<HomePage> {
               CustomLocalizations.delegate
             ],
             localeListResolutionCallback: (locales, supportedLocales) {
-              //监听语言改变
+              //监听语言改变https://flutter.github.io/assets-for-api-docs/assets/widgets/form.png
               print("localeListResolutionCallback locales $locales supportedLocales $supportedLocales");
             },
             localeResolutionCallback: (locale, supportedLocales) {
@@ -199,6 +200,9 @@ class _HomePageState extends State<HomePage> {
 //        如果locale为null，则表示Flutter未能获取到设备的Locale信息，所以我们在使用locale之前一定要先判空
               print("localeResolutionCallback locale $locale supportedLocales $supportedLocales");
             },
+
+            ///todo 配置路由名字
+//            routes: ,
             darkTheme: androidTheme,
             themeMode: ThemeMode.dark,
             navigatorObservers: [MNavigatorObserber()],
@@ -583,7 +587,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         key: Key("long_list"),
         child: Column(
           children: <Widget>[
-            Text("dart extension").paddingAll(20),
+//            Text("dart extension").paddingAll(20),
             Text("${MaterialLocalizations.of(context).backButtonTooltip}"),
             FlatButton(
                 key: Key("FlatButton"),
@@ -1126,6 +1130,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   }));
                 },
                 child: Text("加载3D模型")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return OverlayChangePage();
+                  }));
+                },
+                child: Text("Overlay Change Page")),
             Text("测试第三方包 ----------------------- "),
             FlatButton(
                 onPressed: () {

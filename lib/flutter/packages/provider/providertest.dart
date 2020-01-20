@@ -12,6 +12,8 @@ class Counter with ChangeNotifier {
   }
 }
 
+//My widget rebuilds too often, what can I do? #
+//Instead of Provider.of, you can use Consumer/Selector.
 class ProviderTest extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

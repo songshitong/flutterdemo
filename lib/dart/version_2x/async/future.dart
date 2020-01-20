@@ -54,6 +54,10 @@ main() async {
 //  }).catchError((e) {
 //    print("wait e=$e");
 //  });
+
+  ///接口顺序请求，一个完成后请求另一个
+  ///await a
+  /// await b
 }
 
 Future<String> getA() async {

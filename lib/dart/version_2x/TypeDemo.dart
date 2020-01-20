@@ -69,4 +69,21 @@ void main() {
   bool flagA = false;
   bool flagB = false;
   print("flase&&flase ${flagA && flagB}");
+
+  ///String 转utf8    TODO 中文在utf8或utf16分别占几个字节，表情等怎么表示
+  /// String foo = 'Hello world';
+  //List<int> bytes = utf8.encode(foo);
+
+  ///utf8转String
+  ///String bar = utf8.decode(bytes);
+
+  ///String 转utf16
+  /// String foo = 'Hello world';
+  //List<int> bytes = foo.codeUnits;
+
+  ///String 转Unicode code-points
+  ///String foo = 'Hello world';
+  //// Runes runes = foo.runes;
+  //// or
+  //Iterable<int> bytes = foo.runes;
 }

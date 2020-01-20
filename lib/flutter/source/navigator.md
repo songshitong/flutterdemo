@@ -29,3 +29,12 @@ NavigatorState get navigator => _navigator
 ​       3  扩展ServiceLocator
 
 ​           https://juejin.im/post/5d1daadbe51d457759648755
+
+
+
+
+TODO 路由切换会不会触发 didchangedependence
+
+  使用InheritedWidget来传递数据，使用didchangedependence来获取网络，数据变化自动调用接口
+  
+  ModalRoute.of(context).isCurrent 判断当前路由    isFirst,isActive

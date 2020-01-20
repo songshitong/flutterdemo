@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -9,11 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutterdemo/flutter/common/SingleLonData.dart';
 import 'package:flutterdemo/flutter/common/http_util.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:android_intent/android_intent.dart';
-import 'package:platform/platform.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:html/parser.dart' show parse;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 //ios 配置 Opt-in to the embedded views preview by adding a boolean property to the app's Info.plist file with the key
 // io.flutter.embedded_views_preview and the value YES
@@ -185,6 +182,7 @@ class _WebviewPageState extends State<WebviewPage> {
     }
   }
 
+  ///高度使用contrainbox而不是sizebox
   ///webview获取内容高度后更新自己  使用js最多加载3000px然后崩溃   https://stackoverflow.com/questions/57651134/flutter-set-webview-height-as-wrap-content
   ///onPageFinished: (some) async {
   //                double height = double.parse(await _listController[index]
@@ -194,6 +192,8 @@ class _WebviewPageState extends State<WebviewPage> {
   //                  _heights[index] = height;
   //                });
   //              },
+
+  /// webview 滑动冲突
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -352,6 +352,10 @@ class _WebviewPageState extends State<WebviewPage> {
                   progressVisible = false;
                 });
               },
+              javascriptChannels: <JavascriptChannel>[
+                ///js调用flutter   flutter调用js  _controller.evaluateJavascript
+                _alertJavascriptChannel(context)
+              ].toSet(),
               javascriptMode: JavascriptMode.unrestricted,
               navigationDelegate: (request) {
                 var url = request.url;
@@ -416,5 +420,14 @@ class _WebviewPageState extends State<WebviewPage> {
         ],
       ),
     );
+  }
+
+  JavascriptChannel _alertJavascriptChannel(BuildContext context) {
+    ///js调用方法    Toast.postMessage("JS调用了Flutter");
+    return JavascriptChannel(
+        name: 'Toast',
+        onMessageReceived: (JavascriptMessage message) {
+//          showToast(message.message);
+        });
   }
 }

@@ -239,6 +239,7 @@ class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
     bool isInsertLeading = false;
     int collectLeadingIndex = 0;
 
+//  todo 有意思的for 结构体判断条件 break退出  for (int i = 0; true; i += 1) {}
     var allArray = List<List<LineItem>>();
     var lineArray = <LineItem>[];
     allArray.add(lineArray);

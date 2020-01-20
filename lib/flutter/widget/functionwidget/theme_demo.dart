@@ -39,7 +39,7 @@ class _ThemePageState extends State<ThemePage> {
   Color _themeColor; //当前路由主题色
   bool firstBuild = false;
   @override
-  Widget build(BuildContext context) {
+  build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
     if (!firstBuild) {
       _themeColor = themeData.primaryColor;
@@ -55,11 +55,11 @@ class _ThemePageState extends State<ThemePage> {
         appBar: AppBar(title: Text("主题测试")),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          children: [
             //第一行Icon使用主题中的iconTheme
             Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[Icon(Icons.favorite), Icon(Icons.airport_shuttle), Text("  颜色跟随主题")]),
+                children: [Icon(Icons.favorite), Icon(Icons.airport_shuttle), Text("  颜色跟随主题")]),
             //为第二行Icon自定义颜色（固定为黑色)
             Theme(
               data: themeData.copyWith(
@@ -67,7 +67,7 @@ class _ThemePageState extends State<ThemePage> {
               ),
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[Icon(Icons.favorite), Icon(Icons.airport_shuttle), Text("  颜色固定黑色")]),
+                  children: [Icon(Icons.favorite), Icon(Icons.airport_shuttle), Text("  颜色固定黑色")]),
             ),
           ],
         ),
