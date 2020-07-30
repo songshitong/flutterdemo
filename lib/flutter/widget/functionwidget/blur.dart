@@ -16,6 +16,7 @@ class BlurPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.pink,
       appBar: AppBar(
         title: Text("blur page"),
       ),
@@ -39,6 +40,30 @@ class BlurPage extends StatelessWidget {
                   width: 200.0,
                   height: 200.0,
                   child: Text('Hello World'),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 350,
+            child: Image.asset(
+              MyImgs.JINX,
+              fit: BoxFit.contain,
+            ),
+          ),
+          Positioned(
+            top: 350,
+            child: ClipRect(
+              // <-- clips to the 200x200 [Container] below
+              child: BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: 5.0,
+                  sigmaY: 5.0,
+                ),
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  child: Text("hello"),
                 ),
               ),
             ),

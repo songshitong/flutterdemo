@@ -1,14 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/dart/element/visitor.dart';
 import 'package:build/build.dart';
 import 'package:build/src/builder/build_step.dart';
 import 'package:flutterdemo/dart/version_2x/metadata/meta_data.dart';
-import 'package:source_gen/source_gen.dart';
-import 'package:analyzer/src/dart/element/element.dart';
-import 'package:source_gen/src/output_helpers.dart';
 import 'package:path/path.dart' as p;
+import 'package:source_gen/source_gen.dart';
+import 'package:source_gen/src/output_helpers.dart';
+//source_gen 擅长生成文件，不擅长在源文件中修改
 
 //咸鱼https://juejin.im/entry/5c137afdf265da612e28868a
 //dart提供了build、analyser、source_gen这三个库，其中source_gen利用build库和analyser库，给到了一层比较好的注解拦截的封装。从注解功能的角度来看，这三个库分别给到了如下的功能：
@@ -80,30 +81,84 @@ import 'package:path/path.dart' as p;
 
 // 永远不应该使用这些构建器来输出Dart文件或任何其他应该由普通[Builder]处理的文件
 
-//build_runner  该工具允许我们在开发阶段运行我们的generator
+//build_runner  该工具允许我们在开发阶段运行我们的generator  flutter pub run build_runner build
 //pub run build_runner <command>
 //
 //build: 运行单个构建并退出 --release/-r 运行在release模式  -h 帮助命令
 //watch: 运行一个守护程序，该守护程序将在文件更改时运行并在必要时进行重建
 //serve: 类似于watch，但也作为开发server运行
 //test: 用于测试
+//--delete-conflicting-outputs  删除冲突
 
 //根据注解生成代码  识别类注解,顶层函数注解，顶层变量，不能识别类内函数
 class TodoTopGenerate extends GeneratorForAnnotation<Todo> {
   @override
-  generateForAnnotatedElement(Element element, ConstantReader annotation, BuildStep buildStep) async {
+  generateForAnnotatedElement(
+      Element element, ConstantReader annotation, BuildStep buildStep) async {
     print("TodoGenerate start work ==============================");
-    return '// Code for ${element.name} ${element.runtimeType} ${annotation.objectValue} ';
+    var soure = "";
+    if (element is ClassElement) {
+      soure = element.source.contents.data;
+      print('''
+        soure $soure
+        enclosingElement ${element.enclosingElement}
+        name ${element.name}
+        kind ${element.kind}
+        metadata ${element.metadata}
+      ''');
+      print('''buildStep
+      path ${buildStep.inputId.path}
+      extension ${buildStep.inputId.extension}
+      package ${buildStep.inputId.package}
+      uri ${buildStep.inputId.uri}
+      pathSegments ${buildStep.inputId.pathSegments}
+      ''');
+
+      ///获取该类的属性
+      var visitor = ModelVisitor();
+      element.visitChildren(visitor);
+      print(
+          "visitor ${visitor.className} \n ${visitor.fields} \n ${visitor.metaData}");
+      var objectValue = annotation.objectValue;
+      var what = annotation.read("what");
+      var who = annotation.read("who");
+      soure = soure.replaceFirst("class ${visitor.className} {", '''
+      // Code for ${element.name} ${element.runtimeType} who: ${who.stringValue} what: ${what.stringValue} 
+      class ${visitor.className} {
+      ''');
+      return ' //source: \n $soure';
+    } else {
+      return "";
+    }
+  }
+}
+
+class ModelVisitor extends SimpleElementVisitor {
+  DartType className;
+  Map<String, DartType> fields = {};
+  Map<String, dynamic> metaData = {};
+
+  @override
+  visitConstructorElement(ConstructorElement element) {
+    className = element.type.returnType;
+  }
+
+  @override
+  visitFieldElement(FieldElement element) {
+    fields[element.name] = element.type;
+    metaData[element.name] = element.metadata;
   }
 }
 
 //查找类内方法的注解
 class TodoMethodGenerate extends MethodGenerate<Todo> {
   @override
-  generateForAnnotatedElement(Element element, ConstantReader annotation, BuildStep buildStep) async {
+  generateForAnnotatedElement(
+      Element element, ConstantReader annotation, BuildStep buildStep) async {
     final sourcePathDir = p.dirname(buildStep.inputId.path);
     print("sourcePathDir $sourcePathDir");
-    final fileId = AssetId(buildStep.inputId.package, p.join(sourcePathDir, "meta_data.dart"));
+    final fileId = AssetId(
+        buildStep.inputId.package, p.join(sourcePathDir, "meta_data.dart"));
     print("fileId $fileId");
     final content = await buildStep.readAsString(fileId);
     print("contecnt $content");
@@ -126,8 +181,8 @@ abstract class MethodGenerate<T> extends Generator {
         //value.displayName 是代码中展示的名字
 //        print("classElement ${classElement.displayName}");
         for (var annotatedElement in classAnnotated(classElement, tc)) {
-          var generatedValue =
-              generateForAnnotatedElement(annotatedElement.element, annotatedElement.annotation, buildStep);
+          var generatedValue = generateForAnnotatedElement(
+              annotatedElement.element, annotatedElement.annotation, buildStep);
           await for (var value in normalizeGeneratorOutput(generatedValue)) {
             assert(value == null || (value.length == value.trim().length));
             values.add(value);
@@ -138,10 +193,12 @@ abstract class MethodGenerate<T> extends Generator {
     return values.join('\n\n');
   }
 
-  generateForAnnotatedElement(Element element, ConstantReader annotation, BuildStep buildStep);
+  generateForAnnotatedElement(
+      Element element, ConstantReader annotation, BuildStep buildStep);
 }
 
-Iterable<AnnotatedElement> classAnnotated(ClassElement classElement, TypeChecker checker,
+Iterable<AnnotatedElement> classAnnotated(
+    ClassElement classElement, TypeChecker checker,
     {bool throwOnUnresolved}) sync* {
   //拿到类所有方法
   for (var value1 in classElement.methods) {

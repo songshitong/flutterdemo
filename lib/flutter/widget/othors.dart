@@ -261,21 +261,83 @@ import 'package:flutter/material.dart';
 /// MediaQuery.of(Constant().rootContext).padding.top  在didupdatewidget为0，使用根context
 ///
 ///     WidgetSpan(child: null) 富文本使用
+///
+/// http://www.ptbird.cn/flutter-route-named-route-list-root-route.html 静态路由传参
+///
+///
+/// 两个页面使用通信框架与直接传递变量或者监听的比较
+///
+///
+/// 断网重连
+/// https://www.jianshu.com/p/110d1f0b457d
+/// https://gameinstitute.qq.com/community/detail/109927
+///
+///     IsolateNameServer
+///
+///
+///  flutter_downloader 研究下载机制
+///
+///
+/// ScrollablePositionedList
+///
+/// 类似single task
+/// ///   navigator.pushAndRemoveUntil(
+//  ///     MaterialPageRoute(builder: (BuildContext context) => MyHomePage()),
+//  ///     ModalRoute.withName('/'),
+//  ///   );
+
+//todo SliderTheme.of(context).copyWith  SliderTheme自定义滑块样式     Slider
 void main() {
   Visibility(
     child: LayoutBuilder(builder: null),
   );
   Colors.black.withOpacity(0.1);
 
+  // unit8list 保存为图片
+//  File.fromRawPath(rawPath);
 
   ///ancestor
 //  widget.button.localToGlobal(Offset.zero, ancestor: widget.overlay),
+
+  ///paintImage 与 boxfit的关系
 }
 
 ///颜色转换
 /// 1 手动替换# 0xFF   int.parse(String); 不要radix
 /// 2
 /// Construct a color from a hex code string, of the format #RRGGBB.
+///
+///  ///https://www.jianshu.com/p/0f96ce199c38 图片裁剪，拼接
+//  ///
+//  /// SVGAPlayer-Flutter
+//  ///
+//  ///
+
+///flutter cache manager 缓存管理机制
+///
+/// 异步
+/// https://blog.csdn.net/email_jade/article/details/88941434
+///
+///
+/// DefaultTextStyle.of(context).style.fontSize
+///
+///  IntTween()
+//    TweenSequence(items)
+
+//BouncingScrollPhysics  TODO 滚动原理，实现初始位置滑动，停住，结束位置滑动，继续滑动，停住
+
+//https://www.didierboelens.com/2019/05/is-a-widget-inside-a-scrollable-visible/
+
+///flutter texture的使用 textureid
+///
+/// rangeSlider
+///
+///
+/// WillPopScope 路由拦截原理  ModalRoute.addScopedWillPopCallback
+///
+/// datatable
+///
+/// textStyle fontFeatures
 Color hexToColor(String code) {
   ///todo 颜色渐变 通过lerp
 //  Color.lerp(a, b, t)

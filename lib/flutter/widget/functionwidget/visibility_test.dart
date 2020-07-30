@@ -51,6 +51,7 @@ class _VisibilityTestPageState extends State<VisibilityTestPage> {
             child: Text("isVisible $isVisible"),
             visible: isVisible,
           ),
+          Text("保持状态"),
           Visibility(
             visible: isVisible,
             child: AliveCheckbox(

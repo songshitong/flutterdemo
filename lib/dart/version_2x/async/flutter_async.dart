@@ -1,4 +1,3 @@
-import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 

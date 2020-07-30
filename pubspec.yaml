@@ -18,13 +18,11 @@ dependencies:
   # 国际化
   flutter_localizations:
     sdk: flutter
-  source_gen: ^0.9.4+1
   annotation_route: ^0.0.2
 #  fish_redux: ^0.1.3
   grpc: ^1.0.1
   protobuf: ^0.13.4
   http: ^0.12.0+2
-  analyzer: any
   #国际化加翻译
   intl: ^0.16.0
   #webview
@@ -39,7 +37,7 @@ dependencies:
   #视频播放
   video_player: ^0.10.4+1
   #android intent
-  android_intent: ^0.3.0+2
+  android_intent: ^0.3.6+1
   #使用URL拉起
   url_launcher: ^5.2.0
   gif_ani: ^0.0.2
@@ -53,10 +51,7 @@ dependencies:
   flutter_sound: ^1.5.1
 
   w_reorder_list: ^0.1.0
-  #高德地图
-  amap_base_location: ^0.4.0+1
-  # 阿里推送
-  rammus: ^0.0.4
+
   #分享 shareSDK
   sharesdk: ^1.1.8
   #权限
@@ -65,6 +60,7 @@ dependencies:
   path_provider: ^1.4.0
   #数据共享
   provider: ^3.1.0+1
+
 
 
 
@@ -82,7 +78,9 @@ dev_dependencies:
     sdk: flutter
   test: any
   mockito: ^4.0.0
-  build_runner: ^1.3.3
+  build_runner: ^1.10.0
+  source_gen: ^0.9.6
+  analyzer: any
   intl_translation: ^0.17.4
 
 

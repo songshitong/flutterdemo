@@ -12,7 +12,8 @@ class _ScrollNotificationPageState extends State<ScrollNotificationPage> {
   void initState() {
     super.initState();
     _controller.addListener(() {
-      debugPrint("_controller offset ${_controller.offset}  position ${_controller.position}");
+      debugPrint(
+          "_controller offset ${_controller.offset}  position ${_controller.position}");
     });
   }
 
@@ -39,7 +40,8 @@ class _ScrollNotificationPageState extends State<ScrollNotificationPage> {
 //            extentInside：ViewPort内部长度；此示例中屏幕显示的列表部分的长度
 //            extentAfter：列表中未滑入ViewPort部分的长度；此示例中列表底部未显示到屏幕范围部分的长度
 //            atEdge：是否滑到了Scrollable Widget的边界（此示例中相当于列表顶或底部）
-            double progress = notification.metrics.pixels / notification.metrics.maxScrollExtent;
+            double progress = notification.metrics.pixels /
+                notification.metrics.maxScrollExtent;
             //重新构建
             setState(() {
               _progress = "${(progress * 100).toInt()}%";
@@ -47,6 +49,9 @@ class _ScrollNotificationPageState extends State<ScrollNotificationPage> {
             print("BottomEdge: ${notification.metrics.extentAfter == 0}");
             //return true; //放开此行注释后，进度条将失效
             // return true 事件拦截，false向上传递
+            ///滚动方向
+            ///up: _scrollController.position.userScrollDirection == ScrollDirection.forward
+            //down: _scrollController.position.userScrollDirection == ScrollDirection.reverse
           },
           child: Stack(
             alignment: Alignment.center,
@@ -69,7 +74,9 @@ class _ScrollNotificationPageState extends State<ScrollNotificationPage> {
                 child: RaisedButton(
                   onPressed: () {
 //                    _controller.jumpTo(0);
-                    _controller.animateTo(0, duration: Duration(milliseconds: 500), curve: Curves.ease);
+                    _controller.animateTo(0,
+                        duration: Duration(milliseconds: 500),
+                        curve: Curves.ease);
                   },
                   child: Text("返回顶部"),
                 ),

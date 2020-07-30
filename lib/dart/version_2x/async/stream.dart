@@ -25,7 +25,7 @@ main() async {
   controller.close();
 
   ///  转化成为一条新的流
-  //where 过滤 return true 返回该数据，false不返回，最终结果会返回一条新的流
+  /// where    过滤 return true 返回该数据，false不返回，最终结果会返回一条新的流
   _steam3.where((num) {
 //    if (num == 1) {
 //      return false;
@@ -43,7 +43,8 @@ main() async {
     });
 
   //transform 流转换   StreamTransformer 转换器   范型 s 就收数据类型，t 输出数据类型
-  var transformer = StreamTransformer<int, String>.fromHandlers(handleData: (int value, EventSink<String> sink) {
+  var transformer = StreamTransformer<int, String>.fromHandlers(
+      handleData: (int value, EventSink<String> sink) {
 //    handleData接收一个value并创建一条新的流并暴露sink，我们可以在这里对流进行转化
     if (value == 1) {
       return sink.add("这是 1");
@@ -102,7 +103,8 @@ main() async {
   //countStream 异步生成
   print("await sumNum from countStream ${await sumNum(countStream(2))}");
 
-  print("await sumNum from iterrable ${await sumNum(Stream.fromIterable(countIterable(2)))}");
+  print(
+      "await sumNum from iterrable ${await sumNum(Stream.fromIterable(countIterable(2)))}");
 
   //future转stream
   Future(count).asStream();

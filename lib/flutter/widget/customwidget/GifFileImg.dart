@@ -3,18 +3,16 @@ library gif_ani;
 import 'dart:async';
 import 'dart:isolate';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
+
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/material.dart';
 import 'package:flutterdemo/flutter/common/MyImgs.dart';
-import 'package:image/image.dart' as OImage;
-import 'package:flutter/foundation.dart' as foundation;
 
 import 'gif/gif_decode.dart';
-import 'gif/gif_frame.dart';
 
+///todo  学习大佬解码图片的操作
 class GifTestPage extends StatefulWidget {
   @override
   _GifTestPageState createState() => _GifTestPageState();
@@ -29,7 +27,8 @@ class DeocdeParam {
 void decode(DeocdeParam deocdeParam) {
   final value = deocdeParam.value;
   //imgLists是10进制
-  var imgLists = value.buffer.asUint8List(value.offsetInBytes, value.lengthInBytes) /*.cast<int>()*/;
+  var imgLists = value.buffer
+      .asUint8List(value.offsetInBytes, value.lengthInBytes) /*.cast<int>()*/;
 //  print("imgLists $imgLists");
   var gifDecoder = CustomDecodeGif(imgLists);
   List<int> gifBytes = gifDecoder.decodeFirstFrame();
@@ -40,7 +39,8 @@ void decode(DeocdeParam deocdeParam) {
   deocdeParam.sp.send(gifBytes);
 }
 
-class _GifTestPageState extends State<GifTestPage> with SingleTickerProviderStateMixin {
+class _GifTestPageState extends State<GifTestPage>
+    with SingleTickerProviderStateMixin {
   bool isRefreshFrame = false;
   Uint8List imgBytes;
   Uint8List sourceBytes;
@@ -49,7 +49,8 @@ class _GifTestPageState extends State<GifTestPage> with SingleTickerProviderStat
     super.initState();
     print("start load   ${DateTime.now().millisecondsSinceEpoch}");
     rootBundle.load(MyImgs.SANTAIZI).then((value) {
-      sourceBytes = value.buffer.asUint8List(value.offsetInBytes, value.lengthInBytes);
+      sourceBytes =
+          value.buffer.asUint8List(value.offsetInBytes, value.lengthInBytes);
       print("end load   ${DateTime.now().millisecondsSinceEpoch}");
       print("load value $value");
       var decodeStart = DateTime.now().millisecondsSinceEpoch;
@@ -63,11 +64,13 @@ class _GifTestPageState extends State<GifTestPage> with SingleTickerProviderStat
 ////          print("imgBytes $imgBytes");
 //        });
 //      });
-      var gifDecoder = CustomDecodeGif(value.buffer.asUint8List(value.offsetInBytes, value.lengthInBytes));
+      var gifDecoder = CustomDecodeGif(
+          value.buffer.asUint8List(value.offsetInBytes, value.lengthInBytes));
       setState(() {
         var start = DateTime.now().millisecondsSinceEpoch;
         imgBytes = gifDecoder.decodeFirstFrame();
-        print("main thread time  ${DateTime.now().millisecondsSinceEpoch - start}");
+        print(
+            "main thread time  ${DateTime.now().millisecondsSinceEpoch - start}");
       });
     });
   }
@@ -194,7 +197,8 @@ class GifAnimation extends StatefulWidget {
   }
 }
 
-class _AnimatedImageState extends State<GifAnimation> with WidgetsBindingObserver {
+class _AnimatedImageState extends State<GifAnimation>
+    with WidgetsBindingObserver {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
   bool _isListeningToStream = false;
@@ -271,9 +275,12 @@ class _AnimatedImageState extends State<GifAnimation> with WidgetsBindingObserve
   }
 
   void _startResolveImage() {
-    final ImageStream newStream = widget.image.resolve(createLocalImageConfiguration(
+    final ImageStream newStream =
+        widget.image.resolve(createLocalImageConfiguration(
       context,
-      size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
+      size: widget.width != null && widget.height != null
+          ? Size(widget.width, widget.height)
+          : null,
     ));
     assert(newStream != null);
     _updateSourceStream(newStream);

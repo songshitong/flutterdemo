@@ -1,6 +1,7 @@
-import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -8,16 +9,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutterdemo/flutter/common/SingleLonData.dart';
 import 'package:flutterdemo/flutter/common/Style.dart';
-import 'package:flutterdemo/flutter/native_plugin/ali/push.dart';
 import 'package:flutterdemo/flutter/native_plugin/ffmpeg/ffmpeg_page.dart';
 import 'package:flutterdemo/flutter/native_plugin/ffmpeg/movie_audio_replace.dart';
-import 'package:flutterdemo/flutter/native_plugin/map/amap_page.dart';
 import 'package:flutterdemo/flutter/native_plugin/share/share_sdk.dart';
 import 'package:flutterdemo/flutter/native_plugin/video/video_player.dart';
 import 'package:flutterdemo/flutter/native_plugin/webview_page.dart';
 import 'package:flutterdemo/flutter/packages/annotationroute/annotation_route.dart';
-import 'package:flutterdemo/flutter/packages/fish_redux/fish_redux_page.dart';
 import 'package:flutterdemo/flutter/packages/provider/providertest.dart';
+import 'package:flutterdemo/flutter/pages/beautiful/ali_pay_anim.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/bottom_appbar.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/fold_cell.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/gallery/sliver_section.dart';
@@ -42,6 +41,7 @@ import 'package:flutterdemo/flutter/widget/customwidget/GifFileImg.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/buttom_btn.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/capture_screen.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/path.dart';
+import 'package:flutterdemo/flutter/widget/customwidget/proxy_render_obj.dart';
 import 'package:flutterdemo/flutter/widget/customwidget/scroll_physics.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/appbar_test.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/blur.dart';
@@ -71,9 +71,11 @@ import 'package:flutterdemo/flutter/widget/layout/wrap_flow.dart';
 import 'package:flutterdemo/flutter/widget/nativ/native_chat.dart';
 import 'package:flutterdemo/flutter/widget/nativ/native_view_to_widget.dart';
 import 'package:flutterdemo/flutter/widget/radio_page.dart';
+import 'package:flutterdemo/flutter/widget/route/routepage.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/customscrollview.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/grid_view.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/list_view.dart';
+import 'package:flutterdemo/flutter/widget/scrollwidget/listview_memory.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/scroll_notification.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/single_childs_croll_view.dart';
 import 'package:flutterdemo/flutter/widget/sliver/custom_sliver_list.dart';
@@ -82,12 +84,7 @@ import 'package:flutterdemo/flutter/widget/sliver/sliver_app_bar.dart';
 import 'package:flutterdemo/flutter/widget/switch.dart';
 import 'package:flutterdemo/flutter/widget/text.dart';
 import 'package:flutterdemo/flutter/widget/textfield.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutterdemo/main.dart';
-import 'package:grpc/service_api.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'beautiful/change_overlay.dart';
 import 'beautiful/circle_to_rectangle.dart';
@@ -136,6 +133,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    ///自定义errwidget,测试时在测试widget抛出异常就可以 throw Exception("error");
+    ///判断是否是release mode
+    if (kReleaseMode) {
+      ErrorWidget.builder = (context) {
+        return SizedBox.shrink();
+      };
+    }
+
     var defaultPlatform = defaultTargetPlatform;
     var androidTheme = ThemeData.light();
 
@@ -155,7 +160,8 @@ class _HomePageState extends State<HomePage> {
     }
     return RawGestureDetector(
       gestures: <Type, GestureRecognizerFactory>{
-        TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+        TapGestureRecognizer:
+            GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
           () => TapGestureRecognizer(),
           (TapGestureRecognizer instance) {
             instance
@@ -180,25 +186,41 @@ class _HomePageState extends State<HomePage> {
           print("全局点击事件============  up position ${e.position}");
         },
         child: MaterialApp(
+//           禁用系统的字体缩放
+            builder: (BuildContext context, Widget child) {
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                child: child,
+              );
+            },
             title: "flutter",
             theme: androidTheme,
-            //设置支持的语言
+
+            ///设置支持的语言 只有设置支持的语言才会初始化[CustomLocalizations] load传入对应的语言，默认local是英文
+            ///ios 需要在project->info->localizations 增加支持的语言才起作用
             supportedLocales: locals,
             //手动指定locale
             locale: locals[localeIndex],
             localizationsDelegates: <LocalizationsDelegate>[
               // 本地化的代理类
-              GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate,
+              ///Material 风格组件的国际化
+              GlobalMaterialLocalizations.delegate,
+
+              ///Cupertino风格组件的国际化
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
               CustomLocalizations.delegate
             ],
             localeListResolutionCallback: (locales, supportedLocales) {
               //监听语言改变https://flutter.github.io/assets-for-api-docs/assets/widgets/form.png
-              print("localeListResolutionCallback locales $locales supportedLocales $supportedLocales");
+              print(
+                  "localeListResolutionCallback locales $locales supportedLocales $supportedLocales");
             },
             localeResolutionCallback: (locale, supportedLocales) {
               //监听语言改变
 //        如果locale为null，则表示Flutter未能获取到设备的Locale信息，所以我们在使用locale之前一定要先判空
-              print("localeResolutionCallback locale $locale supportedLocales $supportedLocales");
+              print(
+                  "localeResolutionCallback locale $locale supportedLocales $supportedLocales");
             },
 
             ///todo 配置路由名字
@@ -252,15 +274,18 @@ class CustomLocalizations extends DefaultMaterialLocalizations {
   }
   Locale locale;
   @override
-  String get backButtonTooltip => locale.languageCode == "zh" ? "我是返回键" : "i am back";
+  String get backButtonTooltip =>
+      locale.languageCode == "zh" ? "我是返回键" : "i am back";
 
-  static final LocalizationsDelegate<CustomLocalizations> delegate = _MaterialLocalizationsDelegate("");
+  static final LocalizationsDelegate<CustomLocalizations> delegate =
+      _MaterialLocalizationsDelegate("");
   static Future<CustomLocalizations> load(Locale locale) {
     return SynchronousFuture<CustomLocalizations>(CustomLocalizations(locale));
   }
 }
 
-class _MaterialLocalizationsDelegate extends LocalizationsDelegate<CustomLocalizations> {
+class _MaterialLocalizationsDelegate
+    extends LocalizationsDelegate<CustomLocalizations> {
   static const locals = ['en', 'zh'];
   String jsonData;
   _MaterialLocalizationsDelegate(this.jsonData);
@@ -273,7 +298,8 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<CustomLocaliz
   }
 
   @override
-  Future<CustomLocalizations> load(Locale locale) => CustomLocalizations.load(locale);
+  Future<CustomLocalizations> load(Locale locale) =>
+      CustomLocalizations.load(locale);
 
   @override
   bool shouldReload(_MaterialLocalizationsDelegate old) => false;
@@ -286,7 +312,8 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<CustomLocaliz
 class MNavigatorObserber extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
-    print("MNavigatorObserber   route.overlayEntries ${route.overlayEntries.toString()}");
+    print(
+        "MNavigatorObserber   route.overlayEntries ${route.overlayEntries.toString()}");
 
     ///只监听页面route
     if (route is PageRoute && previousRoute is PageRoute) {
@@ -300,7 +327,8 @@ class MNavigatorObserber extends NavigatorObserver {
 //    ModalRoute.of().isCurrent; 最上层的route
     ///只监听页面route
     if (route is PageRoute && previousRoute is PageRoute) {
-      print("HomePage MNavigatorObserber  didPop current ${route?.settings}  previousRoute ${previousRoute?.settings}");
+      print(
+          "HomePage MNavigatorObserber  didPop current ${route?.settings}  previousRoute ${previousRoute?.settings}");
     }
   }
 }
@@ -340,14 +368,17 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+    _controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
     clampAnimation = CurveTween(curve: Curves.linear).animate(_controller)
       ..addListener(() {
         overlayState.setState(() {
           print("clampAnimation.value ${clampAnimation.value}");
-          popupX = MediaQuery.of(context).size.width * clampAnimation.value - radius;
+          popupX =
+              MediaQuery.of(context).size.width * clampAnimation.value - radius;
           //贴边 而不是进入屏幕一部分
-          popupX = popupX.clamp(0.0, MediaQuery.of(context).size.width - radius * 2);
+          popupX =
+              popupX.clamp(0.0, MediaQuery.of(context).size.width - radius * 2);
         });
       });
 
@@ -385,7 +416,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               visible: showCancelPart,
               child: ClipOval(
                 child: Material(
-                  child: Container(alignment: Alignment(-0.5, -0.5), decoration: BoxDecoration(color: Colors.red)),
+                  child: Container(
+                      alignment: Alignment(-0.5, -0.5),
+                      decoration: BoxDecoration(color: Colors.red)),
                 ),
               ),
             )),
@@ -428,14 +461,20 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
               var currentY = dragUpdateDetails.globalPosition.dy;
               popupX = popupX + currentX - preX;
               popupY = popupY + currentY - preY;
-              popupX = popupX.clamp(0.0, MediaQuery.of(context).size.width - radius * 2);
-              popupY = popupY.clamp(0.0, MediaQuery.of(context).size.height - radius * 2);
+              popupX = popupX.clamp(
+                  0.0, MediaQuery.of(context).size.width - radius * 2);
+              popupY = popupY.clamp(
+                  0.0, MediaQuery.of(context).size.height - radius * 2);
               preX = currentX;
               preY = currentY;
               print("popupX $popupX  popupY $popupY ");
               //TODO 判断一点是否在园内  移动球的圆心进入取消区域园
-              double dis = math.sqrt(math.pow(MediaQuery.of(context).size.width - (popupX + radius), 2) +
-                  math.pow(MediaQuery.of(context).size.height - (popupY + radius), 2));
+              double dis = math.sqrt(math.pow(
+                      MediaQuery.of(context).size.width - (popupX + radius),
+                      2) +
+                  math.pow(
+                      MediaQuery.of(context).size.height - (popupY + radius),
+                      2));
               print("dis $dis");
               if (dis <= 150) {
                 //相交时 取消区域增大
@@ -467,10 +506,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   "popupX $popupX popupY $popupY radius $radius MediaQuery.of(context).size.width ${MediaQuery.of(context).size.width}  ${(popupX + radius) / MediaQuery.of(context).size.width}");
               if (popupX + radius >= MediaQuery.of(context).size.width / 2) {
 //                popupX = MediaQuery.of(context).size.width - radius * 2;
-                _controller.forward(from: (popupX + radius) / MediaQuery.of(context).size.width);
+                _controller.forward(
+                    from:
+                        (popupX + radius) / MediaQuery.of(context).size.width);
               } else {
 //                popupX = 0;
-                _controller.reverse(from: (popupX + radius) / MediaQuery.of(context).size.width);
+                _controller.reverse(
+                    from:
+                        (popupX + radius) / MediaQuery.of(context).size.width);
               }
             },
             child: ClipOval(
@@ -502,10 +545,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
           DropdownButton(
               hint: Text(menuType),
               items: [
-                DropdownMenuItem(child: Text(strChangeLocale), value: strChangeLocale),
-                DropdownMenuItem(child: Text(strChangeColor), value: strChangeColor),
-                DropdownMenuItem(child: Text(strResetColor), value: strResetColor),
-                DropdownMenuItem(child: Text(strChangeTheme), value: strChangeTheme)
+                DropdownMenuItem(
+                    child: Text(strChangeLocale), value: strChangeLocale),
+                DropdownMenuItem(
+                    child: Text(strChangeColor), value: strChangeColor),
+                DropdownMenuItem(
+                    child: Text(strResetColor), value: strResetColor),
+                DropdownMenuItem(
+                    child: Text(strChangeTheme), value: strChangeTheme)
               ],
               onChanged: (value) {
                 setState(() {
@@ -671,6 +718,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   }));
                 },
                 child: Text("wrap and flow")),
+            Text("路由 ----------------------- "),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return RouterPage();
+                  }));
+                },
+                child: Text("路由")),
             Text("scroll ----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -1038,6 +1093,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   }));
                 },
                 child: Text("widget 更新")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return ListViewMemoryPage();
+                  }));
+                },
+                child: Text("list view 内存")),
             Text("酷炫效果和自定义----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -1137,6 +1199,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   }));
                 },
                 child: Text("Overlay Change Page")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return ApiPayAnim();
+                  }));
+                },
+                child: Text("ali pay anim")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(builder: (context) {
+                    return ProxyRenderPage();
+                  }));
+                },
+                child: Text('ProxyRenderPage')),
             Text("测试第三方包 ----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -1148,24 +1225,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             FlatButton(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return PushPage();
-                  }));
-                },
-                child: Text("阿里推送")),
-            FlatButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return ShareSDKPage();
                   }));
                 },
                 child: Text("ShareSDK分享")),
-            FlatButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return AmapPage();
-                  }));
-                },
-                child: Text("高德地图")),
             FlatButton(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {

@@ -8,7 +8,12 @@
 // AnimationController会在动画的每一帧，就会生成一个新的值。默认情况下，AnimationController在给定的时间段内线性的生成从0.0到1.0（默认区间）的数字
 //AnimationController生成数字的区间可以通过lowerBound和upperBound来指定
 //Animation对象的当前值可以通过value()方法取到
-//repeat()重复方法，调用前必须设置duration ，与forward选一个
+//repeat()重复方法，调用前必须设置duration ，与forward选一个  控制repeat的时间
+//TickerFuture tickerFuture = _animationController.repeat();
+//tickerFuture.timeout(Duration(seconds:  3 * 10), onTimeout:  () {
+//_animationController.forward(from: 0);
+//_animationController.stop(canceled: true);
+//});
 //AnimationController.vaue = [0,1] 0到1
 //   animateto    将动画从其当前值驱动到目标值
 //   animatewith  根据给定的模拟驱动动画

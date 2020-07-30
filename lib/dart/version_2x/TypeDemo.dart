@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutterdemo/dart/version_2x/Btn.dart';
 
 const a = "a";
@@ -71,19 +73,50 @@ void main() {
   print("flase&&flase ${flagA && flagB}");
 
   ///String 转utf8    TODO 中文在utf8或utf16分别占几个字节，表情等怎么表示
+  ///utf8 中文3字节，英文1字节
   /// String foo = 'Hello world';
   //List<int> bytes = utf8.encode(foo);
 
   ///utf8转String
   ///String bar = utf8.decode(bytes);
 
-  ///String 转utf16
+//  https://asecuritysite.com/coding/asc2
+  ///String 转utf16  改字符在utf16的index
   /// String foo = 'Hello world';
   //List<int> bytes = foo.codeUnits;
+  //给定位置的16-bit UTF-16 code unit
+//  foo.codeUnitAt(int index);
 
-  ///String 转Unicode code-points
-  ///String foo = 'Hello world';
+  ///String 转Unicode code-points   在Unicode第几位
+  String foo = 'Hello world';
   //// Runes runes = foo.runes;
   //// or
-  //Iterable<int> bytes = foo.runes;
+  Iterable<int> bytes = foo.runes;
+  print("hello world  unicode points $bytes");
+
+  ///url URL转义   转义#或特殊字符
+  Uri.encodeComponent("www.baidu.com?#aaa");
+
+  List<int> hBytes = utf8.encode("hello");
+  print("hBytes ${hBytes.length} $hBytes");
+  List<int> niBytes = utf8.encode("你好");
+  print("niBytes ${niBytes.length} $niBytes");
+
+  List<int> h16Bytes = "hello".codeUnits;
+  print("h16Bytes ${h16Bytes.length} $h16Bytes");
+  List<int> ni16Bytes = "你好".codeUnits;
+  print("ni16Bytes ${ni16Bytes.length} $ni16Bytes");
+
+  Map map = {"a": "a", "b": "b", "c": "c"};
+//  json格式化
+  var encoder = JsonEncoder.withIndent("   ");
+  print("json  ${json.encode(map)}");
+  print("json pretty ${encoder.convert(map)}");
+
+  ///正则 匹配数字和符号，只保留数字
+  var title = "1,2 3.4 5，6";
+  title = title.replaceAllMapped(RegExp(r'''(\d)([,，.])(\d)'''), (match) {
+    return "${match.group(1)}${match.group(3)}";
+  });
+  print("title $title");
 }

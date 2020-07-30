@@ -15,4 +15,8 @@ class MyImgs {
   static const midouzi = "lib/img/midouzi.jpeg";
   static const midouzi_cute = "lib/img/midouzi_cute.jpg";
   static const midouzi_cute2 = "lib/img/midouzi_cute_2.jpeg";
+  static const green_home_sapling_little =
+      "lib/img/green_home_sapling_little.png";
+  static const water = "lib/img/water.png";
+  static const water_container = "lib/img/water_container.png";
 }

@@ -4,6 +4,19 @@ import 'package:flutter/services.dart';
 //TODO https://juejin.im/post/5b7ba79a6fb9a01a1826776b texture 原理
 
 //todo EventChannel.StreamHandler  事件监听
+
+//!!! android调用通道必须在主线程
+
+//三种通道
+//* BasicMessageChannel：用于传递字符串和半结构化的信息,这个用的比较少
+//
+//* MethodChannel：用于传递方法调用（method invocation）通常用来调用native中某个方法
+//
+//* EventChannel: 用于数据流（event streams）的通信。有监听功能，比如电量变化之后直接推送数据给flutter端。
+
+/// MethodChannel与EventChannel 命名时注意带有view的ID，比如VideoPlayer注册了一个EventChannel，
+/// flutter两个nativeview存在，创建了两个EventChannel，此时第二个会顶掉第一个
+
 class MethodChannelPage extends StatefulWidget {
   @override
   _MethodChannelPageState createState() => _MethodChannelPageState();

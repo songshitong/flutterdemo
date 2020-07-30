@@ -10,6 +10,12 @@ main() async {
 // ...code goes here...
   });
 
+  print("getLong1 ${await getLong()}");
+  print("getShort1 ${await getShort()}");
+
+  print("getLong2 ${getLong()}");
+  print("getShort2 ${getShort()}");
+
 //  print("getA ${await getA()}");
 //
 //  try {
@@ -18,6 +24,7 @@ main() async {
 //    print("e ${e}");
 //  }
   // try  catch可以 捕获 await/async的异常， 不能捕获Future.onerror 异常   推荐使用await for
+  //todo try future.then
 
   //创建Future
   var start = DateTime.now().millisecondsSinceEpoch;
@@ -32,23 +39,30 @@ main() async {
   //
   //catchError future出错先走test，test为false，错误不被catchError处理，test为true，错误被catchError处理，test省略时，默认为true
   //onError和catchError 没有return，继续执行没有result（null），有return后，result是return的值
+
+//  type '_TypeError' is not a subtype of type 'FutureOr<Null>'
+  // return e的问题，exception不是future类型
+
+  //onError 通常有两种形式
+  // - (dynamic) -> FutureOr<T>
+  // - (dynamic, StackTrace) -> FutureOr<T>
   Future(() {
     throw Exception("first error");
   }).then((data) {
     return "data is 12";
   }, onError: (e) {
     print("第一个onerror e=$e");
-    return e;
+//    return e;
   }).then((s) {
-//    throw Exception("sceond error");
+    throw Exception("sceond error");
   }).catchError((e) {
     print("catch error e=$e");
-    return e;
+//    return e;
   }, test: (error) {
     return true;
   });
 
-  //将多个异步函数的返回汇总  如果其中一个函数抛错，进入catchError 流程
+  //将多个异步函数的返回汇总  如果其中一个函数抛错，进入catchError 流程   多个异步链式调用，一个异常，一个处理结果最后怎么返回
 //  Future.wait([getA(), getB(), getAValue()]).then((data) {
 //    print("wait data=$data");
 //  }).catchError((e) {
@@ -58,6 +72,49 @@ main() async {
   ///接口顺序请求，一个完成后请求另一个
   ///await a
   /// await b
+  ///
+
+  //同步任务
+//  Future.sync(computation)
+
+  ///FutureOr 代表future 和 T的两种情况
+  ///
+  ///
+  /// if (result is Future<T>) {
+  ///          return result;
+  ///     } else {
+  ///        return new _Future<T>.value(result);
+  ///      }
+
+  FutureOr a;
+
+  ///future有关的函数最好声明类型
+  /// type 'Future<dynamic>' is not a subtype of type 'FutureOr<String>'
+  /// 多个future的调用，返回值与函数的声明要一致。
+  ///
+  /// Future<R> then<R>(FutureOr<R> onValue(T value), {Function onError});
+  /// then里面如果有多个return，return的返回值要与函数声明的一致
+  ///
+  ///
+
+  ///测试 await async 顺序
+  ///getStr1
+  ///getName2
+  ///getName3
+  ///getStr2
+  ///getName1
+  getName1();
+  getName2();
+  getName3();
+
+  ///getStr1
+  ///getStr2
+  ///getName1
+  ///getName2
+  ///getName3
+//  await getName1();
+//  getName2();
+//  getName3();
 }
 
 Future<String> getA() async {
@@ -73,4 +130,40 @@ Future<String> getB() async {
 Future<String> getAValue() async {
   throw Exception("getAValue there is an error throw");
   return await getA();
+}
+
+Future<String> getLong() async {
+  await Future.delayed(Duration(seconds: 3));
+  return "long";
+}
+
+Future<String> getShort() async {
+  await Future.delayed(Duration(seconds: 1));
+  return "short";
+}
+
+getName1() async {
+  await getStr1();
+  await getStr2();
+  print('getName1');
+}
+
+getStr1() {
+  Future.delayed(Duration(seconds: 1), () {
+    print('getStr1 delay');
+    return Future.value();
+  });
+  print('getStr1');
+}
+
+getStr2() {
+  print('getStr2');
+}
+
+getName2() {
+  print('getName2');
+}
+
+getName3() {
+  print('getName3');
 }

@@ -9,7 +9,10 @@ SDK constraints  sdk限制
  environment:
    sdk: '>=1.19.0 <3.0.0'     dart 版本在1.19.0和3.0.0之间
    flutter: ^0.1.2             flutter版本 0.1.2
+   flutter: ">=1.12.0 <2.0.0"
 
+APP版本
+version: 1.0.0+1              版本号+版本名称   不生效执行flutter clean  flutter get
 
 本地依赖
    dependencies:
@@ -58,7 +61,7 @@ dependency_overrides:
   author: icepy # 包的作者
   homepage: https://github.com/icepy # 包的网页地址
 
-  environment: # 指定环境
+  environment: # 指定dart环境
     sdk: ">=2.0.0-dev.68.0 <3.0.0"
 
   dependencies: # 指定包的依赖

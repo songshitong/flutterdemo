@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutterdemo/dart/version_2x/yufa.dart';
 import 'package:flutterdemo/flutter/common/MyImgs.dart';
-import 'dart:ui' as ui;
 
 class ImagePage extends StatefulWidget {
-  static const url = "https://img.alicdn.com/imgextra/i2/2053469401/O1CN01HnPAtY2JJhyZa3MFe_!!2053469401.jpg";
+  static const url =
+      "https://img.alicdn.com/imgextra/i2/2053469401/O1CN01HnPAtY2JJhyZa3MFe_!!2053469401.jpg";
 
   ImagePage();
 
@@ -52,6 +52,7 @@ class _ImagePageState extends State<ImagePage> {
 
   @override
   Widget build(BuildContext context) {
+    var dpFactor = MediaQuery.of(context).devicePixelRatio;
     return Scaffold(
       appBar: AppBar(
         title: Text('image'),
@@ -62,7 +63,8 @@ class _ImagePageState extends State<ImagePage> {
                 //TODO 图片格式 RawImage
                 //
                 image.toByteData(format: ImageByteFormat.png).then((byteData) {
-                  imgList = byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
+                  imgList = byteData.buffer.asUint8List(
+                      byteData.offsetInBytes, byteData.lengthInBytes);
                   print("after getImage imgList $imgList");
                   setState(() {});
                 });
@@ -80,7 +82,9 @@ class _ImagePageState extends State<ImagePage> {
             Container(
               height: 100,
               width: MediaQuery.of(context).size.width,
-              child: imgList != null ? Image.memory(imgList, gaplessPlayback: true) : Container(),
+              child: imgList != null
+                  ? Image.memory(imgList, gaplessPlayback: true)
+                  : Container(),
             ),
             Image.asset(MyImgs.SANTAIZI),
             Image.network(ImagePage.url),
@@ -93,9 +97,17 @@ class _ImagePageState extends State<ImagePage> {
               MyImgs.TEST,
               width: 150,
               height: 150,
+
+              ///查看[paintImage] boxFit的默认行为
+              ///* `fit`: How the image should be inscribed into `rect`. If null, the
+              ///    default behavior depends on `centerSlice`. If `centerSlice` is also null,
+              ///    the default behavior is [BoxFit.scaleDown]. If `centerSlice` is
+              ///    non-null, the default behavior is [BoxFit.fill]. See [BoxFit] for
+              ///    details.
+              ///
               //fill：会拉伸填充满显示空间，图片本身长宽比会发生变化，图片会变形。
               //cover：会按图片的长宽比放大后居中填满显示空间，图片不会变形，超出显示空间部分会被剪裁。
-//              contain：这是图片的默认适应规则，图片会在保证图片本身长宽比不变的情况下缩放以适应当前显示空间，图片不会变形
+//              contain：图片会在保证图片本身长宽比不变的情况下缩放以适应当前显示空间，图片不会变形
 //              fitWidth：图片的宽度会缩放到显示空间的宽度，高度会按比例缩放，然后居中显示，图片不会变形，超出显示空间部分会被剪裁
 //              fitHeight：图片的高度会缩放到显示空间的高度，宽度会按比例缩放，然后居中显示，图片不会变形，超出显示空间部分会被剪裁
 //              none：图片没有适应策略，会在显示空间内显示图片，如果图片比显示空间大，则显示空间只会显示图片中间部分
@@ -109,7 +121,8 @@ class _ImagePageState extends State<ImagePage> {
             Image.asset(
               MyImgs.TEST, height: 50,
               color: Colors.blue,
-              colorBlendMode: BlendMode.difference, //在图片绘制时可以对每一个像素进行颜色混合处理，color指定混合色，而colorBlendMode指定混合模式
+              colorBlendMode: BlendMode
+                  .difference, //在图片绘制时可以对每一个像素进行颜色混合处理，color指定混合色，而colorBlendMode指定混合模式
             ),
             Image.asset(
               MyImgs.TEST,
@@ -279,6 +292,40 @@ class _ImagePageState extends State<ImagePage> {
               colorBlendMode: BlendMode.xor,
               height: 50,
             ),
+            Text("jinx 259*194 BoxFit.cover  container 259*100"),
+            Image.asset(
+              MyImgs.JINX,
+              width: 259 / dpFactor,
+              height: 100 / dpFactor,
+              fit: BoxFit.cover,
+            ),
+            Text("jinx 259*194 BoxFit.cover  container 100*100"),
+            Image.asset(
+              MyImgs.JINX,
+              width: 100 / dpFactor,
+              height: 100 / dpFactor,
+              fit: BoxFit.cover,
+            ),
+            Text("jinx 259*194 BoxFit.cover  container 100*194"),
+            Image.asset(
+              MyImgs.JINX,
+              width: 100 / dpFactor,
+              height: 194 / dpFactor,
+              fit: BoxFit.cover,
+            ),
+            Text("jinx 259*194 BoxFit.cover  container 300*300"),
+            Image.asset(
+              MyImgs.JINX,
+              width: 300 / dpFactor,
+              height: 300 / dpFactor,
+              fit: BoxFit.cover,
+            ),
+            Text("jinx 259*194 default BoxFit.cover  container 300*300"),
+            Image.asset(
+              MyImgs.JINX,
+              width: 300 / dpFactor,
+              height: 300 / dpFactor,
+            )
           ], //加载本地图片
         ),
       ),

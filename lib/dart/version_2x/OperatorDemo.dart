@@ -28,6 +28,7 @@ void main() {
   print("numA ${numA ~/ 2}");
   print("numB ${numB ~/ 2}");
   print("numB ${numC ~/ 2}");
+  print("dobule to int ${2.5 ~/ 1}");
 //
 //  /// % 模除
 //  print("\n3%2结果为 ");

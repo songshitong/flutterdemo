@@ -8,7 +8,11 @@ class StackPage extends StatefulWidget {
 }
 
 class StackPageState extends State<StackPage> {
-  List<StackFit> stackFits = [StackFit.loose, StackFit.expand, StackFit.passthrough];
+  List<StackFit> stackFits = [
+    StackFit.loose,
+    StackFit.expand,
+    StackFit.passthrough
+  ];
   List<Overflow> overFlows = [Overflow.clip, Overflow.visible];
   int fitValue = 0;
   int overFlowValue = 0;
@@ -21,6 +25,8 @@ class StackPageState extends State<StackPage> {
     // 设置Overflow.visible后超出部分可以绘制，但默认的点击事件没有处理
 
     //有四个child，上面两个重叠，下面两个重叠，如果子的child会发生变化，最好将上下分为两个stack,便于控制整体大小，将相同的归为一类
+
+    //positioned指定child的大小  child大小确定left+size，child大小根据父确定left+right/top+bottom
 
     //todo stack中有输入框，position设置top好，软键盘弹出，能正常移动适应,不要设置bottom
     return Scaffold(
@@ -109,7 +115,8 @@ class StackPageState extends State<StackPage> {
                       return Container(
                         width: contraints.maxWidth,
                         height: contraints.maxHeight,
-                        decoration: BoxDecoration(color: Colors.amber.withOpacity(0.5)),
+                        decoration:
+                            BoxDecoration(color: Colors.amber.withOpacity(0.5)),
                         child: Stack(
                           children: <Widget>[
                             Positioned(

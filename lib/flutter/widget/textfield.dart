@@ -39,7 +39,8 @@ class _TextfieldPageState extends State<TextfieldPage> {
     ///[Tooltip] 代码   点击外部区域取消键盘  TODO MouseRegion
     _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
     // Listen to see when a mouse is added.
-    RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChange);
+    RendererBinding.instance.mouseTracker
+        .addListener(_handleMouseTrackerChange);
     // Listen to global pointer events so that we can hide a tooltip immediately
     // if some other control is clicked on.
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
@@ -48,8 +49,10 @@ class _TextfieldPageState extends State<TextfieldPage> {
   @override
   void dispose() {
     ///不移除监听，dispose后仍然存在监听
-    RendererBinding.instance.mouseTracker.removeListener(_handleMouseTrackerChange);
-    GestureBinding.instance.pointerRouter.removeGlobalRoute(_handlePointerEvent);
+    RendererBinding.instance.mouseTracker
+        .removeListener(_handleMouseTrackerChange);
+    GestureBinding.instance.pointerRouter
+        .removeGlobalRoute(_handlePointerEvent);
     super.dispose();
   }
 
@@ -101,6 +104,7 @@ class _TextfieldPageState extends State<TextfieldPage> {
               onChanged: (str) {
                 print('onchanged str $str');
               },
+
               style: TextStyle(color: Colors.purple), //字体样式
               textAlign: TextAlign.end, // 文字对齐 center  hinttext一样生效
               textDirection: TextDirection.rtl, //文字书写方向，从右到左
@@ -125,7 +129,8 @@ class _TextfieldPageState extends State<TextfieldPage> {
                       print("icon click");
                     }),
                 labelText: "lable",
-                hintText: "测试hint测试hint测试hint测试hint测试\n hint测试hint测试hint测试hint测试hint测试hint测试hint",
+                hintText:
+                    "测试hint测试hint测试hint测试hint测试\n hint测试hint测试hint测试hint测试hint测试hint测试hint",
                 hintStyle: TextStyle(inherit: false, color: Colors.green),
                 prefixText: "frefix text", //内容前面
                 prefixIcon: IconButton(
@@ -171,7 +176,8 @@ class _TextfieldPageState extends State<TextfieldPage> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              maxLength: 5, //输入框 maxlenth 后会出现计数，可以用inputFormatters来代替然后限制长度不占空间
+              maxLength:
+                  5, //输入框 maxlenth 后会出现计数，可以用inputFormatters来代替然后限制长度不占空间
               decoration: InputDecoration(
                   counterText: "counter：", //计数文字
                   //semanticCounterText If provided, this replaces the semantic label of the [counterText].
@@ -197,7 +203,8 @@ class _TextfieldPageState extends State<TextfieldPage> {
               inputFormatters: [
                 LengthLimitingTextInputFormatter(5), // 长度限制为5
                 BlacklistingTextInputFormatter(RegExp("[0-9]")), //限制数字
-                WhitelistingTextInputFormatter(RegExp("[a-zA-Z]|[\u4e00-\u9fa5]|[0-9]")) //字母 汉字，数字
+                WhitelistingTextInputFormatter(
+                    RegExp("[a-zA-Z]|[\u4e00-\u9fa5]|[0-9]")) //字母 汉字，数字
               ],
             ),
           ),
@@ -224,7 +231,11 @@ class _TextfieldPageState extends State<TextfieldPage> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              decoration: InputDecoration(isDense: false, filled: true, fillColor: Colors.black26, hintText: "isDense"),
+              decoration: InputDecoration(
+                  isDense: false,
+                  filled: true,
+                  fillColor: Colors.black26,
+                  hintText: "isDense"),
             ),
           ),
           //todo form 表单
@@ -239,7 +250,9 @@ class _TextfieldPageState extends State<TextfieldPage> {
   }
 
   void _handlePointerEvent(PointerEvent event) {
-    if (event is PointerUpEvent || event is PointerCancelEvent || event is PointerDownEvent) {
+    if (event is PointerUpEvent ||
+        event is PointerCancelEvent ||
+        event is PointerDownEvent) {
       SystemChannels.textInput.invokeMethod('TextInput.hide');
     }
   }
@@ -248,7 +261,8 @@ class _TextfieldPageState extends State<TextfieldPage> {
     if (!mounted) {
       return;
     }
-    final bool mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
+    final bool mouseIsConnected =
+        RendererBinding.instance.mouseTracker.mouseIsConnected;
     if (mouseIsConnected != _mouseIsConnected) {
       SystemChannels.textInput.invokeMethod('TextInput.hide');
       setState(() {

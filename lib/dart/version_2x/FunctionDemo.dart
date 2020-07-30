@@ -10,6 +10,22 @@ typedef TestFunction = dynamic Function(String param);
 //(T,action)=>T  函数式
 typedef ApplyLikeEnhancer = TestFunction Function(TestFunction functor);
 
+class LocaleErrors{
+
+}
+
+///声明一个返回值为LocaleErrors的function
+typedef GetLocaleErrors = LocaleErrors Function(String key);
+
+///代码简化  此时i18nLabels==getLocaleLabels   CustomLocalizations.of(Constant().rootContext)获取的对象只执行了一次
+//GetLocaleErrors i18nLabels =
+//    CustomLocalizations.of(Constant().rootContext).getLocaleLabels;
+
+///此时 此时i18nLabels==getLocaleLabels   CustomLocalizations.of(Constant().rootContext)获取的对象每次都执行一次
+//GetLocaleLabels i18nLabels = (String key) {
+//  return CustomLocalizations.of(Constant().rootContext).getLocaleLabels(key);
+//};
+
 ApplyLikeEnhancer delay(int millis) {
   return (dynamic Function(String) functor) {
     return (String positionalArguments) async {

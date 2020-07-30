@@ -629,7 +629,7 @@ class EffectiveDoer extends Doer {
 // can't be instantiated.
 abstract class AbstractContainer {
   // ...Define constructors, fields, methods...
-
+  String get serverUrl;
   void updateChildren(); // Abstract method.
 }
 

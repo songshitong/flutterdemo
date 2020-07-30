@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutterdemo/flutter/pages/beautiful/reorder_list.dart';
 
 import '../CheckBox.dart';
 import 'load_more.dart';
@@ -85,7 +84,8 @@ class ListViewPageState extends State<ListViewPage> {
               }),
           RaisedButton(
               onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) {
                   return LoadMorePage();
                 }));
               },
@@ -110,7 +110,8 @@ class ListViewPageState extends State<ListViewPage> {
               children: <Widget>[
                 Transform(
                     transform: Matrix4.identity()..translate(0.0, offsetYAAA),
-                    child: Container(color: Colors.black12, child: Text("aaaa"))),
+                    child:
+                        Container(color: Colors.black12, child: Text("aaaa"))),
                 GestureDetector(
                     key: keyBBB,
                     onTap: () {
@@ -119,9 +120,11 @@ class ListViewPageState extends State<ListViewPage> {
                       setState(() {
                         print("rb.paintBounds ${rb.paintBounds}");
                         Offset localOffset = rb.paintBounds.topLeft;
-                        offsetYAAA =
-                            rb.localToGlobal(localOffset).dy - MediaQuery.of(context).padding.top - kToolbarHeight;
-                        print("offsetYAAA  ===  $offsetYAAA  localOffset $localOffset");
+                        offsetYAAA = rb.localToGlobal(localOffset).dy -
+                            MediaQuery.of(context).padding.top -
+                            kToolbarHeight;
+                        print(
+                            "offsetYAAA  ===  $offsetYAAA  localOffset $localOffset");
                       });
                     },
                     //
@@ -132,7 +135,9 @@ class ListViewPageState extends State<ListViewPage> {
                     // todo  各种key使用的总结
                     /// [ReorderListPage]  不使用popup，不使用globalkey 直接使用context+widgetsbings.addpostframecallback 获取渲染后的尺寸，做动画
                     /// 调用对外暴露的自定义的indexChange回调
-                    child: Container(color: Colors.black12, child: Text("bbbb 点击b移动A到B的位置"))),
+                    child: Container(
+                        color: Colors.black12,
+                        child: Text("bbbb 点击b移动A到B的位置"))),
                 Checkbox(
                     value: true,
                     activeColor: Colors.red,
@@ -158,31 +163,39 @@ class ListViewPageState extends State<ListViewPage> {
             ),
             SizedBox(
               height: 50,
-              child: CustomScrollView(scrollDirection: Axis.horizontal, controller: centerController, slivers: [
-                SliverList(
-                    key: centerItemKey,
-                    delegate: SliverChildListDelegate(List.generate(20, (index) {
-                      return GestureDetector(
-                        onTap: () {
-                          final paintExtent = getAllPaintExtentToIndex(centerItemKey, index);
-                          var offset = paintExtent -
-                              getPaintExtentOfIndex(centerItemKey, index) / 2 -
-                              MediaQuery.of(context).size.width / 2;
-                          print("center === offset $offset");
-                          centerController.animateTo(offset,
-                              duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          width: 50,
-                          height: 50,
-                          margin: EdgeInsets.symmetric(horizontal: 10),
-                          decoration: BoxDecoration(color: Colors.amberAccent),
-                          child: Text("$index"),
-                        ),
-                      );
-                    })))
-              ]),
+              child: CustomScrollView(
+                  scrollDirection: Axis.horizontal,
+                  controller: centerController,
+                  slivers: [
+                    SliverList(
+                        key: centerItemKey,
+                        delegate:
+                            SliverChildListDelegate(List.generate(20, (index) {
+                          return GestureDetector(
+                            onTap: () {
+                              final paintExtent = getAllPaintExtentToIndex(
+                                  centerItemKey, index);
+                              var offset = paintExtent -
+                                  getPaintExtentOfIndex(centerItemKey, index) /
+                                      2 -
+                                  MediaQuery.of(context).size.width / 2;
+                              print("center === offset $offset");
+                              centerController.animateTo(offset,
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut);
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              width: 50,
+                              height: 50,
+                              margin: EdgeInsets.symmetric(horizontal: 10),
+                              decoration:
+                                  BoxDecoration(color: Colors.amberAccent),
+                              child: Text("$index"),
+                            ),
+                          );
+                        })))
+                  ]),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -193,29 +206,39 @@ class ListViewPageState extends State<ListViewPage> {
                   itemBuilder: (context, index) {
                     return GestureDetector(
                       onTap: () async {
-                        var listRenderObj = infoKey.currentContext.findRenderObject();
+                        var listRenderObj =
+                            infoKey.currentContext.findRenderObject();
 //                        print("listRenderObj $listRenderObj");
 //                        var renderObj1 = listRenderObj.child as RenderCustomPaint;
 //                        print("renderObj1 $renderObj1");
-                        var childSemantics = await callbackHellVisitChildrenSemantics(listRenderObj);
+                        var childSemantics =
+                            await callbackHellVisitChildrenSemantics(
+                                listRenderObj);
                         var visitChildrenSemanticsCount = 0;
-                        while (null != (childSemantics = await callbackHellVisitChildrenSemantics(childSemantics))) {
+                        while (null !=
+                            (childSemantics =
+                                await callbackHellVisitChildrenSemantics(
+                                    childSemantics))) {
                           print("child $childSemantics");
                           visitChildrenSemanticsCount++;
                           if (childSemantics is RenderSliverMultiBoxAdaptor) {
-                            print("Semantics i found you visitChildrenSemanticsCount $visitChildrenSemanticsCount");
+                            print(
+                                "Semantics i found you visitChildrenSemanticsCount $visitChildrenSemanticsCount");
                             break;
                           }
                           print("break ? ======");
                         }
 
                         var visitChildrenCount = 0;
-                        var child = await callbackHellVisitChildren(listRenderObj);
-                        while (null != (child = await callbackHellVisitChildren(child))) {
+                        var child =
+                            await callbackHellVisitChildren(listRenderObj);
+                        while (null !=
+                            (child = await callbackHellVisitChildren(child))) {
                           visitChildrenCount++;
                           print("child $child");
                           if (child is RenderSliverMultiBoxAdaptor) {
-                            print("VisitChildren i found you visitChildrenCount $visitChildrenCount");
+                            print(
+                                "VisitChildren i found you visitChildrenCount $visitChildrenCount");
                             break;
                           }
                           print("break ? ======");
@@ -245,8 +268,10 @@ class ListViewPageState extends State<ListViewPage> {
                                             print("render9 $render9");
                                             render9.visitChildren((render10) {
                                               print("render10 $render10");
-                                              if (render10 is RenderSliverMultiBoxAdaptor) {
-                                                print("callback hell i found you =====");
+                                              if (render10
+                                                  is RenderSliverMultiBoxAdaptor) {
+                                                print(
+                                                    "callback hell i found you =====");
                                               }
                                             });
                                           });
@@ -293,7 +318,9 @@ class ListViewPageState extends State<ListViewPage> {
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
                     return GestureDetector(
-                        onTap: () {}, child: Container(color: Colors.black12, child: Text("$index")));
+                        onTap: () {},
+                        child: Container(
+                            color: Colors.black12, child: Text("$index")));
                   }),
             ),
 
@@ -303,7 +330,8 @@ class ListViewPageState extends State<ListViewPage> {
               child: ListView.separated(
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
-                    return Container(color: Colors.blueGrey, child: Text("$index"));
+                    return Container(
+                        color: Colors.blueGrey, child: Text("$index"));
                   },
                   separatorBuilder: (context, index) {
                     return Divider(
@@ -438,7 +466,8 @@ class ListViewPageState extends State<ListViewPage> {
 
   //setsate 更新范围，机制
   double getAllPaintExtentToIndex(GlobalKey key, int index) {
-    RenderSliverMultiBoxAdaptor renderObject = key.currentContext.findRenderObject() as RenderSliverMultiBoxAdaptor;
+    RenderSliverMultiBoxAdaptor renderObject =
+        key.currentContext.findRenderObject() as RenderSliverMultiBoxAdaptor;
     //list的属性
     var top = renderObject.paintBounds.top;
     var bottom = renderObject.paintBounds.bottom;
@@ -447,7 +476,8 @@ class ListViewPageState extends State<ListViewPage> {
     print("list  top $top  bottom $bottom left $left right $right ");
     var child = renderObject.firstChild;
     var paintExtent = 0.0;
-    paintExtent = renderObject.paintExtentOf(child) + renderObject.childScrollOffset(child);
+    paintExtent = renderObject.paintExtentOf(child) +
+        renderObject.childScrollOffset(child);
     print("firstChild paintExtent $paintExtent");
     if (index > 0) {
       //缺点在绘制完成后使用
@@ -456,7 +486,8 @@ class ListViewPageState extends State<ListViewPage> {
       while ((child = renderObject.childAfter(child)) != null) {
         //todo 方法性能分析，缓存区存在，first一直是缓存区第一个，方法时间复杂度不会太高
         // childScrollOffset是什么 由于缓存存在，只有可见及缓存区的总高度可加，第一个到index的高度通过childScrollOffset来获得
-        paintExtent = renderObject.paintExtentOf(child) + renderObject.childScrollOffset(child);
+        paintExtent = renderObject.paintExtentOf(child) +
+            renderObject.childScrollOffset(child);
         var childIndex = renderObject.indexOf(child);
         if (childIndex == index) {
           break;
@@ -471,7 +502,8 @@ class ListViewPageState extends State<ListViewPage> {
   //TODO listview 设置itemcount 和不设置的初始化 shrikwrap
   //todo 获取第一个可见https://github.com/flutter/flutter/issues/19941
   double getPaintExtentOfIndex(GlobalKey key, int index) {
-    RenderSliverMultiBoxAdaptor renderObject = key.currentContext.findRenderObject() as RenderSliverMultiBoxAdaptor;
+    RenderSliverMultiBoxAdaptor renderObject =
+        key.currentContext.findRenderObject() as RenderSliverMultiBoxAdaptor;
     var child = renderObject.firstChild;
     var paintExtent = 0.0;
     paintExtent = renderObject.paintExtentOf(child);
@@ -489,7 +521,8 @@ class ListViewPageState extends State<ListViewPage> {
       }
     }
     var point = child.localToGlobal(Offset.zero);
-    print("index $index paintExtent $paintExtent dx ${point.dx} dy ${point.dy}");
+    print(
+        "index $index paintExtent $paintExtent dx ${point.dx} dy ${point.dy}");
     return paintExtent;
   }
 }
@@ -519,7 +552,8 @@ class AliveListItem extends StatefulWidget {
   _AliveListItemState createState() => _AliveListItemState();
 }
 
-class _AliveListItemState extends State<AliveListItem> with AutomaticKeepAliveClientMixin {
+class _AliveListItemState extends State<AliveListItem>
+    with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -682,8 +716,26 @@ class LoadDefaultIndicator extends StatelessWidget {
         child: SizedBox(
             width: 24.0,
             height: 24.0,
-            child: CupertinoActivityIndicator() /*CircularProgressIndicator(strokeWidth: 2.0)*/),
+            child:
+                CupertinoActivityIndicator() /*CircularProgressIndicator(strokeWidth: 2.0)*/),
       ),
     );
+  }
+}
+
+typedef OnFinishLayout = void Function(int firstIndex, int lastIndex);
+
+///获取布局结束的 [firstIndex] [lastIndex]
+class LayoutIndexSliverChildBuilderDelegate extends SliverChildBuilderDelegate {
+  LayoutIndexSliverChildBuilderDelegate(builder,
+      {int itemCount, this.onFinishLayout})
+      : super(builder, childCount: itemCount);
+  OnFinishLayout onFinishLayout;
+  @override
+  void didFinishLayout(int firstIndex, int lastIndex) {
+    super.didFinishLayout(firstIndex, lastIndex);
+    if (null != onFinishLayout) {
+      onFinishLayout(firstIndex, lastIndex);
+    }
   }
 }
