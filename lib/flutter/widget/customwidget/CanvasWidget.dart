@@ -19,31 +19,13 @@ class CanvasPage extends StatelessWidget {
   }
 }
 
-///
-/// save()
-///save() 操作会保存此前的所有绘制内容和 Canvas 状态。
-///在调用该函数之后的绘制操作和变换操作，会重新记录。
-///当你调用 restore() 之后，会把 save() 到 restore() 之间所进行的操作与之前的内容进行合并
-///
-///save() 并不会创建新的图层，和 saveLayer() 是不同的
-///
-/// saveLayer()
-/// saveLayer() 在大多数情况下看起来和 save() 的效果是差不多的。
-/// 不同的是 saveLayer() 会创建一个新的图层。在 saveLayer() 到 restore() 之间的操作，是在新的图层上进行的，虽然最终它们还是会合成到一起
-/// Paint，其 ColorFilters 和 BlendMode 配置会在图层合成的时候生效。其中，前面的图层为 dst，本图层为 src
-/// 如果 Paint 没有设置混合参数，新图层就相当于仅仅是盖在了前面的图层之上
-///
-/// restore
-/// 在调用 save() 或者 saveLayer() 必须调用 restore() 来合成，否则 Flutter 会抛出异常。
-///值得注意的是，每一个 save() 或者 saveLayer() 都必须有一个对应的 restore()
-
 class CanvasWidget extends StatefulWidget {
   @override
   _CanvasPageState createState() => _CanvasPageState();
 }
 
 class _CanvasPageState extends State<CanvasWidget> {
-  ui.Image jinxImage;
+  ui.Image? jinxImage;
   @override
   void initState() {
     super.initState();
@@ -70,7 +52,7 @@ class _CanvasPageState extends State<CanvasWidget> {
       //背景画笔，会显示在子节点后面
       painter: MyPainter(jinxImage),
       //前景画笔，会显示在子节点前
-      foregroundPainter: null,
+      foregroundPainter: null!,
       //当child为null时，代表默认绘制区域大小，如果有child则忽略此参数，画布尺寸则为child尺寸。
       // 如果有child但是想指定画布为特定大小，可以使用SizeBox包裹CustomPaint实现
       size: Size(MediaQuery.of(context).size.width,
@@ -87,7 +69,7 @@ class _CanvasPageState extends State<CanvasWidget> {
 
 ///canvas 可以超出绘制，clip默认阻止child超出绘制
 class MyPainter extends CustomPainter {
-  ui.Image image;
+  ui.Image? image;
 
   MyPainter(this.image);
 
@@ -97,7 +79,7 @@ class MyPainter extends CustomPainter {
     ..strokeWidth = 5
     ..style = PaintingStyle.stroke;
 
-  TextPainter textPainter;
+  late TextPainter textPainter;
   @override
   void paint(Canvas canvas, Size size) {
 //    size当前绘制区域大小。
@@ -143,6 +125,23 @@ class MyPainter extends CustomPainter {
 
     canvas.restore();
 
+    ///
+    /// save()
+    ///save() 操作会保存此前的所有绘制内容和 Canvas 状态。
+    ///在调用该函数之后的绘制操作和变换操作，会重新记录。
+    ///当你调用 restore() 之后，会把 save() 到 restore() 之间所进行的操作与之前的内容进行合并
+    ///
+    ///save() 并不会创建新的图层，和 saveLayer() 是不同的
+    ///
+    /// saveLayer()
+    /// saveLayer() 在大多数情况下看起来和 save() 的效果是差不多的。
+    /// 不同的是 saveLayer() 会创建一个新的图层。在 saveLayer() 到 restore() 之间的操作，是在新的图层上进行的，虽然最终它们还是会合成到一起
+    /// Paint，其 ColorFilters 和 BlendMode 配置会在图层合成的时候生效。其中，前面的图层为 dst，本图层为 src
+    /// 如果 Paint 没有设置混合参数，新图层就相当于仅仅是盖在了前面的图层之上
+    ///
+    /// restore
+    /// 在调用 save() 或者 saveLayer() 必须调用 restore() 来合成，否则 Flutter 会抛出异常。
+    ///值得注意的是，每一个 save() 或者 saveLayer() 都必须有一个对应的 restore()
     canvas.saveLayer(
         Rect.fromCircle(
             center: Offset(size.width / 2, size.height / 2), radius: 60),
@@ -186,7 +185,6 @@ class MyPainter extends CustomPainter {
                 recognizer: TapGestureRecognizer()
                   ..onTap = () => print('inline text onTap'))
           ]);
-
     //计算用于绘制文本的字形的可视位置 minWidth/maxWidth 长度限制
     textPainter.layout(minWidth: 0, maxWidth: 300);
     //返回从文本顶部到///给定类型的第一个基线的距离
@@ -205,16 +203,15 @@ class MyPainter extends CustomPainter {
 
     //设置maxLines后，超过maxLines返回true
     textPainter.didExceedMaxLines;
-
-    canvas.drawImage(image, Offset(0, 0), myPaint);
+    canvas.drawImage(image!, Offset(0, 0), myPaint);
     //将图片的哪一部分绘制到哪
     canvas.drawImageRect(
-        image,
-        ui.Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+        image!,
+        ui.Rect.fromLTWH(0, 0, image!.width.toDouble(), image!.height.toDouble()),
         Rect.fromCenter(
             center: Offset(100, 100),
-            width: image.width.toDouble(),
-            height: image.height.toDouble()),
+            width: image!.width.toDouble(),
+            height: image!.height.toDouble()),
         myPaint);
   }
 

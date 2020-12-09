@@ -37,7 +37,7 @@ class _NotificationPageState extends State<NotificationPage> {
         title: Text("notification page"),
       ),
       body: NotificationListener(
-        onNotification: (notification) {
+        onNotification: (dynamic notification) {
           //print(notification);
           switch (notification.runtimeType) {
             case ScrollStartNotification:

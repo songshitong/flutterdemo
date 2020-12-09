@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
 
 ///自定义 scrolls physics 使用自定义的scrollphysic+listview模拟PageView效果
 ///
@@ -10,7 +11,7 @@ class CustomScrollPhysicsPage extends StatefulWidget {
 }
 
 class _CustomScrollPhysicsState extends State<CustomScrollPhysicsPage> {
-  ScrollPhysics _physics;
+  ScrollPhysics? _physics;
   PageController _controller = PageController();
   int itemCount = 5;
   @override
@@ -37,14 +38,17 @@ class _CustomScrollPhysicsState extends State<CustomScrollPhysicsPage> {
             child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: itemCount,
-                physics: _physics,
+                physics: _physics!,
                 controller: _controller,
                 itemBuilder: (context, index) {
                   return Container(
                     width: MediaQuery.of(context).size.width,
                     height: 150,
                     decoration: BoxDecoration(
-                        color: Color.fromARGB(255, math.Random.secure().nextInt(255), math.Random.secure().nextInt(255),
+                        color: Color.fromARGB(
+                            255,
+                            math.Random.secure().nextInt(255),
+                            math.Random.secure().nextInt(255),
                             math.Random.secure().nextInt(255))),
                   );
                 }),
@@ -60,7 +64,10 @@ class _CustomScrollPhysicsState extends State<CustomScrollPhysicsPage> {
                     width: MediaQuery.of(context).size.width,
                     height: 150,
                     decoration: BoxDecoration(
-                        color: Color.fromARGB(255, math.Random.secure().nextInt(255), math.Random.secure().nextInt(255),
+                        color: Color.fromARGB(
+                            255,
+                            math.Random.secure().nextInt(255),
+                            math.Random.secure().nextInt(255),
                             math.Random.secure().nextInt(255))),
                   );
                 }),
@@ -76,27 +83,31 @@ class _CustomScrollPhysicsState extends State<CustomScrollPhysicsPage> {
 ///模拟pageView的效果  滚动超过一半，弹到下一页，滚动不超过一半，回到原位置
 ///也可以参考gallery[_SnappingScrollPhysics]
 class CustomScrollPhysics extends ScrollPhysics {
-  final double itemDimension;
-  CustomScrollPhysics({this.itemDimension, ScrollPhysics parent}) : super(parent: parent);
+  final double? itemDimension;
+  CustomScrollPhysics({this.itemDimension, ScrollPhysics? parent})
+      : super(parent: parent);
 
   @override
-  CustomScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return CustomScrollPhysics(itemDimension: itemDimension, parent: buildParent(ancestor));
+  CustomScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return CustomScrollPhysics(
+        itemDimension: itemDimension, parent: buildParent(ancestor));
   }
 
   double _getPage(ScrollPosition position) {
     ///  当前位置/每一个的滚动宽度
-    return position.pixels / itemDimension;
+    return position.pixels / itemDimension!;
   }
 
   double _getPixels(double page) {
     ///返回page对应的位置
-    return page * itemDimension;
+    return page * itemDimension!;
   }
 
-  double _getTargetPixels(ScrollPosition position, Tolerance tolerance, double velocity) {
+  double _getTargetPixels(
+      ScrollPosition position, Tolerance tolerance, double velocity) {
     double page = _getPage(position);
-    print("_getTargetPixels page  $page velocity $velocity  tolerance.velocity ${tolerance.velocity}");
+    print(
+        "_getTargetPixels page  $page velocity $velocity  tolerance.velocity ${tolerance.velocity}");
 
     /// 拖动到临界点，停止速度为0，两个if都不进入，按四舍五入逻辑，超过0.5进1，不超过舍去
     /// 轻轻拖动 速度一般大于tolerance.velocity的绝对值，按方向加减0.5后，四舍五入
@@ -113,7 +124,8 @@ class CustomScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(
+      ScrollMetrics position, double velocity) {
     // If we're out of range and not headed back in range, defer to the parent
     // ballistics, which should put us back in range at a page boundary.
     ///滚动距离超过最大和最小，走父类的逻辑
@@ -124,12 +136,14 @@ class CustomScrollPhysics extends ScrollPhysics {
     ///tolerance 计算滚动的默认精度 包括速度和距离
     final Tolerance tolerance = this.tolerance;
 
-    final double target = _getTargetPixels(position, tolerance, velocity);
+    final double target =
+        _getTargetPixels(position as ScrollPosition, tolerance, velocity);
     if (target != position.pixels)
 
       ///ScrollSpringSimulation 可以模拟减速和震动效果
-      return ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
-    return null;
+      return ScrollSpringSimulation(spring, position.pixels, target, velocity,
+          tolerance: tolerance);
+    return null!;
   }
 
   @override
@@ -139,9 +153,9 @@ class CustomScrollPhysics extends ScrollPhysics {
 //Todo 多方向滚动   Scrollable只支持单一方向滚动
 //在同一个方向上（上下都可以）无限滚动，参考infinite_listview  Scrollable的ViewPortBuilder返回Stack里面有两个viewport
 class CustomDegreeScrollPhysics extends ScrollPhysics {
-  CustomDegreeScrollPhysics({ScrollPhysics parent}) : super(parent: parent);
+  CustomDegreeScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
-  CustomDegreeScrollPhysics applyTo(ScrollPhysics ancestor) {
+  CustomDegreeScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return CustomDegreeScrollPhysics(parent: buildParent(ancestor));
   }
 
@@ -150,9 +164,13 @@ class CustomDegreeScrollPhysics extends ScrollPhysics {
   @override
   Tolerance get tolerance {
     return Tolerance(
-      velocity: (1.0 / (0.050 * WidgetsBinding.instance.window.devicePixelRatio)) /
+      velocity: (1.0 /
+              (0.050 *
+                  (WidgetsBinding.instance?.window.devicePixelRatio ?? 0))) /
           degreeFraction, // logical pixels per second
-      distance: (1.0 / WidgetsBinding.instance.window.devicePixelRatio), // logical pixels
+      distance: (1.0 /
+          (WidgetsBinding.instance?.window.devicePixelRatio ??
+              0)), // logical pixels
     );
   }
 

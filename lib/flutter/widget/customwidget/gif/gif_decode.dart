@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:math' as Math;
-
 import 'gif_frame.dart';
 
 /*
@@ -34,28 +31,29 @@ class CustomDecodeGif {
    */
   static const int DESCRIPTOR_MASK_LCT_SIZE = 0x7;
   List<int> bytes;
-  List<GifFrame> frames = new List<GifFrame>();
-  int index;
-  int width;
-  int height;
-  bool gctFlag;
-  int gctSize;
-  int bgIndex;
-  int pixelAspect;
-  int bgColor;
-  GifFrame currentFrame;
+  List<GifFrame?> frames = [];
+  int index = 0;
+  int? width;
+  int? height;
+  late bool gctFlag;
+  late int gctSize;
+  int? bgIndex;
+  int? pixelAspect;
+  int? bgColor;
+  GifFrame? currentFrame;
   int frameCount = 0;
-  List<int> gct; //全局颜色列表
+  List<int?>? gct; //全局颜色列表
   int blockSize = 0; //扩展块大小
-  List<int> block = new List(256); // current data block
+  List<int?> block =
+      new List.filled(256, null, growable: false); // current data block
 
   static const int MaxStackSize = 4096;
   // max decoder pixel stack size
   // LZW decoder working arrays
-  List<int> prefix;
-  List<int> suffix;
-  List<int> pixelStack;
-  List<int> pixels;
+  List<int?>? prefix;
+  List<int?>? suffix;
+  List<int?>? pixelStack;
+  List<int?>? pixels;
 
   int loopCount = 1; // iterations; 0 = repeat forever
 
@@ -108,7 +106,7 @@ class CustomDecodeGif {
 
     if (gctFlag) {
       gct = readColorTable(gctSize);
-      bgColor = gct[bgIndex]; //根据索引在全局颜色列表拿到背景颜色
+      bgColor = gct![bgIndex!]; //根据索引在全局颜色列表拿到背景颜色
       print("bgColor $bgColor");
     }
   }
@@ -125,10 +123,10 @@ class CustomDecodeGif {
     return bytes[index];
   }
 
-  List<int> readColorTable(int ncolors) {
+  List<int?> readColorTable(int ncolors) {
     int nbytes = 3 * ncolors; //一个颜色占3个字节（r g b 各占1字节），因此占用空间为 颜色数量*3 字节
-    List<int> tab = null;
-    List<int> c = new List(nbytes);
+    List<int?>? tab = null;
+    List<int?> c = new List.filled(nbytes, null, growable: false);
     index++;
     for (int i1 = index; i1 < index + nbytes; i1++) {
       c[i1 - index] = bytes[i1];
@@ -136,13 +134,13 @@ class CustomDecodeGif {
     //当前index
     index = index + nbytes - 1;
     //开始解析颜色列表
-    tab = new List(256); //设置最大尺寸避免边界检查
+    tab = new List.filled(256, null, growable: false); //设置最大尺寸避免边界检查
     int i = 0;
     int j = 0;
     while (i < ncolors) {
-      int r = (c[j++]) & 0xff;
-      int g = (c[j++]) & 0xff;
-      int b = (c[j++]) & 0xff;
+      int r = c[j++]! & 0xff;
+      int g = c[j++]! & 0xff;
+      int b = c[j++]! & 0xff;
       tab[i++] = 0xff000000 | (r << 16) | (g << 8) | b;
     }
     return tab;
@@ -157,11 +155,12 @@ class CustomDecodeGif {
    */
   void readImage() {
     // (sub)image position & size.
-    currentFrame.ix = readShort();
-    currentFrame.iy = readShort();
-    currentFrame.iw = readShort();
-    currentFrame.ih = readShort();
-    print("current ix ${currentFrame.ix} iy ${currentFrame.iy} iw ${currentFrame.iw} ih ${currentFrame.ih}");
+    currentFrame!.ix = readShort();
+    currentFrame!.iy = readShort();
+    currentFrame!.iw = readShort();
+    currentFrame!.ih = readShort();
+    print(
+        "current ix ${currentFrame!.ix} iy ${currentFrame!.iy} iw ${currentFrame!.iw} ih ${currentFrame!.ih}");
 
     /*
      * Image Descriptor packed field:
@@ -178,81 +177,82 @@ class CustomDecodeGif {
     int packed = read();
     bool lctFlag = (packed & DESCRIPTOR_MASK_LCT_FLAG) != 0;
     int lctSize = 2 << (packed & 7);
-    currentFrame.interlace = (packed & DESCRIPTOR_MASK_INTERLACE_FLAG) != 0;
-    print("currentFrame.interlace ${currentFrame.interlace}");
+    currentFrame!.interlace = (packed & DESCRIPTOR_MASK_INTERLACE_FLAG) != 0;
+    print("currentFrame.interlace ${currentFrame!.interlace}");
 
-    var act = null;
+    dynamic act = null;
     if (lctFlag) {
       act = readColorTable(lctSize); //若有局部颜色列表，则图象数据是基于局部颜色列表的
     } else {
       // No local color table.
       act = gct; //否则都以全局颜色列表为准
-      if (bgIndex == currentFrame.transIndex) {
+      if (bgIndex == currentFrame!.transIndex) {
         bgColor = 0;
       }
     }
-    currentFrame.lct = act;
-    int save = 0;
-    if (currentFrame.transparency) {
-      save = act[currentFrame.transIndex]; //保存透明色索引位置原来的颜色
-      act[currentFrame.transIndex] = 0; //根据索引位置设置透明颜色
+    currentFrame!.lct = act;
+    int? save = 0;
+    if (currentFrame!.transparency!) {
+      save = act[currentFrame!.transIndex]; //保存透明色索引位置原来的颜色
+      act[currentFrame!.transIndex] = 0; //根据索引位置设置透明颜色
     }
     if (act == null) {
       print("readImage 没有可用的颜色列表");
       return;
     }
     //第index++ 正式开始
-    currentFrame.bufferFrameStart = index;
+    currentFrame!.bufferFrameStart = index;
 
     /**
      * 开始解码图像数据
      */
-    currentFrame.pixels = decodeImageData();
+    currentFrame!.pixels = decodeImageData();
     skip();
 
     frameCount++;
     // Add image to frame.
     frames.add(currentFrame);
-    print(" currentFrame.lct ${currentFrame.lct} ");
-    if (currentFrame.transparency) {
-      act[currentFrame.transIndex] = save; //重置回原来的颜色
+    print(" currentFrame.lct ${currentFrame!.lct} ");
+    if (currentFrame!.transparency!) {
+      act[currentFrame!.transIndex] = save; //重置回原来的颜色
     }
-    currentFrame.resetFrame();
+    currentFrame!.resetFrame();
   }
 
 //  解码图像数据
-  List<int> decodeImageData() {
+  List<int?>? decodeImageData() {
     int NullCode = -1;
-    int npix = currentFrame.iw * currentFrame.ih;
-    int available,
-        clear,
-        code_mask,
-        code_size,
-        end_of_information,
-        in_code,
-        old_code,
-        bits,
-        code,
-        count,
-        i,
-        datum,
-        data_size,
-        first,
-        top,
-        bi,
-        pi;
+    int npix = currentFrame!.iw! * currentFrame!.ih!;
+    int available = 0,
+        clear = 0,
+        code_mask = 0,
+        code_size = 0,
+        end_of_information = 0,
+        in_code = 0,
+        old_code = 0,
+        bits = 0,
+        code = 0,
+        count = 0,
+        i = 0,
+        datum = 0,
+        data_size = 0,
+        first = 0,
+        top = 0,
+        bi = 0,
+        pi = 0;
 
-    if ((pixels == null) || (pixels.length < npix)) {
-      pixels = List(npix); // allocate new pixel array
+    if ((pixels == null) || (pixels!.length < npix)) {
+      pixels =
+          List.filled(npix, null, growable: false); // allocate new pixel array
     }
     if (prefix == null) {
-      prefix = List(MaxStackSize);
+      prefix = List.filled(MaxStackSize, null, growable: false);
     }
     if (suffix == null) {
-      suffix = List(MaxStackSize);
+      suffix = List.filled(MaxStackSize, null, growable: false);
     }
     if (pixelStack == null) {
-      pixelStack = List(MaxStackSize + 1);
+      pixelStack = List.filled(MaxStackSize + 1, null, growable: false);
     }
     // Initialize GIF data stream decoder.
     data_size = read();
@@ -263,8 +263,8 @@ class CustomDecodeGif {
     code_size = data_size + 1;
     code_mask = (1 << code_size) - 1;
     for (code = 0; code < clear; code++) {
-      prefix[code] = 0;
-      suffix[code] = code;
+      prefix![code] = 0;
+      suffix![code] = code;
     }
 
     // Decode GIF pixel stream.
@@ -281,7 +281,7 @@ class CustomDecodeGif {
             }
             bi = 0;
           }
-          datum += ((block[bi]) & 0xff) << bits;
+          datum += (block[bi]! & 0xff) << bits;
           bits += 8;
           bi++;
           count--;
@@ -305,28 +305,28 @@ class CustomDecodeGif {
           continue;
         }
         if (old_code == NullCode) {
-          pixelStack[top++] = suffix[code];
+          pixelStack![top++] = suffix![code];
           old_code = code;
           first = code;
           continue;
         }
         in_code = code;
         if (code == available) {
-          pixelStack[top++] = first;
+          pixelStack![top++] = first;
           code = old_code;
         }
         while (code > clear) {
-          pixelStack[top++] = suffix[code];
-          code = prefix[code];
+          pixelStack![top++] = suffix![code];
+          code = prefix![code]!;
         }
-        first = (suffix[code]) & 0xff;
+        first = suffix![code]! & 0xff;
         // Add a new string to the string table,
         if (available >= MaxStackSize) {
           break;
         }
-        pixelStack[top++] = first;
-        prefix[available] = old_code;
-        suffix[available] = first;
+        pixelStack![top++] = first;
+        prefix![available] = old_code;
+        suffix![available] = first;
         available++;
         if (((available & code_mask) == 0) && (available < MaxStackSize)) {
           code_size++;
@@ -337,11 +337,11 @@ class CustomDecodeGif {
 
       // Pop a pixel off the pixel stack.
       top--;
-      pixels[pi++] = pixelStack[top];
+      pixels![pi++] = pixelStack![top];
       i++;
     }
     for (i = pi; i < npix; i++) {
-      pixels[i] = 0; // clear missing pixels
+      pixels![i] = 0; // clear missing pixels
     }
     print("decodeImageData pixels $pixels ");
     return pixels;
@@ -381,7 +381,7 @@ class CustomDecodeGif {
     return n;
   }
 
-  int readArray(List<int> b, int off, int len) {
+  int readArray(List<int?> b, int off, int len) {
     if (b == null) {
       return 0;
     } else if (off < 0 || len < 0 || len > b.length - off) {
@@ -418,8 +418,8 @@ class CustomDecodeGif {
       readBlock();
       if (block[0] == 1) {
         // loop count sub-block
-        int b1 = (block[1]) & 0xff;
-        int b2 = (block[2]) & 0xff;
+        int b1 = block[1]! & 0xff;
+        int b2 = block[2]! & 0xff;
         loopCount = (b2 << 8) | b1;
       }
     } while ((blockSize > 0));
@@ -432,14 +432,15 @@ class CustomDecodeGif {
     read(); //按读取顺序，此处为块大小
 
     int packed = read(); //读取处置方法、用户输入标志等
-    currentFrame.dispose = (packed & 0x1c) >> 2; //从packed中解析出处置方法(Disposal Method)
-    if (currentFrame.dispose == 0) {
-      currentFrame.dispose = 1; //elect to keep old image if discretionary
+    currentFrame!.dispose =
+        (packed & 0x1c) >> 2; //从packed中解析出处置方法(Disposal Method)
+    if (currentFrame!.dispose == 0) {
+      currentFrame!.dispose = 1; //elect to keep old image if discretionary
     }
-    currentFrame.transparency = (packed & 1) != 0; //从packed中解析出透明色标志
+    currentFrame!.transparency = (packed & 1) != 0; //从packed中解析出透明色标志
 
-    currentFrame.delay = readShort() * 10; //读取延迟时间(毫秒)
-    currentFrame.transIndex = read(); //读取透明色索引
+    currentFrame!.delay = readShort() * 10; //读取延迟时间(毫秒)
+    currentFrame!.transIndex = read(); //读取透明色索引
     read(); //按读取顺序，此处为标识块终结(Block Terminator)
   }
 
@@ -472,7 +473,7 @@ class CustomDecodeGif {
               readBlock();
               String app = "";
               for (int i = 0; i < 11; i++) {
-                app += String.fromCharCode(block[i]);
+                app += String.fromCharCode(block[i]!);
               }
               if (app == "NETSCAPE2.0") {
                 readNetscapeExt();

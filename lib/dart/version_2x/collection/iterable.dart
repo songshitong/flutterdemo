@@ -16,7 +16,7 @@ void main() {
   //castfrom static方法强转
   print("castfrom ${List.castFrom(doubleList)}");
 
-  //map  对每个元素执行函数F,返回iterable
+  //map  对每个元素执行函数F,返回iterable  适用于取列表中每个对象的某个属性然后生成新的列表，或者对每个对象进行某种操作
   var map = inits.map((item) {
     return "${item + 1}";
   });
@@ -61,7 +61,7 @@ void main() {
   print("reduce $reduce");
 
   //fold    根据结合函数，将iterable的每一个元素缩减为一个,操作前有个初始值
-  var fold = inits.fold(1, (item1, item2) {
+  var fold = inits.fold(1, (dynamic item1, item2) {
     return item2 + item1;
   });
   print("fold $fold");
@@ -114,7 +114,8 @@ void main() {
   print("lastwhere ${inits.lastWhere((item) => item > 5)}");
 
   //singlewhere     只有一个元素满足，返回这个元素，多个元素满足，抛出异常，没有元素满足，返回orElse的结果，如果orElse为空，抛出异常
-  print("singlewhere ${inits.singleWhere((item) => item > 10, orElse: () => 0)}");
+  print(
+      "singlewhere ${inits.singleWhere((item) => item > 10, orElse: () => 0)}");
 
   //elementAt   返回第几个元素
   print("elementat ${inits.elementAt(1)}");

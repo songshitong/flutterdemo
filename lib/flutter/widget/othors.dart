@@ -91,7 +91,7 @@ import 'package:flutter/material.dart';
 // function 是const吗  一个const构造器，接受一个function     class外面的是function，里面的是method???
 
 //SynchronousFuture
-//Completer
+//todo Completer
 //AspectRatio
 //Texture
 
@@ -289,7 +289,7 @@ import 'package:flutter/material.dart';
 //todo SliderTheme.of(context).copyWith  SliderTheme自定义滑块样式     Slider
 void main() {
   Visibility(
-    child: LayoutBuilder(builder: null),
+    child: LayoutBuilder(builder: null!),
   );
   Colors.black.withOpacity(0.1);
 
@@ -338,6 +338,9 @@ void main() {
 /// datatable
 ///
 /// textStyle fontFeatures
+///
+/// GestureDetector 实现
+/// SelectableText selectcontrol 实现
 Color hexToColor(String code) {
   ///todo 颜色渐变 通过lerp
 //  Color.lerp(a, b, t)

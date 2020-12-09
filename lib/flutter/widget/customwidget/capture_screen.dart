@@ -1,8 +1,8 @@
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'dart:ui' as ui;
 
 ///截图 功能
 ///涂鸦功能
@@ -15,11 +15,11 @@ class _CaptureScreenPageState extends State<CaptureScreenPage> {
   GlobalKey captureKey = GlobalKey();
   GlobalKey captureAfterPaintKey = GlobalKey();
 
-  Uint8List pngBytes;
-  Uint8List pngAfterPaintBytes;
+  Uint8List? pngBytes;
+  Uint8List? pngAfterPaintBytes;
   Path mPath = new Path();
-  double startX;
-  double startY;
+  late double startX;
+  late double startY;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,7 +36,8 @@ class _CaptureScreenPageState extends State<CaptureScreenPage> {
                 child: Card(
                   elevation: 5,
                   color: Colors.yellow,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20))),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20))),
                   child: Padding(
                     padding: EdgeInsets.all(80),
                     child: Text("我是内容 "),
@@ -69,8 +70,8 @@ class _CaptureScreenPageState extends State<CaptureScreenPage> {
                             print(
                                 "update  (currentX + startX) / 2  ${(currentX + startX) / 2}  (currentY + startY) / 2  ${(currentY + startY) / 2} currentX $currentX currentY $currentY  ");
                             //使用quadraticBezierTo 比lineto相对平滑
-                            mPath.quadraticBezierTo(
-                                (currentX + startX) / 2, (currentY + startY) / 2, currentX, currentY);
+                            mPath.quadraticBezierTo((currentX + startX) / 2,
+                                (currentY + startY) / 2, currentX, currentY);
                             startX = currentX;
                             startY = currentY;
 //                            mPath.lineTo(currentX, currentY);
@@ -80,7 +81,7 @@ class _CaptureScreenPageState extends State<CaptureScreenPage> {
                           child: CustomPaint(
                             foregroundPainter: GesturePainter(mPath),
                             child: Image.memory(
-                              pngBytes,
+                              pngBytes!,
                               scale: ui.window.devicePixelRatio,
                               gaplessPlayback: true,
                             ),
@@ -97,7 +98,7 @@ class _CaptureScreenPageState extends State<CaptureScreenPage> {
               pngAfterPaintBytes == null
                   ? Container()
                   : Image.memory(
-                      pngAfterPaintBytes,
+                      pngAfterPaintBytes!,
                       scale: ui.window.devicePixelRatio,
                       gaplessPlayback: true,
                     )
@@ -113,13 +114,16 @@ class _CaptureScreenPageState extends State<CaptureScreenPage> {
   ///同时显示图片的sale设置为[window.devicePixelRatio]，可以显示为截取大小
   ///调用[OffsetLayer.toImage]，然后调用[ui.Scene.toImage]
   ///TODO compositing层  [ui.Scene.toImage] 生成光栅image
-  Future<Uint8List> _capturePng(GlobalKey currentKey) async {
+  Future<Uint8List?> _capturePng(GlobalKey currentKey) async {
     int startTime = DateTime.now().millisecondsSinceEpoch;
     print("startTime $startTime");
-    RenderRepaintBoundary boundary = currentKey.currentContext.findRenderObject();
-    ui.Image image = await boundary.toImage(pixelRatio: ui.window.devicePixelRatio);
-    ByteData bytesData = await image.toByteData(format: ui.ImageByteFormat.png);
-    var bytes = bytesData.buffer.asUint8List();
+    RenderRepaintBoundary boundary =
+        currentKey.currentContext?.findRenderObject() as RenderRepaintBoundary;
+    ui.Image image =
+        await boundary.toImage(pixelRatio: ui.window.devicePixelRatio);
+    ByteData? bytesData =
+        await image.toByteData(format: ui.ImageByteFormat.png);
+    var bytes = bytesData?.buffer.asUint8List();
     int stopTime = DateTime.now().millisecondsSinceEpoch;
     print("stopTime $stopTime   duration ${stopTime - startTime}");
     return bytes;

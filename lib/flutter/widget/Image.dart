@@ -38,7 +38,7 @@ class ImagePage extends StatefulWidget {
 }
 
 class _ImagePageState extends State<ImagePage> {
-  Uint8List imgList;
+  Uint8List? imgList;
   @override
   void initState() {
     super.initState();
@@ -63,7 +63,7 @@ class _ImagePageState extends State<ImagePage> {
                 //TODO 图片格式 RawImage
                 //
                 image.toByteData(format: ImageByteFormat.png).then((byteData) {
-                  imgList = byteData.buffer.asUint8List(
+                  imgList = byteData!.buffer.asUint8List(
                       byteData.offsetInBytes, byteData.lengthInBytes);
                   print("after getImage imgList $imgList");
                   setState(() {});
@@ -83,7 +83,7 @@ class _ImagePageState extends State<ImagePage> {
               height: 100,
               width: MediaQuery.of(context).size.width,
               child: imgList != null
-                  ? Image.memory(imgList, gaplessPlayback: true)
+                  ? Image.memory(imgList!, gaplessPlayback: true)
                   : Container(),
             ),
             Image.asset(MyImgs.SANTAIZI),

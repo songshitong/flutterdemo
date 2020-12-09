@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutterdemo/flutter/common/MyImgs.dart';
-import 'dart:math' as Math;
 
 class ImagePreviewPage extends StatelessWidget {
   String url1 = "http://pic13.nipic.com/20110409/7119492_114440620000_2.jpg";
@@ -55,7 +53,8 @@ class _ImagePreviewState extends State<ImagePreview> {
           )),
       onTap: () {
         //进入全屏预览
-        Navigator.of(context).push(TransparentMaterialPageRoute(builder: (context) {
+        Navigator.of(context)
+            ?.push(TransparentMaterialPageRoute(builder: (context) {
           return ImageDetail(NetworkImage(widget.url));
         }));
       },
@@ -90,23 +89,23 @@ class StateData {
   double offsetY = 0.0;
   double startOffsetX = 0.0;
   double startOffsetY = 0.0;
-  Offset lastOffset;
+  late Offset lastOffset;
   double backgroundOpacity = iniOpacity;
   double scaleNum = iniScale;
 
   //图片与屏幕的对比
-  double iniScaleContrasW;
-  double iniScaleContrasH;
+  double? iniScaleContrasW;
+  double? iniScaleContrasH;
 
-  double scaleContrasW;
-  double scaleContrasH;
+  double? scaleContrasW;
+  double? scaleContrasH;
 
-  double firstScaleContrasW;
-  double firstScaleContrasH;
+  double? firstScaleContrasW;
+  double? firstScaleContrasH;
 
   //图片信息
-  double imgWidth;
-  double imgHeight;
+  double? imgWidth;
+  double? imgHeight;
 }
 
 //
@@ -120,7 +119,8 @@ abstract class HandleIniState {
     stateData.startOffsetY = details.focalPoint.dy;
   }
 
-  void handleMove(ScaleUpdateDetails details, IniMoveDir moveDir, double dy, double dx);
+  void handleMove(
+      ScaleUpdateDetails details, IniMoveDir? moveDir, double dy, double dx);
 
   void handleScale(ScaleUpdateDetails details);
 
@@ -130,29 +130,35 @@ abstract class HandleIniState {
 }
 
 class HandleIniStateScale extends HandleIniState {
-  HandleIniStateScale(ScaleStartDetails details, BuildContext buildContext, Offset lastOffset)
+  HandleIniStateScale(
+      ScaleStartDetails details, BuildContext buildContext, Offset lastOffset)
       : super(details, buildContext) {
     stateData.lastOffset = lastOffset;
   }
 
   @override
-  handleMove(ScaleUpdateDetails details, IniMoveDir moveDir, double dy, double dx) {
+  handleMove(
+      ScaleUpdateDetails details, IniMoveDir? moveDir, double dy, double dx) {
     print("HandleIniStateScale handleMove");
-    double computeScreenWidth = stateData.imgWidth * stateData.scaleContrasW;
-    double computeScreenHeight = stateData.imgHeight * stateData.scaleContrasH;
+    double computeScreenWidth = stateData.imgWidth! * stateData.scaleContrasW!;
+    double computeScreenHeight =
+        stateData.imgHeight! * stateData.scaleContrasH!;
     //1 找到图片与屏幕的初始比
     //2 计算缩放后的图片与屏幕比
     //3 图片移动到与屏幕贴合的程度，往一侧的总的移动距离=左侧超出的宽度 （中心缩放时，超出宽度=(ImgWidth-ImgWidth*对比)/2）
     //4 根据图片应该移动的距离，计算手指在屏幕上的移动距离
     print(
         "computeScreenWidth $computeScreenWidth computeScreenHeight $computeScreenHeight stateData.imgWidth ${stateData.imgWidth} stateData.scaleContrasW ${stateData.scaleContrasW} stateData.imgHeight ${stateData.imgHeight} stateData.scaleContrasH ${stateData.scaleContrasH}");
-    double diffWidth = (computeScreenWidth - MediaQuery.of(buildContext).size.width).abs();
-    double diffHeight = (computeScreenHeight - MediaQuery.of(buildContext).size.height).abs();
+    double diffWidth =
+        (computeScreenWidth - MediaQuery.of(buildContext).size.width).abs();
+    double diffHeight =
+        (computeScreenHeight - MediaQuery.of(buildContext).size.height).abs();
 //    print("diffWidth $diffWidth diffHeight $diffHeight");
     double minX = -diffWidth * ((Alignment.center.x - 1).abs() / 2);
     double maxX = diffWidth * ((Alignment.center.x + 1).abs() / 2);
 
-    print("HandleIniStateScale handleMove minX $minX maxX $maxX stateData.scaleNum ${stateData.scaleNum}");
+    print(
+        "HandleIniStateScale handleMove minX $minX maxX $maxX stateData.scaleNum ${stateData.scaleNum}");
     double maxY = diffHeight * ((Alignment.center.y + 1).abs() / 2);
     double minY = -diffHeight * ((Alignment.center.y - 1).abs() / 2);
 //    print("HandleIniStateScale handleMove minY $minY maxY $maxY ");
@@ -161,8 +167,14 @@ class HandleIniStateScale extends HandleIniState {
     stateData.offsetX = (dx + stateData.lastOffset.dx).clamp(minX, maxX);
     stateData.offsetY = (dy + stateData.lastOffset.dy).clamp(minY, maxY);
     //当图片为长方形，有一侧缩放后没有超过屏幕，不进行移动
-    stateData.offsetX = computeScreenWidth > MediaQuery.of(buildContext).size.width ? stateData.offsetX : 0.0;
-    stateData.offsetY = computeScreenHeight > MediaQuery.of(buildContext).size.height ? stateData.offsetY : 0.0;
+    stateData.offsetX =
+        computeScreenWidth > MediaQuery.of(buildContext).size.width
+            ? stateData.offsetX
+            : 0.0;
+    stateData.offsetY =
+        computeScreenHeight > MediaQuery.of(buildContext).size.height
+            ? stateData.offsetY
+            : 0.0;
 
     print(
         "stateData.offsetX ${stateData.offsetX} stateData.offsetY ${stateData.offsetY} lastOffset ${stateData.lastOffset}");
@@ -179,11 +191,13 @@ class HandleIniStateScale extends HandleIniState {
     print("target $target");
     //调用onScaleEnd后会调用onScaleUpdate，并且scaleNum回到初始值
     stateData.scaleNum = target.clamp(0.5, 8.0);
-    stateData.scaleContrasW = (stateData.scaleContrasW * orginScale)
-        .clamp(stateData.firstScaleContrasW * 0.5, stateData.firstScaleContrasW * 8.0);
+    stateData.scaleContrasW = (stateData.scaleContrasW! * orginScale).clamp(
+        stateData.firstScaleContrasW! * 0.5,
+        stateData.firstScaleContrasW! * 8.0);
 
-    stateData.scaleContrasH = (stateData.scaleContrasH * orginScale)
-        .clamp(stateData.firstScaleContrasH * 0.5, stateData.firstScaleContrasH * 8.0);
+    stateData.scaleContrasH = (stateData.scaleContrasH! * orginScale).clamp(
+        stateData.firstScaleContrasH! * 0.5,
+        stateData.firstScaleContrasH! * 8.0);
     print("scaleContras ${stateData.scaleContrasW}");
   }
 
@@ -204,22 +218,26 @@ class HandleIniStateScale extends HandleIniState {
       stateData.scaleContrasH = stateData.firstScaleContrasH;
     } else if (stateData.scaleNum > 4) {
       stateData.scaleNum = 4;
-      stateData.scaleContrasW = stateData.firstScaleContrasW * 4;
-      stateData.scaleContrasH = stateData.firstScaleContrasH * 4;
+      stateData.scaleContrasW = stateData.firstScaleContrasW! * 4;
+      stateData.scaleContrasH = stateData.firstScaleContrasH! * 4;
     }
   }
 }
 
 class HandleIniStateDefault extends HandleIniState {
-  HandleIniStateDefault(ScaleStartDetails details, BuildContext buildContext) : super(details, buildContext);
+  HandleIniStateDefault(ScaleStartDetails details, BuildContext buildContext)
+      : super(details, buildContext);
   @override
-  handleMove(ScaleUpdateDetails details, IniMoveDir moveDir, double dy, double dx) {
+  handleMove(
+      ScaleUpdateDetails details, IniMoveDir? moveDir, double dy, double dx) {
     print("HandleIniStateDefault handleMove moveDir $moveDir");
     if (moveDir == IniMoveDir.DOWN) {
       //移动   移动监听是缩放监听的子集，1.0是移动，其他是缩放
       if (dy > 0) {
         //只有在初始向下，移动向下的同时变化背景和大小
-        stateData.backgroundOpacity = (1 - dy.abs() / (MediaQuery.of(buildContext).size.height / 2)).clamp(0.2, 1.0);
+        stateData.backgroundOpacity =
+            (1 - dy.abs() / (MediaQuery.of(buildContext).size.height / 2))
+                .clamp(0.2, 1.0);
         //放大状态的图片，下滑不进行缩小
         stateData.scaleNum = 1 - (1 - stateData.backgroundOpacity) / 2;
       }
@@ -244,12 +262,15 @@ class HandleIniStateDefault extends HandleIniState {
     print("target $target");
     //调用onScaleEnd后会调用onScaleUpdate，并且scaleNum回到初始值
     stateData.scaleNum = target.clamp(0.5, 8.0);
-    stateData.scaleContrasW = (stateData.scaleContrasW * orginScale)
-        .clamp(stateData.firstScaleContrasW * 0.5, stateData.firstScaleContrasW * 8.0);
+    stateData.scaleContrasW = (stateData.scaleContrasW! * orginScale).clamp(
+        stateData.firstScaleContrasW! * 0.5,
+        stateData.firstScaleContrasW! * 8.0);
 
-    stateData.scaleContrasH = (stateData.scaleContrasH * orginScale)
-        .clamp(stateData.firstScaleContrasH * 0.5, stateData.firstScaleContrasH * 8.0);
-    print("scaleContrasW ${stateData.scaleContrasW}  scaleContrasH ${stateData.scaleContrasH}");
+    stateData.scaleContrasH = (stateData.scaleContrasH! * orginScale).clamp(
+        stateData.firstScaleContrasH! * 0.5,
+        stateData.firstScaleContrasH! * 8.0);
+    print(
+        "scaleContrasW ${stateData.scaleContrasW}  scaleContrasH ${stateData.scaleContrasH}");
   }
 
   @override
@@ -257,7 +278,7 @@ class HandleIniStateDefault extends HandleIniState {
     print("HandleIniStateDefault moveEnd");
 
     if (stateData.offsetY > 100) {
-      Navigator.of(buildContext).pop();
+      Navigator.of(buildContext)?.pop();
       return;
     }
     //移动结束，重置状态
@@ -280,10 +301,11 @@ class HandleIniStateDefault extends HandleIniState {
       stateData.scaleContrasH = stateData.firstScaleContrasH;
     } else if (stateData.scaleNum > 4) {
       stateData.scaleNum = 4;
-      stateData.scaleContrasW = stateData.firstScaleContrasW * 4;
-      stateData.scaleContrasH = stateData.firstScaleContrasH * 4;
+      stateData.scaleContrasW = stateData.firstScaleContrasW! * 4;
+      stateData.scaleContrasH = stateData.firstScaleContrasH! * 4;
     }
-    print("stateData.scaleContrasW ${stateData.scaleContrasW} stateData.scaleContrasH ${stateData.scaleContrasH} ");
+    print(
+        "stateData.scaleContrasW ${stateData.scaleContrasW} stateData.scaleContrasH ${stateData.scaleContrasH} ");
   }
 }
 
@@ -296,28 +318,28 @@ class _ImageDetailState extends State<ImageDetail> {
   double offsetY = 0.0;
   double backgroundOpacity = iniOpacity;
 
-  HandleIniState handleIniState;
-  IniMoveDir iniMoveDir;
+  late HandleIniState handleIniState;
+  IniMoveDir? iniMoveDir;
   bool isMove = false;
 
   //图片大小与屏幕的对比
-  double iniScaleContrasW;
-  double iniScaleContrasH;
+  double? iniScaleContrasW;
+  double? iniScaleContrasH;
 
-  double scaleContrasW;
-  double scaleContrasH;
+  double? scaleContrasW;
+  double? scaleContrasH;
 
-  double firstScaleContrasW;
-  double firstScaleContrasH;
+  double? firstScaleContrasW;
+  double? firstScaleContrasH;
 
-  double imgWidth;
-  double imgHeight;
+  double? imgWidth;
+  double? imgHeight;
   @override
   void initState() {
     //全屏模式，隐藏状态栏，底部导航
 //    SystemChrome.setEnabledSystemUIOverlays([]);
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
+    WidgetsBinding.instance?.addPostFrameCallback(_afterLayout);
   }
 
   void _afterLayout(Duration duration) {
@@ -334,14 +356,16 @@ class _ImageDetailState extends State<ImageDetail> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: Colors.black.withOpacity(backgroundOpacity)),
+      decoration:
+          BoxDecoration(color: Colors.black.withOpacity(backgroundOpacity)),
       child: GestureDetector(
         onTap: () {
-          Navigator.of(context).pop();
+          Navigator.of(context)?.pop();
         },
         onScaleStart: (startDetails) {
           if (scaleNum != 1) {
-            handleIniState = new HandleIniStateScale(startDetails, context, Offset(offsetX, offsetY));
+            handleIniState = new HandleIniStateScale(
+                startDetails, context, Offset(offsetX, offsetY));
             //初始化上一次缩放的scaleNum
             handleIniState.stateData.scaleNum = scaleNum;
             handleIniState.stateData.iniScaleContrasW = iniScaleContrasW;
@@ -370,12 +394,16 @@ class _ImageDetailState extends State<ImageDetail> {
           }
         },
         onScaleUpdate: (updateDetails) {
-          print("focalPoint.dy ${updateDetails.focalPoint.dy} focalPoint.dx ${updateDetails.focalPoint.dx}");
-          double dy = updateDetails.focalPoint.dy - handleIniState.stateData.startOffsetY;
-          double dx = updateDetails.focalPoint.dx - handleIniState.stateData.startOffsetX;
+          print(
+              "focalPoint.dy ${updateDetails.focalPoint.dy} focalPoint.dx ${updateDetails.focalPoint.dx}");
+          double dy = updateDetails.focalPoint.dy -
+              handleIniState.stateData.startOffsetY;
+          double dx = updateDetails.focalPoint.dx -
+              handleIniState.stateData.startOffsetX;
           print("before updateDetails ${updateDetails.scale} dx $dx dy $dy");
           //确定初始方向
-          if (handleIniState.stateData.offsetX == 0 && handleIniState.stateData.offsetY == 0) {
+          if (handleIniState.stateData.offsetX == 0 &&
+              handleIniState.stateData.offsetY == 0) {
             if (dy > 0 && dy.abs() > dx.abs()) {
               iniMoveDir = IniMoveDir.DOWN;
             } else if (dx > 0 && dx.abs() > dy.abs()) {
@@ -443,24 +471,28 @@ class _ImageDetailState extends State<ImageDetail> {
     iniScaleContrasW = handleIniState.stateData.scaleContrasW;
     iniScaleContrasH = handleIniState.stateData.scaleContrasH;
 
-    print("changeState iniScaleContras $iniScaleContrasW iniScaleContrasH $iniScaleContrasH");
+    print(
+        "changeState iniScaleContras $iniScaleContrasW iniScaleContrasH $iniScaleContrasH");
   }
 
   Future<ImageInfo> _getImageInfo() {
     final Completer completer = Completer<ImageInfo>();
-    final ImageStream stream = widget.imageProvider.resolve(const ImageConfiguration());
-    final listener = ImageStreamListener((ImageInfo info, bool synchronousCall) {
+    final ImageStream stream =
+        widget.imageProvider.resolve(const ImageConfiguration());
+    final listener =
+        ImageStreamListener((ImageInfo info, bool synchronousCall) {
       if (!completer.isCompleted) {
         completer.complete(info);
         if (mounted) {
           imgWidth = info.image.width.toDouble();
           imgHeight = info.image.height.toDouble();
-          var size = Size(imgWidth, imgHeight);
+          var size = Size(imgWidth!, imgHeight!);
           print("_getImageInfo size $size");
-          print("scrennwidth ${MediaQuery.of(context).size.width} screenHeight ${MediaQuery.of(context).size.height}");
+          print(
+              "scrennwidth ${MediaQuery.of(context).size.width} screenHeight ${MediaQuery.of(context).size.height}");
           //图片与屏幕的对比取，宽和高比的最大值
-          firstScaleContrasW = MediaQuery.of(context).size.width / imgWidth;
-          firstScaleContrasH = MediaQuery.of(context).size.height / imgHeight;
+          firstScaleContrasW = MediaQuery.of(context).size.width / imgWidth!;
+          firstScaleContrasH = MediaQuery.of(context).size.height / imgHeight!;
           iniScaleContrasW = firstScaleContrasW;
           iniScaleContrasH = firstScaleContrasH;
         }
@@ -470,29 +502,31 @@ class _ImageDetailState extends State<ImageDetail> {
     completer.future.then((_) {
       stream.removeListener(listener);
     });
-    return completer.future;
+    return completer.future as Future<ImageInfo>;
   }
 }
 
 class TransparentMaterialPageRoute extends PageRoute {
-  WidgetBuilder builder;
+  WidgetBuilder? builder;
   @override
   // 不遮挡前一页
   bool get opaque => false;
   TransparentMaterialPageRoute({this.builder});
 
   @override
-  Color get barrierColor => null;
+  Color get barrierColor => null!;
 
   @override
-  String get barrierLabel => null;
+  String get barrierLabel => null!;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    final Widget result = builder(context);
+  Widget buildPage(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation) {
+    final Widget result = builder!(context);
     assert(() {
       if (result == null) {
-        throw FlutterError('The builder for route "${settings.name}" returned null.\n'
+        throw FlutterError(
+            'The builder for route "${settings.name}" returned null.\n'
             'Route builders must never return null.');
       }
       return true;
@@ -505,10 +539,11 @@ class TransparentMaterialPageRoute extends PageRoute {
   }
 
   @override
-  Widget buildTransitions(
-      BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation, Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
-    return theme.buildTransitions(this, context, animation, secondaryAnimation, child);
+    return theme.buildTransitions(
+        this, context, animation, secondaryAnimation, child);
 //    return CupertinoPageTransition(
 //      primaryRouteAnimation: animation,
 //      secondaryRouteAnimation: secondaryAnimation,

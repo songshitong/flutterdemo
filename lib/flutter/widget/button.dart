@@ -55,7 +55,7 @@ class ButtonPageState extends State<ButtonPage> {
             ///OutlineButton默认有一个边框，不带阴影且背景透明。按下后，边框颜色会变亮、同时出现背景和阴影(较弱)
             ///todo 改变样式
             OutlineButton(
-              onPressed: _isClickable ? () {} : null,
+              onPressed: _isClickable ? () {} : null!,
               child: Text("OutlineButton"),
               disabledBorderColor: Colors.red, //禁用状态边框颜色
               highlightedBorderColor: Colors.greenAccent, //按下时边框颜色
@@ -68,7 +68,7 @@ class ButtonPageState extends State<ButtonPage> {
 
             ///设置其他属性
             FlatButton(
-              onPressed: _isClickable ? () {} : null,
+              onPressed: _isClickable ? () {} : null!,
               child: Text(
                 "custom style",
 //              style: TextStyle(color: Colors.yellow),
@@ -153,7 +153,7 @@ class ButtonPageState extends State<ButtonPage> {
             ),
             DropdownButton(
               hint: Text("DropdownButton"),
-              onChanged: (index) {},
+              onChanged: (dynamic index) {},
               items: <DropdownMenuItem<int>>[
                 DropdownMenuItem(child: Text("DropdownButton1"), value: 1),
                 DropdownMenuItem(child: Text("DropdownButton2"), value: 2),

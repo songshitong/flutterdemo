@@ -19,4 +19,5 @@ class MyImgs {
       "lib/img/green_home_sapling_little.png";
   static const water = "lib/img/water.png";
   static const water_container = "lib/img/water_container.png";
+  static const overlay = "lib/img/overlay.png";
 }

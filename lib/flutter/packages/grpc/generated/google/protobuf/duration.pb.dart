@@ -26,13 +26,13 @@ class Duration extends $pb.GeneratedMessage {
       : super.fromJson(i, r);
   Duration clone() => new Duration()..mergeFromMessage(this);
   Duration copyWith(void Function(Duration) updates) =>
-      super.copyWith((message) => updates(message as Duration));
+      super.copyWith((message) => updates(message as Duration)) as Duration;
   $pb.BuilderInfo get info_ => _i;
   static Duration create() => new Duration();
   Duration createEmptyInstance() => create();
   static $pb.PbList<Duration> createRepeated() => new $pb.PbList<Duration>();
   static Duration getDefault() => _defaultInstance ??= create()..freeze();
-  static Duration _defaultInstance;
+  static Duration? _defaultInstance;
 
   Int64 get seconds => $_getI64(0);
   set seconds(Int64 v) {

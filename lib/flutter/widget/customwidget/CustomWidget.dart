@@ -12,7 +12,7 @@ class slw extends StatelessWidget {
 //StatefulWidget 状态可变的widget，发生重建  setState 改变数据，从而实现画面变化  外部拿到state(Overlay.of(context))也可以调用overlayState.setState(() {});
 //todo 触发每个生命周期
 class sfw extends StatefulWidget {
-  String user;
+  String? user;
   @override
   _sfwState createState() => _sfwState();
 }
@@ -38,7 +38,7 @@ class stani extends StatefulWidget {
 
 ///SingleTickerProviderStateMixin 提供一个ticker，只在tree可用的情况下
 class _staniState extends State<stani> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+  late AnimationController _controller;
 
   @override
   void initState() {

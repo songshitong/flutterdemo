@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class WillPopScopePage extends StatelessWidget {
-  DateTime _lastPressedAt; //上次点击时间
+  DateTime? _lastPressedAt; //上次点击时间
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,7 @@ class WillPopScopePage extends StatelessWidget {
       ),
       body: WillPopScope(
           onWillPop: () async {
-            if (_lastPressedAt == null || DateTime.now().difference(_lastPressedAt) > Duration(seconds: 1)) {
+            if (_lastPressedAt == null || DateTime.now().difference(_lastPressedAt!) > Duration(seconds: 1)) {
               //两次点击间隔超过1秒则重新计时
               _lastPressedAt = DateTime.now();
               return false;

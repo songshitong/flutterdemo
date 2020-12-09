@@ -26,14 +26,17 @@ class _DecorationAndBordersState extends State<DecorationAndBorders> {
             Container(
               margin: EdgeInsets.all(8),
               height: 50,
-              decoration: BoxDecoration(border: Border.all(color: Colors.green, width: 3, style: BorderStyle.solid)),
+              decoration: BoxDecoration(
+                  border: Border.all(
+                      color: Colors.green, width: 3, style: BorderStyle.solid)),
               child: Text("BoxDecoration decoration"),
             ),
             Container(
               margin: EdgeInsets.all(8),
               height: 50,
               decoration: BoxDecoration(
-                border: CustomBoxBorder.all(color: Colors.red, width: 3, style: BorderStyle.solid),
+                border: CustomBoxBorder.all(
+                    color: Colors.red, width: 3, style: BorderStyle.solid),
               ),
               child: Text("BoxDecoration decoration"),
             ),
@@ -41,7 +44,11 @@ class _DecorationAndBordersState extends State<DecorationAndBorders> {
               margin: EdgeInsets.all(8),
               height: 50,
               decoration: ShapeDecoration(
-                shape: CircleBorder(side: BorderSide(color: Colors.purpleAccent, width: 3, style: BorderStyle.solid)),
+                shape: CircleBorder(
+                    side: BorderSide(
+                        color: Colors.purpleAccent,
+                        width: 3,
+                        style: BorderStyle.solid)),
               ),
               child: Text("ShapeDecoration decoration"),
             ),
@@ -50,7 +57,10 @@ class _DecorationAndBordersState extends State<DecorationAndBorders> {
               height: 50,
               decoration: ShapeDecoration(
                 shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.purpleAccent, width: 3, style: BorderStyle.solid),
+                    side: BorderSide(
+                        color: Colors.purpleAccent,
+                        width: 3,
+                        style: BorderStyle.solid),
                     borderRadius: BorderRadius.all(Radius.circular(10))),
               ),
               child: Text("ShapeDecoration decoration  RoundedRectangleBorder"),
@@ -62,7 +72,10 @@ class _DecorationAndBordersState extends State<DecorationAndBorders> {
               height: 50,
               decoration: ShapeDecoration(
                 shape: StadiumBorder(
-                  side: BorderSide(color: Colors.purpleAccent, width: 3, style: BorderStyle.solid),
+                  side: BorderSide(
+                      color: Colors.purpleAccent,
+                      width: 3,
+                      style: BorderStyle.solid),
                 ),
               ),
               child: Text("ShapeDecoration decoration  StadiumBorder"),
@@ -76,7 +89,10 @@ class _DecorationAndBordersState extends State<DecorationAndBorders> {
               height: 50,
               decoration: ShapeDecoration(
                 shape: BeveledRectangleBorder(
-                    side: BorderSide(color: Colors.purpleAccent, width: 3, style: BorderStyle.solid),
+                    side: BorderSide(
+                        color: Colors.purpleAccent,
+                        width: 3,
+                        style: BorderStyle.solid),
                     borderRadius: BorderRadius.all(Radius.circular(10))),
               ),
               child: Text("ShapeDecoration decoration  BeveledRectangleBorder"),
@@ -87,15 +103,20 @@ class _DecorationAndBordersState extends State<DecorationAndBorders> {
               height: 50,
               decoration: ShapeDecoration(
                 shape: ContinuousRectangleBorder(
-                    side: BorderSide(color: Colors.purpleAccent, width: 3, style: BorderStyle.solid),
+                    side: BorderSide(
+                        color: Colors.purpleAccent,
+                        width: 3,
+                        style: BorderStyle.solid),
                     borderRadius: BorderRadius.all(Radius.circular(10))),
               ),
-              child: Text("ShapeDecoration decoration  ContinuousRectangleBorder"),
+              child:
+                  Text("ShapeDecoration decoration  ContinuousRectangleBorder"),
             ),
             Container(
               margin: EdgeInsets.all(8),
               height: 50,
-              decoration: UnderlineTabIndicator(borderSide: BorderSide(color: Colors.deepPurple)),
+              decoration: UnderlineTabIndicator(
+                  borderSide: BorderSide(color: Colors.deepPurple)),
               child: Text("UnderlineTabIndicator decoration"),
             ),
             Container(
@@ -113,7 +134,7 @@ class _DecorationAndBordersState extends State<DecorationAndBorders> {
 
 class CustomDecoration extends Decoration {
   @override
-  BoxPainter createBoxPainter([onChanged]) {
+  BoxPainter createBoxPainter([VoidCallback? onChanged]) {
     return CustomBoxPainter();
   }
 }
@@ -152,7 +173,8 @@ class CustomBoxBorder extends BoxBorder {
     double width = 1.0,
     BorderStyle style = BorderStyle.solid,
   }) {
-    final BorderSide side = BorderSide(color: color, width: width, style: style);
+    final BorderSide side =
+        BorderSide(color: color, width: width, style: style);
     return CustomBoxBorder.fromBorderSide(side);
   }
 
@@ -171,27 +193,36 @@ class CustomBoxBorder extends BoxBorder {
   BorderSide left;
   @override
   EdgeInsetsGeometry get dimensions {
-    return EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
+    return EdgeInsets.fromLTRB(
+        left.width, top.width, right.width, bottom.width);
   }
 
 //  边框的所有四个边是否都相同。统一边界是通常更有效地绘画
   @override
   bool get isUniform {
     final Color topColor = top.color;
-    if (right.color != topColor || bottom.color != topColor || left.color != topColor) return false;
+    if (right.color != topColor ||
+        bottom.color != topColor ||
+        left.color != topColor) return false;
 
     final double topWidth = top.width;
-    if (right.width != topWidth || bottom.width != topWidth || left.width != topWidth) return false;
+    if (right.width != topWidth ||
+        bottom.width != topWidth ||
+        left.width != topWidth) return false;
 
     final BorderStyle topStyle = top.style;
-    if (right.style != topStyle || bottom.style != topStyle || left.style != topStyle) return false;
+    if (right.style != topStyle ||
+        bottom.style != topStyle ||
+        left.style != topStyle) return false;
 
     return true;
   }
 
   @override
   void paint(Canvas canvas, Rect rect,
-      {TextDirection textDirection, BoxShape shape = BoxShape.rectangle, BorderRadius borderRadius}) {
+      {TextDirection? textDirection,
+      BoxShape shape = BoxShape.rectangle,
+      BorderRadius? borderRadius}) {
     if (isUniform) {
       switch (top.style) {
         case BorderStyle.none:
@@ -199,7 +230,8 @@ class CustomBoxBorder extends BoxBorder {
         case BorderStyle.solid:
           switch (shape) {
             case BoxShape.circle:
-              assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
+              assert(borderRadius == null,
+                  'A borderRadius can only be given for rectangular boxes.');
               paintBorderAndOther(canvas, rect);
               break;
             case BoxShape.rectangle:
@@ -214,14 +246,17 @@ class CustomBoxBorder extends BoxBorder {
       }
     }
 
-    assert(borderRadius == null, 'A borderRadius can only be given for uniform borders.');
-    assert(shape == BoxShape.rectangle, 'A border can only be drawn as a circle if it is uniform.');
+    assert(borderRadius == null,
+        'A borderRadius can only be given for uniform borders.');
+    assert(shape == BoxShape.rectangle,
+        'A border can only be drawn as a circle if it is uniform.');
     paintBorderAndOther(canvas, rect);
   }
 
   void paintBorderAndOther(Canvas canvas, Rect rect) {
     paintOthor(canvas, rect);
-    paintBorder(canvas, rect, top: top, right: right, bottom: bottom, left: left);
+    paintBorder(canvas, rect,
+        top: top, right: right, bottom: bottom, left: left);
   }
 
   void paintOthor(Canvas canvas, Rect rect) {

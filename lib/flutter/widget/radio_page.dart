@@ -7,6 +7,7 @@ class RadioPage extends StatefulWidget {
 
 //通过groupValue来确保唯一选中，groupValue是动态改变的
 class _RadioPageState extends State<RadioPage> {
+  int groupValue = 1;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,13 +19,21 @@ class _RadioPageState extends State<RadioPage> {
           Radio(
             value: 1,
             //选中radio的值
-            groupValue: 1,
-            onChanged: (value) {},
+            groupValue: groupValue,
+            onChanged: (dynamic value) {
+              setState(() {
+                groupValue = value;
+              });
+            },
           ),
           Radio(
             value: 2,
-            groupValue: 2,
-            onChanged: (value) {},
+            groupValue: groupValue,
+            onChanged: (dynamic value) {
+              setState(() {
+                groupValue = value;
+              });
+            },
           ),
         ],
       ),

@@ -6,7 +6,7 @@ Future<void> main() async {
   final channel = new ClientChannel('localhost', port: 50051, options: const ChannelOptions(credentials: credentials));
   final stub = new LoginClient(channel);
   try {
-    final response = await stub.startLogin(Empty(),
+    final LoginResponse response = await stub.startLogin(Empty(),
         options:
             CallOptions(metadata: {"metadata": "this is MetaData"}, providers: <MetadataProvider>[(metadata, uri) {}]));
     print('Greeter client received: ${response}');

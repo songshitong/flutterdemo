@@ -40,13 +40,14 @@ class _IntlPageState extends State<IntlPage> {
 
     //查找上一级context的语言环境   不手动指定定locale，默认为en，但在WidgetsApp的_WidgetsAppState的initState时会获取WidgetsBinding.instance.window.locales
 //     然后回掉给localeResolutionCallback,同时Localizations.localeOf使用正确的context可以获得正确的locale
-    Locale myLocale = Localizations.localeOf(context);
+    Locale myLocale = Localizations.localeOf(context)!;
     print("IntlPage myLocale $myLocale");
-    print("window binding locale  ${WidgetsBinding.instance.window.locales}");
+    print("window binding locale  ${WidgetsBinding.instance?.window.locales}");
     return MaterialApp(
       localizationsDelegates: [
         // 本地化的代理类
-        GlobalMaterialLocalizations.delegate, GlobalWidgetsLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
         // 注册我们的Delegate
         DemoLocalizationsDelegate(),
         IntlLocalizationsDelegate(),
@@ -58,12 +59,14 @@ class _IntlPageState extends State<IntlPage> {
 
       localeListResolutionCallback: (locales, supportedLocales) {
         //监听语言改变
-        print("localeListResolutionCallback locales $locales supportedLocales $supportedLocales");
+        print(
+            "localeListResolutionCallback locales $locales supportedLocales $supportedLocales");
       },
       localeResolutionCallback: (locale, supportedLocales) {
         //监听语言改变
 //        如果locale为null，则表示Flutter未能获取到设备的Locale信息，所以我们在使用locale之前一定要先判空
-        print("localeResolutionCallback locale $locale supportedLocales $supportedLocales");
+        print(
+            "localeResolutionCallback locale $locale supportedLocales $supportedLocales");
       },
       home: ContentBody(() {
         print("点击");
@@ -83,17 +86,18 @@ class ContentBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //查找当前的语言环境
-    Locale myLocale = Localizations.localeOf(context);
+    Locale myLocale = Localizations.localeOf(context)!;
     print("ContentBody myLocale $myLocale");
     return Scaffold(
       appBar: AppBar(
         //使用Locale title
-        title: Text(DemoLocalizations.of(context).title),
+        title: Text(DemoLocalizations.of(context)?.title ?? ""),
       ),
       body: Center(
         child: Column(
           children: <Widget>[
-            Text(/*"使用intl包改变标题：${}"*/ IntlLocalizations.of(context).title),
+            Text(/*"使用intl包改变标题：${}"*/ IntlLocalizations.of(context)?.title ??
+                ""),
             RaisedButton(
               onPressed: callback,
               child: Text("改变标题语言"),
@@ -107,7 +111,8 @@ class ContentBody extends StatelessWidget {
             //https://github.com/flutter/flutter/pull/44029  查看官方修复
             //https://github.com/flutter/flutter/issues/40118
             TextField(
-              decoration: InputDecoration(hintText: "${DemoLocalizations.of(context).title}"),
+              decoration: InputDecoration(
+                  hintText: "${DemoLocalizations.of(context)?.title}"),
               //改变语言后，焦点与hint text对齐
               style: TextStyle(textBaseline: TextBaseline.alphabetic),
             )

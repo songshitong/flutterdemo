@@ -10,7 +10,7 @@ void main() {
 }
 
 class StudentInfo {
-  String name;
+  String? name;
   void sayHello() {
     print(
         "method name ${Trace.current().frames[0].member} location  ${Trace.current().frames[0].location}");

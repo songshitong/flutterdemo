@@ -44,7 +44,9 @@ class _PageViewPageState extends State<PageViewPage> {
                       child: Container(
                         width: 8,
                         height: 8,
-                        color: fractionPage.round() % 5 == index ? Colors.white : Colors.grey,
+                        color: fractionPage.round() % 5 == index
+                            ? Colors.white
+                            : Colors.grey,
                       ),
                     ),
                   );
@@ -64,26 +66,27 @@ typedef MPageViewItemBuilder = Widget Function(BuildContext context, int index);
 typedef MPageViewItemTransitionBuilder = Widget Function(
     BuildContext context, int index, double pageFraction, Widget item);
 
-typedef MPageViewIndicatorBuilder = Widget Function(BuildContext context, int index, int pageIndex);
+typedef MPageViewIndicatorBuilder = Widget Function(
+    BuildContext context, int index, int pageIndex);
 
 ///itemcount为0，默认不展示
 class MPageView extends StatefulWidget {
   MPageViewItemBuilder itemBuilder;
-  MPageViewIndicatorBuilder indicatorBuilder;
-  MPageViewItemTransitionBuilder itemTransitionBuilder;
+  MPageViewIndicatorBuilder? indicatorBuilder;
+  MPageViewItemTransitionBuilder? itemTransitionBuilder;
   int itemCount;
   bool autoScroll;
   double pageTime;
-  double indicatorBottom;
-  double indicatorTop;
-  double indicatorLeft;
-  double indicatorRight;
+  double? indicatorBottom;
+  double? indicatorTop;
+  double? indicatorLeft;
+  double? indicatorRight;
   double indicatorRadius;
   double indicatorSpace;
   bool showIndicator;
-  PageController pageController;
+  PageController? pageController;
   MPageView.builder(
-      {@required this.itemBuilder,
+      {required this.itemBuilder,
       this.indicatorBuilder,
       this.itemTransitionBuilder,
       this.itemCount = 0,
@@ -106,9 +109,9 @@ class MPageView extends StatefulWidget {
 
 ///todo controller.hasClients 判断controller绑定view
 class _MPageViewState extends State<MPageView> {
-  PageController _controller = PageController();
+  PageController? _controller = PageController();
   double controllerPage = 0.0;
-  Timer _timer;
+  Timer? _timer;
 
   @override
   void initState() {
@@ -116,11 +119,11 @@ class _MPageViewState extends State<MPageView> {
     if (widget.pageController != null) {
       _controller = widget.pageController;
     }
-    _controller.addListener(() {
+    _controller!.addListener(() {
       setState(() {
         print(
-            "offset ${_controller.offset} _controller.page ${_controller.page}  _controller.page.toInt  ${_controller.page.toInt()}");
-        controllerPage = _controller.page;
+            "offset ${_controller!.offset} _controller.page ${_controller!.page}  _controller.page.toInt  ${_controller!.page?.toInt()}");
+        controllerPage = _controller!.page!;
       });
     });
   }
@@ -128,7 +131,7 @@ class _MPageViewState extends State<MPageView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    WidgetsBinding.instance.addPostFrameCallback(postFrameCallback);
+    WidgetsBinding.instance?.addPostFrameCallback(postFrameCallback);
   }
 
   void postFrameCallback(Duration duration) {
@@ -145,10 +148,12 @@ class _MPageViewState extends State<MPageView> {
     }
     //一张图片不轮播
     if (widget.itemCount == 1) return;
-    _timer = Timer.periodic(Duration(milliseconds: (widget.pageTime * 1000).toInt()), (timer) {
+    _timer = Timer.periodic(
+        Duration(milliseconds: (widget.pageTime * 1000).toInt()), (timer) {
       int page = controllerPage.round() + 1;
       print("periodic page $page");
-      _controller.animateToPage(page, duration: const Duration(milliseconds: 400), curve: Curves.easeInOut);
+      _controller!.animateToPage(page,
+          duration: const Duration(milliseconds: 400), curve: Curves.easeInOut);
     });
   }
 
@@ -160,7 +165,7 @@ class _MPageViewState extends State<MPageView> {
 
   void cancelTimer() {
     if (null != _timer) {
-      _timer.cancel();
+      _timer!.cancel();
       _timer = null;
     }
   }
@@ -188,19 +193,25 @@ class _MPageViewState extends State<MPageView> {
         Visibility(
           visible: widget.showIndicator && widget.itemCount > 1,
           child: Positioned(
-              bottom: widget.indicatorBottom,
-              top: widget.indicatorTop,
-              left: widget.indicatorLeft,
-              right: widget.indicatorRight,
+              bottom: widget.indicatorBottom!,
+              top: widget.indicatorTop!,
+              left: widget.indicatorLeft!,
+              right: widget.indicatorRight!,
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List<Widget>.generate(widget.itemCount, (index) {
                     if (null != widget.indicatorBuilder) {
-                      return widget.indicatorBuilder(
-                          context, index % widget.itemCount, controllerPage.round() % widget.itemCount);
+                      return widget.indicatorBuilder!(
+                          context,
+                          index % widget.itemCount,
+                          controllerPage.round() % widget.itemCount);
                     } else {
-                      return DefaultIndicator(widget.indicatorSpace, widget.indicatorRadius, index % widget.itemCount,
-                          controllerPage, widget.itemCount);
+                      return DefaultIndicator(
+                          widget.indicatorSpace,
+                          widget.indicatorRadius,
+                          index % widget.itemCount,
+                          controllerPage,
+                          widget.itemCount);
                     }
                   }))),
         )
@@ -210,9 +221,11 @@ class _MPageViewState extends State<MPageView> {
 
   PageView buildPageView() {
     return PageView.builder(
-      physics: widget.itemCount == 1 ? NeverScrollableScrollPhysics() : PageScrollPhysics(),
+      physics: widget.itemCount == 1
+          ? NeverScrollableScrollPhysics()
+          : PageScrollPhysics(),
       scrollDirection: Axis.horizontal,
-      controller: _controller,
+      controller: _controller!,
       itemBuilder: (context, index) {
         final realIndex = index % widget.itemCount;
         final fractionPage = controllerPage;
@@ -220,7 +233,8 @@ class _MPageViewState extends State<MPageView> {
         if (null == widget.itemTransitionBuilder) {
           return DefaultItemTransition(realIndex, fractionPage, item);
         } else {
-          return widget.itemTransitionBuilder(context, realIndex, fractionPage, item);
+          return widget.itemTransitionBuilder!(
+              context, realIndex, fractionPage, item);
         }
       },
 
@@ -246,13 +260,17 @@ class DefaultItemTransition extends StatelessWidget {
       //正在离开
       return Opacity(
         opacity: 1 - (fractionPage - index),
-        child: Transform(transform: Matrix4.identity()..rotateX(fractionPage - index), child: item),
+        child: Transform(
+            transform: Matrix4.identity()..rotateX(fractionPage - index),
+            child: item),
       );
     } else if (index == fractionPage.floor() + 1) {
       //正在进入
       return Opacity(
         opacity: 1 - (index - fractionPage),
-        child: Transform(transform: Matrix4.identity()..rotateX(fractionPage - index), child: item),
+        child: Transform(
+            transform: Matrix4.identity()..rotateX(fractionPage - index),
+            child: item),
       );
     } else {
       //离开
@@ -270,7 +288,9 @@ class DefaultIndicator extends StatelessWidget {
         child: Container(
           width: indicatorRadius,
           height: indicatorRadius,
-          color: fractionPage.round() % count == index ? Colors.white : Colors.grey,
+          color: fractionPage.round() % count == index
+              ? Colors.white
+              : Colors.grey,
         ),
       ),
     );
@@ -282,7 +302,8 @@ class DefaultIndicator extends StatelessWidget {
   double fractionPage;
   int count;
   //todo 修改颜色
-  Color selectedColor;
-  Color unSelectedColor;
-  DefaultIndicator(this.indicatorSpace, this.indicatorRadius, this.index, this.fractionPage, this.count);
+  Color? selectedColor;
+  Color? unSelectedColor;
+  DefaultIndicator(this.indicatorSpace, this.indicatorRadius, this.index,
+      this.fractionPage, this.count);
 }

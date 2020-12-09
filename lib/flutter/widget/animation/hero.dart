@@ -53,16 +53,19 @@ class _HeroPageState extends State<HeroPage> {
               return Material(child: Text("flightShuttle"));
             },
             //定义目标hero的界限在从起始route飞向目的地route时如何变化,MaterialApp默认使用MaterialRectArcTween
-            createRectTween: (Rect begin, Rect end) {
+            createRectTween: (Rect? begin, Rect? end) {
               return MaterialRectArcTween(begin: begin, end: end);
             },
             child: RaisedButton(
               onPressed: () {
-                Navigator.push(context, PageRouteBuilder(
-                    pageBuilder: (BuildContext context, Animation animation, Animation secondaryAnimation) {
+                Navigator.push(context, PageRouteBuilder(pageBuilder:
+                    (BuildContext context, Animation animation,
+                        Animation secondaryAnimation) {
                   return new FadeTransition(
-                    opacity: animation,
-                    child: Scaffold(appBar: AppBar(title: Text("TargetPage")), body: TargetPage()),
+                    opacity: animation as Animation<double>,
+                    child: Scaffold(
+                        appBar: AppBar(title: Text("TargetPage")),
+                        body: TargetPage()),
                   );
                 }));
               },

@@ -3,6 +3,13 @@ https://dart.dev/tools/pub/pubspec
 
 //内容来自https://zhuanlan.zhihu.com/p/55398976
 
+publish_to: none
+
+Caret syntax(^)
+Caret syntax is a compact way of expressing the most common sort of version constraint. ^version means the range of all versions guaranteed to be backwards compatible with the specified version.
+
+For example, ^1.2.3 is equivalent to '>=1.2.3 <2.0.0', and ^0.1.2 is equivalent to '>=0.1.2 <0.2.0'. The following is an example of caret syntax:
+
 SDK constraints  sdk限制
    '>=0.1.2 <0.2.0' 可以指定一个区间
 

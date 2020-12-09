@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutterdemo/flutter/common/MyImgs.dart';
 import 'package:flutterdemo/flutter/common/Style.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/gallery/section_info.dart';
@@ -21,8 +21,10 @@ const double _kAppBarMidHeight = 256.0;
 
 class _SliverSectionState extends State<SliverSectionOrganizer> {
   List<SectionInfo> _setions = [
-    SectionInfo(MyImgs.SUNNIES, "SUNGLASSES", MyColor.mediumPurple, MyColor.mariner),
-    SectionInfo(MyImgs.TABLE, "FURNITURE", MyColor.tomato, MyColor.mediumPurple),
+    SectionInfo(
+        MyImgs.SUNNIES, "SUNGLASSES", MyColor.mediumPurple, MyColor.mariner),
+    SectionInfo(
+        MyImgs.TABLE, "FURNITURE", MyColor.tomato, MyColor.mediumPurple),
     SectionInfo(MyImgs.EARRINGS, "JEWELRY", MyColor.mySin, MyColor.tomato),
     SectionInfo(MyImgs.HAT, "HEADWEAR", Colors.white, MyColor.tomato)
   ];
@@ -37,7 +39,8 @@ class _SliverSectionState extends State<SliverSectionOrganizer> {
         fit: StackFit.expand,
         children: <Widget>[
           CustomScrollView(
-            physics: _SnappingScrollPhysics(midScrollOffset: allHeight - _kAppBarMidHeight),
+            physics: _SnappingScrollPhysics(
+                midScrollOffset: allHeight - _kAppBarMidHeight),
             slivers: <Widget>[
               //statusbar
               StatusBarSliver(2, statusBarHeight),
@@ -70,7 +73,9 @@ class _SliverSectionState extends State<SliverSectionOrganizer> {
           alignment: Alignment.center,
           children: <Widget>[
             DecoratedBox(
-              decoration: BoxDecoration(gradient: LinearGradient(colors: [_setions[i].left, _setions[i].right])),
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      colors: [_setions[i].left, _setions[i].right])),
               child: Image.asset(
                 _setions[i].imgUrl,
                 color: const Color.fromRGBO(255, 255, 255, 0.075),
@@ -97,12 +102,16 @@ class _SliverSectionState extends State<SliverSectionOrganizer> {
             // 布局从列到行的进度. 它的价值在于
             // 0.0当size.height等于maxHeight时，1.0当size.height时
             //等于midHeight。
-            final double tColumnToRow = 1.0 - ((size.height - midHeight) / (maxHeight - midHeight)).clamp(0.0, 1.0);
+            final double tColumnToRow = 1.0 -
+                ((size.height - midHeight) / (maxHeight - midHeight))
+                    .clamp(0.0, 1.0);
 
             // 布局从midHeight行布局到
             // minHeight行布局。当size.height等于 midHeight时，其值为0.0
             //和1.0当size.height等于minHeight时.
-            final double tCollapsed = 1.0 - ((size.height - minHeight) / (midHeight - minHeight)).clamp(0.0, 1.0);
+            final double tCollapsed = 1.0 -
+                ((size.height - minHeight) / (midHeight - minHeight))
+                    .clamp(0.0, 1.0);
             return CustomMultiChildLayout(
               delegate: _AllSectionsLayout(
                   selectedIndex: 0,
@@ -171,16 +180,17 @@ class HeadTitle extends StatelessWidget {
 ///[SliverPersistentHeader]的委派配置
 class SectionBodyDelete extends SliverPersistentHeaderDelegate {
   SectionBodyDelete({
-    @required this.minHeight,
-    @required this.maxHeight,
-    @required this.child,
+    required this.minHeight,
+    required this.maxHeight,
+    required this.child,
   });
 
   final double minHeight;
   final double maxHeight;
   final Widget child;
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return new SizedBox.expand(child: child);
   }
 
@@ -192,7 +202,9 @@ class SectionBodyDelete extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(SectionBodyDelete oldDelegate) {
-    return maxHeight != oldDelegate.maxHeight || minHeight != oldDelegate.minHeight || child != oldDelegate.child;
+    return maxHeight != oldDelegate.maxHeight ||
+        minHeight != oldDelegate.minHeight ||
+        child != oldDelegate.child;
   }
 }
 
@@ -205,11 +217,13 @@ class StatusBarSliver extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return StatusBarSliverRender(scrollFactor: scrollFactor, maxHeight: maxHeight);
+    return StatusBarSliverRender(
+        scrollFactor: scrollFactor, maxHeight: maxHeight);
   }
 
   @override
-  void updateRenderObject(BuildContext context, StatusBarSliverRender renderObject) {
+  void updateRenderObject(
+      BuildContext context, StatusBarSliverRender renderObject) {
     super.updateRenderObject(context, renderObject);
     renderObject
       ..maxHeight = maxHeight
@@ -232,13 +246,16 @@ class StatusBarSliverRender extends RenderSliver {
     markNeedsLayout();
   }
 
-  StatusBarSliverRender({@required double scrollFactor, @required double maxHeight})
+  StatusBarSliverRender(
+      {required double scrollFactor, required double maxHeight})
       : _scrollFactor = scrollFactor,
         _maxHeight = maxHeight;
 
   @override
   void performLayout() {
-    final double height = (_maxHeight - constraints.scrollOffset / _scrollFactor).clamp(0.0, _maxHeight);
+    final double height =
+        (_maxHeight - constraints.scrollOffset / _scrollFactor)
+            .clamp(0.0, _maxHeight);
     geometry = SliverGeometry(
       paintExtent: math.min(height, constraints.remainingPaintExtent),
       scrollExtent: _maxHeight,
@@ -250,7 +267,7 @@ class StatusBarSliverRender extends RenderSliver {
 ///代码改编自[BackButton]
 class BackButtonWithCall extends StatelessWidget {
   final Color color;
-  final VoidCallback callback;
+  final VoidCallback? callback;
   BackButtonWithCall({this.color = Colors.black87, this.callback});
 
   @override
@@ -259,7 +276,7 @@ class BackButtonWithCall extends StatelessWidget {
       icon: const BackButtonIcon(),
       color: color,
       tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-      onPressed: this.callback,
+      onPressed: this.callback!,
     );
   }
 }
@@ -268,31 +285,36 @@ class BackButtonWithCall extends StatelessWidget {
 
 class _SnappingScrollPhysics extends ClampingScrollPhysics {
   const _SnappingScrollPhysics({
-    ScrollPhysics parent,
-    @required this.midScrollOffset,
-  })  : assert(midScrollOffset != null),
+    ScrollPhysics? parent,
+    required this.midScrollOffset,
+  })   : assert(midScrollOffset != null),
         super(parent: parent);
 
   final double midScrollOffset;
 
   @override
-  _SnappingScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return _SnappingScrollPhysics(parent: buildParent(ancestor), midScrollOffset: midScrollOffset);
+  _SnappingScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _SnappingScrollPhysics(
+        parent: buildParent(ancestor), midScrollOffset: midScrollOffset);
   }
 
   Simulation _toMidScrollOffsetSimulation(double offset, double dragVelocity) {
     final double velocity = math.max(dragVelocity, minFlingVelocity);
-    return ScrollSpringSimulation(spring, offset, midScrollOffset, velocity, tolerance: tolerance);
+    return ScrollSpringSimulation(spring, offset, midScrollOffset, velocity,
+        tolerance: tolerance);
   }
 
   Simulation _toZeroScrollOffsetSimulation(double offset, double dragVelocity) {
     final double velocity = math.max(dragVelocity, minFlingVelocity);
-    return ScrollSpringSimulation(spring, offset, 0.0, velocity, tolerance: tolerance);
+    return ScrollSpringSimulation(spring, offset, 0.0, velocity,
+        tolerance: tolerance);
   }
 
   @override
-  Simulation createBallisticSimulation(ScrollMetrics position, double dragVelocity) {
-    final Simulation simulation = super.createBallisticSimulation(position, dragVelocity);
+  Simulation? createBallisticSimulation(
+      ScrollMetrics position, double dragVelocity) {
+    final Simulation? simulation =
+        super.createBallisticSimulation(position, dragVelocity);
     final double offset = position.pixels;
     print("simulation $simulation");
     if (simulation != null) {
@@ -306,10 +328,12 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
       if (simulationEnd >= midScrollOffset) return simulation;
 
       ///没有滚动到midScrollOffset但有速度，此时滚动到midScrollOffset
-      if (dragVelocity > 0.0) return _toMidScrollOffsetSimulation(offset, dragVelocity);
+      if (dragVelocity > 0.0)
+        return _toMidScrollOffsetSimulation(offset, dragVelocity);
 
       ///没有滚动到midScrollOffset但速度<0，滚动到初始位置
-      if (dragVelocity < 0.0) return _toZeroScrollOffsetSimulation(offset, dragVelocity);
+      if (dragVelocity < 0.0)
+        return _toZeroScrollOffsetSimulation(offset, dragVelocity);
     } else {
       // 用户以很少或没有速度结束拖动。 如果他们
       //没有将偏移量保留在midScrollOffset之上, 然后
@@ -322,7 +346,8 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
         return _toMidScrollOffsetSimulation(offset, dragVelocity);
 
       ///偏移不超过midScrollOffset/2，滚动到0初始位置
-      if (offset > 0.0 && offset < snapThreshold) return _toZeroScrollOffsetSimulation(offset, dragVelocity);
+      if (offset > 0.0 && offset < snapThreshold)
+        return _toZeroScrollOffsetSimulation(offset, dragVelocity);
     }
     return simulation;
   }
@@ -358,17 +383,17 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
     this.selectedIndex,
   });
 
-  final Alignment translation;
-  final double tColumnToRow;
-  final double tCollapsed;
-  final int cardCount;
-  final double selectedIndex;
-  Rect _interpolateRect(Rect begin, Rect end) {
-    return Rect.lerp(begin, end, tColumnToRow);
+  final Alignment? translation;
+  final double? tColumnToRow;
+  final double? tCollapsed;
+  final int? cardCount;
+  final double? selectedIndex;
+  Rect? _interpolateRect(Rect begin, Rect end) {
+    return Rect.lerp(begin, end, tColumnToRow!);
   }
 
-  Offset _interpolatePoint(Offset begin, Offset end) {
-    return Offset.lerp(begin, end, tColumnToRow);
+  Offset? _interpolatePoint(Offset begin, Offset end) {
+    return Offset.lerp(begin, end, tColumnToRow!);
   }
 
   @override
@@ -378,21 +403,24 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
     //偏移一份，占据4份
     final double columnCardWidth = size.width - columnCardX;
     //高度平分为cardCount份
-    final double columnCardHeight = size.height / cardCount;
+    final double columnCardHeight = size.height / cardCount!;
     //横向排列时每个card的宽度
     final double rowCardWidth = size.width;
     //根据aligment 和size得出offset
-    final Offset offset = translation.alongSize(size);
+    final Offset offset = translation!.alongSize(size);
     //初始为y=0
     double columnCardY = 0.0;
     //横向每个cardx
-    double rowCardX = -(selectedIndex * rowCardWidth);
+    double rowCardX = -(selectedIndex! * rowCardWidth);
 
-    for (int index = 0; index < cardCount; index++) {
+    for (int index = 0; index < cardCount!; index++) {
       // 布局带有索引的每个card
-      final Rect columnCardRect = Rect.fromLTWH(columnCardX, columnCardY, columnCardWidth, columnCardHeight);
-      final Rect rowCardRect = Rect.fromLTWH(rowCardX, 0.0, rowCardWidth, size.height);
-      final Rect cardRect = _interpolateRect(columnCardRect, rowCardRect).shift(offset);
+      final Rect columnCardRect = Rect.fromLTWH(
+          columnCardX, columnCardY, columnCardWidth, columnCardHeight);
+      final Rect rowCardRect =
+          Rect.fromLTWH(rowCardX, 0.0, rowCardWidth, size.height);
+      final Rect cardRect =
+          _interpolateRect(columnCardRect, rowCardRect)!.shift(offset);
       final String cardId = 'card$index';
       if (hasChild(cardId)) {
         layoutChild(cardId, BoxConstraints.tight(cardRect.size));

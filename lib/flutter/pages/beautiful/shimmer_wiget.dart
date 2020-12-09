@@ -11,7 +11,7 @@ class ShimmerWidget extends StatefulWidget {
 }
 
 class _ShimmerWidgetState extends State<ShimmerWidget> with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
+  late AnimationController _animationController;
   double percent = 0.0;
   @override
   void initState() {
@@ -54,7 +54,7 @@ class _ShimmerWidgetState extends State<ShimmerWidget> with SingleTickerProvider
 class Shimmer extends SingleChildRenderObjectWidget {
   Gradient gradient;
   double percent;
-  Shimmer({@required this.gradient, this.percent = 0.0, Widget child}) : super(child: child);
+  Shimmer({required this.gradient, this.percent = 0.0, required Widget child}) : super(child: child);
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -89,8 +89,8 @@ class _ShimmerFilter extends RenderProxyBox {
     super.paint(context, offset);
     if (child != null) {
 //      print("paint start ======");
-      final width = child.size.width;
-      final height = child.size.height;
+      final width = child!.size.width;
+      final height = child!.size.height;
       Rect rect;
       double dx, dy;
       dx = _offset(-width, width, _percent);
@@ -99,10 +99,10 @@ class _ShimmerFilter extends RenderProxyBox {
       mPaint.shader = gradient.createShader(rect);
       //offset & child.size 是 child.size位移offset
       //注掉saveLayer查看渐变的变化
-      context.canvas.saveLayer(offset & child.size, _clearPaint);
+      context.canvas.saveLayer(offset & child!.size, _clearPaint);
 
       ///SingleChildRenderObjectWidget 比CustomPainter的优点是可以控制child的绘制时期
-      context.paintChild(child, offset);
+      context.paintChild(child!, offset);
       context.canvas.translate(dx, dy);
       context.canvas.drawRect(rect, mPaint);
       context.canvas.restore();

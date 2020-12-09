@@ -52,7 +52,7 @@ class _ScrollNotificationPageState extends State<ScrollNotificationPage> {
             ///滚动方向
             ///up: _scrollController.position.userScrollDirection == ScrollDirection.forward
             //down: _scrollController.position.userScrollDirection == ScrollDirection.reverse
-          },
+          } as bool Function(ScrollNotification),
           child: Stack(
             alignment: Alignment.center,
             children: <Widget>[

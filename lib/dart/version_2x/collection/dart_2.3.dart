@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 //主要更新是关于集合colleciton的
 void main() {
 //  1 Spread operator （...）
@@ -28,4 +26,17 @@ void main() {
 
   //在集合中使用for
   widgets = [for (var item in orders) Text("item is $item")];
+
+  //在map中使用if
+  var a = 1, b = 2;
+  var map1 = {"a": a, if (a < b) "b": b};
+  var map2 = {"a": a, if (a >= b) "b": b};
+
+  print("map1 $map1 \nmap2 $map2");
+}
+
+abstract class Widget {}
+
+class Text extends Widget {
+  Text(String text);
 }

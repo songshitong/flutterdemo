@@ -43,37 +43,37 @@ class GifFrame {
    * @see #DISPOSAL_PREVIOUS
    */
 
-  int ix, iy, iw, ih;
+  int? ix, iy, iw, ih;
 /**
  * Control Flag.
  */
-  bool interlace;
+  bool? interlace;
 /**
  * Control Flag.
  */
-  bool transparency;
+  bool? transparency;
 /**
  * Disposal Method.
  */
-  int dispose;
+  int? dispose;
 /**
  * Transparency Index.
  */
-  int transIndex;
+  int? transIndex;
 /**
  * Delay, in milliseconds, to next frame.
  */
-  int delay;
+  int? delay;
 /**
  * Index in the raw buffer where we need to start reading to decode.
  */
-  int bufferFrameStart;
+  int? bufferFrameStart;
 /**
  * Local Color Table.
  */
-  List<int> lct;
+  List<int?>? lct;
 
-  List<int> pixels;
+  List<int?>? pixels;
 
   void resetFrame() {
     ix = null;

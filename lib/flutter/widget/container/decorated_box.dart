@@ -16,11 +16,15 @@ class DecoratedBoxPage extends StatelessWidget {
         children: <Widget>[
           DecoratedBox(
             decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [Colors.red, Colors.orange[700]]), //背景渐变
+                gradient: LinearGradient(
+                    colors: [Colors.red, Colors.orange[700]!]), //背景渐变
                 borderRadius: BorderRadius.circular(3.0), //3像素圆角
                 boxShadow: [
                   //阴影
-                  BoxShadow(color: Colors.black54, offset: Offset(2.0, 2.0), blurRadius: 4.0)
+                  BoxShadow(
+                      color: Colors.black54,
+                      offset: Offset(2.0, 2.0),
+                      blurRadius: 4.0)
                 ]),
             position: DecorationPosition.background,
             child: Padding(
@@ -30,11 +34,15 @@ class DecoratedBoxPage extends StatelessWidget {
           ),
           DecoratedBox(
             decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [Colors.red, Colors.orange[700]]), //背景渐变
+                gradient: LinearGradient(
+                    colors: [Colors.red, Colors.orange[700]!]), //背景渐变
                 shape: BoxShape.circle,
                 boxShadow: [
                   //阴影
-                  BoxShadow(color: Colors.black54, offset: Offset(2.0, 2.0), blurRadius: 4.0)
+                  BoxShadow(
+                      color: Colors.black54,
+                      offset: Offset(2.0, 2.0),
+                      blurRadius: 4.0)
                 ]),
             position: DecorationPosition.background,
             child: Padding(

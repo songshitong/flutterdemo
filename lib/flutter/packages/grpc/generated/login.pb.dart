@@ -24,13 +24,13 @@ class Empty extends $pb.GeneratedMessage {
       : super.fromJson(i, r);
   Empty clone() => new Empty()..mergeFromMessage(this);
   Empty copyWith(void Function(Empty) updates) =>
-      super.copyWith((message) => updates(message as Empty));
+      super.copyWith((message) => updates(message as Empty)) as Empty;
   $pb.BuilderInfo get info_ => _i;
   static Empty create() => new Empty();
   Empty createEmptyInstance() => create();
   static $pb.PbList<Empty> createRepeated() => new $pb.PbList<Empty>();
   static Empty getDefault() => _defaultInstance ??= create()..freeze();
-  static Empty _defaultInstance;
+  static Empty? _defaultInstance;
 }
 
 class LoginResponse extends $pb.GeneratedMessage {
@@ -45,9 +45,9 @@ class LoginResponse extends $pb.GeneratedMessage {
         'LoginResponse.ExtrasEntry',
         $pb.PbFieldType.OS,
         $pb.PbFieldType.OS,
-        null,
-        null,
-        null,
+        null!,
+        null!,
+        null!,
         const $pb.PackageName('login'))
     ..pPS(5, 'msg')
     ..aOB(6, 'isVip')
@@ -62,14 +62,14 @@ class LoginResponse extends $pb.GeneratedMessage {
       : super.fromJson(i, r);
   LoginResponse clone() => new LoginResponse()..mergeFromMessage(this);
   LoginResponse copyWith(void Function(LoginResponse) updates) =>
-      super.copyWith((message) => updates(message as LoginResponse));
+      super.copyWith((message) => updates(message as LoginResponse)) as LoginResponse;
   $pb.BuilderInfo get info_ => _i;
   static LoginResponse create() => new LoginResponse();
   LoginResponse createEmptyInstance() => create();
   static $pb.PbList<LoginResponse> createRepeated() =>
       new $pb.PbList<LoginResponse>();
   static LoginResponse getDefault() => _defaultInstance ??= create()..freeze();
-  static LoginResponse _defaultInstance;
+  static LoginResponse? _defaultInstance;
 
   int get appId => $_get(0, 0);
   set appId(int v) {

@@ -137,15 +137,15 @@ String tag =
 //file:///data/user/0/com.example.flutterdemo/app_flutter/20829447_16153273773.jpg
 //http://depot.nipic.com/file/20150423/20829447_16153273773.jpg
 class _WebviewPageState extends State<WebviewPage> {
-  var url = "";
+  String? url = "";
   Map<String, String> urlSources = {};
   bool progressVisible = true;
   final Completer<WebViewController> _controller = Completer<WebViewController>();
   var localHtml = SingleLonData().appDocDir + "/localHtml.html";
   //缓存HTML ，图片，视频，然后加载本地页面及图片，视频
   Map<String, String> replaceActions = {"load": "加载页面", "cache": "缓存到本地", "loadCache": "加载本地缓存"};
-  var saveFile;
-  var videoFile;
+  late var saveFile;
+  late var videoFile;
 
   @override
   void initState() {
@@ -209,7 +209,7 @@ class _WebviewPageState extends State<WebviewPage> {
                 value: key,
               );
             }),
-            onSelected: (key) {
+            onSelected: (dynamic key) {
               url = urlSources[key];
               if (url == "localFile") {
                 //加载base64
@@ -225,7 +225,7 @@ class _WebviewPageState extends State<WebviewPage> {
                           .toString();
                   url = flappyUri;
                   _controller.future.then((controller) {
-                    controller.loadUrl(url);
+                    controller.loadUrl(url!);
                     setState(() {
                       progressVisible = true;
                     });
@@ -233,7 +233,7 @@ class _WebviewPageState extends State<WebviewPage> {
                 });
               } else {
                 _controller.future.then((controller) {
-                  controller.loadUrl(url);
+                  controller.loadUrl(url!);
                   setState(() {
                     progressVisible = true;
                   });
@@ -249,11 +249,11 @@ class _WebviewPageState extends State<WebviewPage> {
                 value: key,
               );
             }),
-            onSelected: (key) {
+            onSelected: (dynamic key) {
               if (key == "load") {
                 url = urlSources["AndroidDemo"];
                 _controller.future.then((controller) {
-                  controller.loadUrl(url);
+                  controller.loadUrl(url!);
                   setState(() {
                     progressVisible = true;
                   });
@@ -264,7 +264,7 @@ class _WebviewPageState extends State<WebviewPage> {
                 var imgElements = document.querySelectorAll("img");
                 var newString;
                 imgElements.forEach((e) {
-                  var url = e.attributes["src"];
+                  var url = e.attributes["src"]!;
                   print("document img url  $url ");
                   //下载存储
                   var temp = url.split(".");
@@ -285,7 +285,7 @@ class _WebviewPageState extends State<WebviewPage> {
 
                 var videoElements = document.querySelectorAll("video");
                 videoElements.forEach((e) {
-                  var url = e.attributes["src"];
+                  var url = e.attributes["src"]!;
                   print("document video url  $url ");
                   //下载存储
                   var temp = url.split(".");
@@ -341,7 +341,7 @@ class _WebviewPageState extends State<WebviewPage> {
               print("GestureDetector update ");
             },
             child: WebView(
-              initialUrl: url,
+              initialUrl: url!,
               onWebViewCreated: (viewController) {
                 _controller.complete(viewController);
                 print("webview created =====================");
@@ -389,7 +389,7 @@ class _WebviewPageState extends State<WebviewPage> {
               },
               gestureRecognizers: Set()
                 ..add(Factory(() {
-                  var x;
+                  late var x;
                   return HorizontalDragGestureRecognizer()
                     ..onDown = (downDetail) {
                       print("ondown  ===== ");

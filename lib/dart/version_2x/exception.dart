@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 void main() {
-  Map a;
+  Map? a;
   try {
     a = json.decode("aa");
   } catch (e) {

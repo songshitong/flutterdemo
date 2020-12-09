@@ -12,6 +12,6 @@ class MyRouter {
 }
 
 class MyRouteOption {
-  String urlpattern;
-  Map<String, dynamic> params;
+  late String urlpattern;
+  late Map<String, dynamic> params;
 }

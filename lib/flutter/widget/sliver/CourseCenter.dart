@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 ///滑动冲突前结构   滑动listview页面不滚动，滑动listview上面的部分，页面可以滚动
@@ -23,10 +21,11 @@ class CourseCenter extends StatefulWidget {
   }
 }
 
-class _CourseCenterState extends State<CourseCenter> with SingleTickerProviderStateMixin {
-  List<String> tabList;
-  TabController mController;
-  CourseSliverList courseSliverList;
+class _CourseCenterState extends State<CourseCenter>
+    with SingleTickerProviderStateMixin {
+  late List<String> tabList;
+  late TabController mController;
+  late CourseSliverList courseSliverList;
 
   @override
   void initState() {
@@ -89,7 +88,9 @@ class _CourseCenterState extends State<CourseCenter> with SingleTickerProviderSt
             return <Widget>[
               buildCard(),
               SliverOverlapAbsorber(
-                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context), child: buildTabBarTitle()),
+                  handle:
+                      NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                  sliver: buildTabBarTitle()),
             ];
           },
           body: TabBarView(controller: mController, children: <Widget>[
@@ -131,11 +132,13 @@ class _CourseCenterState extends State<CourseCenter> with SingleTickerProviderSt
       child: Container(
           margin: EdgeInsets.all(16), //容器外补白
           constraints: BoxConstraints(minWidth: double.infinity), //卡片大小
-          decoration:
-              BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(5.0)), color: Colors.white, boxShadow: [
-            //卡片阴影
-            BoxShadow(color: Color(0x14000000), blurRadius: 5.0)
-          ]), //卡片内文字居中
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(5.0)),
+              color: Colors.white,
+              boxShadow: [
+                //卡片阴影
+                BoxShadow(color: Color(0x14000000), blurRadius: 5.0)
+              ]), //卡片内文字居中
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -143,11 +146,14 @@ class _CourseCenterState extends State<CourseCenter> with SingleTickerProviderSt
               Container(
                   margin: EdgeInsets.symmetric(vertical: 12),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(bottomRight: Radius.circular(12), topRight: Radius.circular(12)),
+                    borderRadius: BorderRadius.only(
+                        bottomRight: Radius.circular(12),
+                        topRight: Radius.circular(12)),
                     color: Color(0xfffff7E9),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+                    padding:
+                        EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
                     child: Text(
                       "小学语文",
                       style: TextStyle(
@@ -159,7 +165,10 @@ class _CourseCenterState extends State<CourseCenter> with SingleTickerProviderSt
                 margin: EdgeInsets.only(left: 15, right: 15),
                 child: Text(
                   "黄寺大街是砥砺奋进阿里斯顿开发及ADSL房间里进垃圾堆",
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xff2D2D2D)),
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xff2D2D2D)),
                   maxLines: 2,
                   textAlign: TextAlign.start,
                   overflow: TextOverflow.ellipsis,
@@ -175,7 +184,8 @@ class _CourseCenterState extends State<CourseCenter> with SingleTickerProviderSt
                 ),
               ), //有效期布局
               Container(
-                margin: EdgeInsets.only(left: 15, right: 15, top: 8, bottom: 16),
+                margin:
+                    EdgeInsets.only(left: 15, right: 15, top: 8, bottom: 16),
                 child: Text(
                   "有效期至  2019.04.04",
                   style: TextStyle(fontSize: 13, color: Color(0xff9D9D9D)),
@@ -216,9 +226,9 @@ class _CourseCenterState extends State<CourseCenter> with SingleTickerProviderSt
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate({
-    @required this.minHeight,
-    @required this.maxHeight,
-    @required this.child,
+    required this.minHeight,
+    required this.maxHeight,
+    required this.child,
   });
 
   final double minHeight;
@@ -232,13 +242,16 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => maxHeight;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return new SizedBox.expand(child: child);
   }
 
   @override
   bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return maxHeight != oldDelegate.maxHeight || minHeight != oldDelegate.minHeight || child != oldDelegate.child;
+    return maxHeight != oldDelegate.maxHeight ||
+        minHeight != oldDelegate.minHeight ||
+        child != oldDelegate.child;
   }
 }
 

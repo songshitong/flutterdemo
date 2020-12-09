@@ -15,14 +15,14 @@ void main() {
   Map<String, dynamic> arguments = {'argA': 'hello', 'argB': 42};
 
   //42转为string
-  print("argB ${(arguments["argB"] as num).toString()}");
+  print("argB ${(arguments["argB"] as num?).toString()}");
 
   Map<String, dynamic> argument1 = {
     'argA': ["aaa", "bbb", "cccc"]
   };
-  List<String> list = argument1["argA"];
+  List<String>? list = argument1["argA"];
   print("list $list");
-  List<String> par = argument1["argA"].cast<String>();
+  List<String>? par = argument1["argA"].cast<String>();
   print("par $par");
 
   //map.from 转类型

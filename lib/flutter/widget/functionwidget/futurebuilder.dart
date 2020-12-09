@@ -9,7 +9,7 @@ class FutureBuilderPage extends StatefulWidget {
 }
 
 class _FutureBuilderPageState extends State<FutureBuilderPage> {
-  Future<String> _future;
+  late Future<String> _future;
   @override
   void initState() {
     super.initState();

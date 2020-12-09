@@ -30,11 +30,12 @@ class BottomAppBarPageState extends State<BottomAppBarPage> {
         children: <Widget>[
           DropdownButton(
               hint: Text(locations[index].toString()),
-              items: List<DropdownMenuItem<int>>.generate(locations.length, (i) {
+              items:
+                  List<DropdownMenuItem<int>>.generate(locations.length, (i) {
                 String text = locations[i].toString();
                 return DropdownMenuItem(value: i, child: Text(text));
               }),
-              onChanged: (i) {
+              onChanged: (dynamic i) {
                 setState(() {
                   index = i;
                 });
@@ -55,9 +56,15 @@ class BottomAppBarPageState extends State<BottomAppBarPage> {
         // 打个圆角矩形 AutomaticNotchedShape(RoundedRectangleBorder(), RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)))
         child: Row(
           children: [
-            IconButton(icon: Icon(Icons.home)),
+            IconButton(
+              icon: Icon(Icons.home),
+              onPressed: null,
+            ),
             SizedBox(), //中间位置空出 用来存放凹陷的按钮
-            IconButton(icon: Icon(Icons.business)),
+            IconButton(
+              icon: Icon(Icons.business),
+              onPressed: null,
+            ),
           ],
           mainAxisAlignment: MainAxisAlignment.spaceAround, //均分底部导航栏横向空间
         ),
@@ -74,10 +81,10 @@ class CustomsNotched extends NotchedShape {
   //AutomaticNotchedShape原理类似但传入的gust形状在类实例化时确定
   //AutomaticNotchedShape 根据传入的shapeborder获取path    shapeborder.getouterPath
   @override
-  Path getOuterPath(Rect host, Rect guest) {
+  Path getOuterPath(Rect host, Rect? guest) {
     double hw = host.width;
     double hh = host.height;
-    double gw = guest.width;
+    double gw = guest!.width;
     double gh = guest.height;
 
     //抠个三角形
@@ -98,7 +105,7 @@ class Triangle extends ShapeBorder {
   //三角形边的样式
   final BorderSide side;
 
-  Paint mPaint;
+  late Paint mPaint;
 
   Triangle(this.side) {
     //根据borderside生成paint
@@ -111,7 +118,7 @@ class Triangle extends ShapeBorder {
 
   //返回内轮廓path  内外轮廓的差距与边的宽度，即画笔的宽度有关
   @override
-  Path getInnerPath(Rect rect, {TextDirection textDirection}) {
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
     return Path()
       ..moveTo(rect.left, rect.top)
       ..lineTo(rect.right, rect.top)
@@ -121,7 +128,7 @@ class Triangle extends ShapeBorder {
 
   //返回外轮廓path
   @override
-  Path getOuterPath(Rect rect, {TextDirection textDirection}) {
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
     return Path()
       ..moveTo(rect.left, rect.top)
       ..lineTo(rect.right, rect.top)
@@ -130,7 +137,7 @@ class Triangle extends ShapeBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {TextDirection textDirection}) {
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
     //根据边的类型进行绘制 一般有无none和solid实心
     switch (side.style) {
       case BorderStyle.none:

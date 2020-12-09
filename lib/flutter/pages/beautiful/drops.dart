@@ -5,17 +5,19 @@ class DropsPage extends StatefulWidget {
   _DropsPageState createState() => _DropsPageState();
 }
 
-class _DropsPageState extends State<DropsPage> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+class _DropsPageState extends State<DropsPage>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _controller;
   double startX = 0.0;
   double updateX = 0.0;
-  double centerX;
-  double centerY;
+  double? centerX;
+  double? centerY;
   List<TrailingItem> items = [];
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(vsync: this, duration: Duration(seconds: 1));
+    _controller =
+        new AnimationController(vsync: this, duration: Duration(seconds: 1));
   }
 
   @override
@@ -40,7 +42,8 @@ class _DropsPageState extends State<DropsPage> with SingleTickerProviderStateMix
                 //减少光圈的数量
                 if (items.isNotEmpty) {
                   var last = items.last;
-                  if ((last.centerX - centerX).abs() > 3 || (last.centerY - centerY).abs() > 3) {
+                  if ((last.centerX! - centerX!).abs() > 3 ||
+                      (last.centerY! - centerY!).abs() > 3) {
                     addItem();
                   }
                 } else {
@@ -64,7 +67,9 @@ class _DropsPageState extends State<DropsPage> with SingleTickerProviderStateMix
                 origin: Offset(0, 350 / 2 + 100),
                 child: Container(
                     margin: EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: Colors.purpleAccent, borderRadius: BorderRadius.circular(20)),
+                    decoration: BoxDecoration(
+                        color: Colors.purpleAccent,
+                        borderRadius: BorderRadius.circular(20)),
                     width: 200,
                     height: 350,
                     child: CustomPaint(
@@ -99,8 +104,8 @@ class _DropsPageState extends State<DropsPage> with SingleTickerProviderStateMix
 }
 
 class TrailingPainter extends CustomPainter {
-  Paint mPaint;
-  List<TrailingItem> items;
+  late Paint mPaint;
+  List<TrailingItem>? items;
   TrailingPainter({this.items}) {
     mPaint = Paint();
   }
@@ -110,9 +115,10 @@ class TrailingPainter extends CustomPainter {
     if (null == items) {
       return;
     }
-    for (var value in items) {
+    for (var value in items!) {
       mPaint..color = Colors.white.withOpacity(value.opacity);
-      canvas.drawCircle(Offset(value.centerX, value.centerY), value.radius, mPaint);
+      canvas.drawCircle(
+          Offset(value.centerX!, value.centerY!), value.radius, mPaint);
     }
   }
 
@@ -123,10 +129,10 @@ class TrailingPainter extends CustomPainter {
 }
 
 class TrailingItem {
-  double centerX;
-  double centerY;
-  double radius;
-  double opacity;
+  double? centerX;
+  double? centerY;
+  late double radius;
+  late double opacity;
   @override
   String toString() {
     return 'TrailingItem{centerX: $centerX, centerY: $centerY, radius: $radius, opacity: $opacity}';

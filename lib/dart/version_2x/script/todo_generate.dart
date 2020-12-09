@@ -134,7 +134,7 @@ class TodoTopGenerate extends GeneratorForAnnotation<Todo> {
 }
 
 class ModelVisitor extends SimpleElementVisitor {
-  DartType className;
+  DartType? className;
   Map<String, DartType> fields = {};
   Map<String, dynamic> metaData = {};
 
@@ -199,7 +199,7 @@ abstract class MethodGenerate<T> extends Generator {
 
 Iterable<AnnotatedElement> classAnnotated(
     ClassElement classElement, TypeChecker checker,
-    {bool throwOnUnresolved}) sync* {
+    {bool? throwOnUnresolved}) sync* {
   //拿到类所有方法
   for (var value1 in classElement.methods) {
     final annotation = checker.firstAnnotationOf(value1);

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutterdemo/flutter/common/SingleLonData.dart';
-import 'package:flutterdemo/flutter/common/Style.dart';
 import 'package:flutterdemo/flutter/native_plugin/ffmpeg/ffmpeg_page.dart';
 import 'package:flutterdemo/flutter/native_plugin/ffmpeg/movie_audio_replace.dart';
 import 'package:flutterdemo/flutter/native_plugin/share/share_sdk.dart';
@@ -16,6 +15,7 @@ import 'package:flutterdemo/flutter/native_plugin/video/video_player.dart';
 import 'package:flutterdemo/flutter/native_plugin/webview_page.dart';
 import 'package:flutterdemo/flutter/packages/annotationroute/annotation_route.dart';
 import 'package:flutterdemo/flutter/packages/provider/providertest.dart';
+import 'package:flutterdemo/flutter/pages/beautiful/FourthPage.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/ali_pay_anim.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/bottom_appbar.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/fold_cell.dart';
@@ -23,6 +23,7 @@ import 'package:flutterdemo/flutter/pages/beautiful/gallery/sliver_section.dart'
 import 'package:flutterdemo/flutter/pages/beautiful/pageview_page.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/test_one_line_layout.dart';
 import 'package:flutterdemo/flutter/services/system_chrome.dart';
+import 'package:flutterdemo/flutter/websocket/client.dart';
 import 'package:flutterdemo/flutter/widget/CheckBox.dart';
 import 'package:flutterdemo/flutter/widget/Image.dart';
 import 'package:flutterdemo/flutter/widget/animation/custom_curve.dart';
@@ -63,6 +64,7 @@ import 'package:flutterdemo/flutter/widget/functionwidget/table_cell.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/theme_demo.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/visibility_test.dart';
 import 'package:flutterdemo/flutter/widget/functionwidget/will_pop_scope.dart';
+import 'package:flutterdemo/flutter/widget/layer/composited_target.dart';
 import 'package:flutterdemo/flutter/widget/layout/flex.dart';
 import 'package:flutterdemo/flutter/widget/layout/indexed_stack.dart';
 import 'package:flutterdemo/flutter/widget/layout/rowcolumn.dart';
@@ -76,8 +78,10 @@ import 'package:flutterdemo/flutter/widget/scrollwidget/customscrollview.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/grid_view.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/list_view.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/listview_memory.dart';
+import 'package:flutterdemo/flutter/widget/scrollwidget/manimated_list.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/scroll_notification.dart';
 import 'package:flutterdemo/flutter/widget/scrollwidget/single_childs_croll_view.dart';
+import 'package:flutterdemo/flutter/widget/selectable_test.dart';
 import 'package:flutterdemo/flutter/widget/sliver/custom_sliver_list.dart';
 import 'package:flutterdemo/flutter/widget/sliver/nested_scroll_view_page.dart';
 import 'package:flutterdemo/flutter/widget/sliver/sliver_app_bar.dart';
@@ -105,6 +109,9 @@ class HomePage extends StatefulWidget {
 //extension WidgetPadding on Widget {
 //  Widget paddingAll(double padding) => Padding(padding: EdgeInsets.all(padding), child: this);
 //}
+final RouteObserver<PageRoute> routeObserver = RouteObserver<PageRoute>();
+
+late BuildContext rootContext;
 
 class _HomePageState extends State<HomePage> {
   ///切换主题
@@ -127,7 +134,7 @@ class _HomePageState extends State<HomePage> {
       SingleLonData().appDocDir = appDocDir.path;
       print("appDocDir.path ${appDocDir.path}");
     });
-    print("language ${WidgetsBinding.instance.window.locales} ====");
+    print("language ${WidgetsBinding.instance?.window.locales} ====");
     super.initState();
   }
 
@@ -141,9 +148,15 @@ class _HomePageState extends State<HomePage> {
       };
     }
 
+    ///打印手势信息，查看手势冲突
+    if (kDebugMode && true) {
+      debugPrintHitTestResults = true;
+      debugPrintRecognizerCallbacksTrace = true;
+      debugPrintGestureArenaDiagnostics = true;
+    }
+
     var defaultPlatform = defaultTargetPlatform;
     var androidTheme = ThemeData.light();
-
     //https://www.w3schools.com/colors/colors_picker.asp 根据主色自动生成色系
     ///Android变色
     if (defaultPlatform == TargetPlatform.android) {
@@ -153,6 +166,9 @@ class _HomePageState extends State<HomePage> {
           tooltipTheme: TooltipThemeData(showDuration: Duration.zero),
           brightness: isDark ? Brightness.dark : Brightness.light,
           //设置全局的页面切换效果 ios 左右  Android默认上下
+          ///右滑退出页面 查看代码CupertinoPageTransitionsBuilder-》_isPopGestureEnabled->hasScopedWillPopCallback{
+          ///    WillPopScope 存在，右滑退出页面失效
+          ///}
           pageTransitionsTheme: PageTransitionsTheme(builders: {
             TargetPlatform.android: CupertinoPageTransitionsBuilder(),
             TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
@@ -187,10 +203,12 @@ class _HomePageState extends State<HomePage> {
         },
         child: MaterialApp(
 //           禁用系统的字体缩放
-            builder: (BuildContext context, Widget child) {
+            builder: (BuildContext context, Widget? child) {
               return MediaQuery(
-                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                child: child,
+                //disableAnimations 禁用动画
+                data: MediaQuery.of(context)
+                    .copyWith(textScaleFactor: 1.0, disableAnimations: false),
+                child: child!,
               );
             },
             title: "flutter",
@@ -227,7 +245,7 @@ class _HomePageState extends State<HomePage> {
 //            routes: ,
             darkTheme: androidTheme,
             themeMode: ThemeMode.dark,
-            navigatorObservers: [MNavigatorObserber()],
+            navigatorObservers: [MNavigatorObserber(), routeObserver],
 //            onGenerateRoute: (RouteSettings settings) {
 //                可以对路由拦截处理
 //              WidgetBuilder builder;
@@ -241,26 +259,29 @@ class _HomePageState extends State<HomePage> {
 //              return new MaterialPageRoute(builder: builder, settings: settings);
 //            },
             home: RepaintBoundary(
-              child: Home(
-                change: () {
-                  color = Colors.green;
-                  setState(() {});
-                },
-                reset: () {
-                  color = Colors.amber;
-                  setState(() {});
-                },
-                themeChange: () {
-                  setState(() {
-                    isDark = !isDark;
-                  });
-                },
-                localeChange: () {
-                  setState(() {
-                    localeIndex = localeIndex == 0 ? 1 : 0;
-                  });
-                },
-              ),
+              child: Builder(builder: (context) {
+                rootContext = context;
+                return Home(
+                  change: () {
+                    color = Colors.green;
+                    setState(() {});
+                  },
+                  reset: () {
+                    color = Colors.amber;
+                    setState(() {});
+                  },
+                  themeChange: () {
+                    setState(() {
+                      isDark = !isDark;
+                    });
+                  },
+                  localeChange: () {
+                    setState(() {
+                      localeIndex = localeIndex == 0 ? 1 : 0;
+                    });
+                  },
+                );
+              }),
             )),
       ),
     );
@@ -311,33 +332,33 @@ class _MaterialLocalizationsDelegate
 ///监听页面进入，离开
 class MNavigatorObserber extends NavigatorObserver {
   @override
-  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     print(
         "MNavigatorObserber   route.overlayEntries ${route.overlayEntries.toString()}");
 
     ///只监听页面route
     if (route is PageRoute && previousRoute is PageRoute) {
       print(
-          "HomePage MNavigatorObserber  didPush current ${route?.settings}  previousRoute ${previousRoute?.settings}");
+          "HomePage MNavigatorObserber  didPush current ${route.settings}  previousRoute ${previousRoute.settings}");
     }
   }
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
 //    ModalRoute.of().isCurrent; 最上层的route
     ///只监听页面route
     if (route is PageRoute && previousRoute is PageRoute) {
       print(
-          "HomePage MNavigatorObserber  didPop current ${route?.settings}  previousRoute ${previousRoute?.settings}");
+          "HomePage MNavigatorObserber  didPop current ${route.settings}  previousRoute ${previousRoute.settings}");
     }
   }
 }
 
 class Home extends StatefulWidget {
-  VoidCallback change;
-  VoidCallback reset;
-  VoidCallback themeChange;
-  VoidCallback localeChange;
+  VoidCallback? change;
+  VoidCallback? reset;
+  VoidCallback? themeChange;
+  VoidCallback? localeChange;
   Home({this.change, this.reset, this.themeChange, this.localeChange});
 
   @override
@@ -345,17 +366,16 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
-  CustomPopup customPopup;
-  int _current;
+  late CustomPopup customPopup;
   double popupX = 100.0;
   double popupY = 100.0;
-  double preX;
-  double preY;
+  late double preX;
+  late double preY;
   double cancelPartWidth = 300;
   double cancelPartHeight = 300;
   var radius = 25;
-  AnimationController _controller;
-  Animation<double> clampAnimation;
+  late AnimationController _controller;
+  late Animation<double> clampAnimation;
   final strChangeLocale = "改变语言";
   final strResetColor = "颜色reset";
   final strChangeColor = "换色";
@@ -385,13 +405,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     customPopup = CustomPopup();
   }
 
-  OverlayEntry overlayEntry;
+  OverlayEntry? overlayEntry;
 
-  var overlayState;
+  late var overlayState;
   bool showCancelPart = false;
   void createApplicationPopup() {
     if (null != overlayEntry) {
-      overlayEntry.remove();
+      overlayEntry!.remove();
       overlayEntry = null;
     }
     overlayState = Overlay.of(context);
@@ -492,7 +512,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 cancelPartWidth = 300;
                 cancelPartHeight = 300;
                 //取消全局浮窗
-                overlayEntry.remove();
+                overlayEntry!.remove();
                 overlayEntry = null;
                 //重置位置
                 popupX = 100.0;
@@ -544,6 +564,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         actions: <Widget>[
           DropdownButton(
               hint: Text(menuType),
+              //下划线
+              underline: Container(),
               items: [
                 DropdownMenuItem(
                     child: Text(strChangeLocale), value: strChangeLocale),
@@ -554,18 +576,18 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 DropdownMenuItem(
                     child: Text(strChangeTheme), value: strChangeTheme)
               ],
-              onChanged: (value) {
+              onChanged: (dynamic value) {
                 setState(() {
                   menuType = value;
                 });
                 if (value == strChangeLocale) {
-                  widget.localeChange();
+                  widget.localeChange!();
                 } else if (value == strChangeColor) {
-                  widget.change();
+                  widget.change!();
                 } else if (value == strResetColor) {
-                  widget.reset();
+                  widget.reset!();
                 } else if (value == strChangeTheme) {
-                  widget.themeChange();
+                  widget.themeChange!();
                 }
               }),
           FlatButton(
@@ -613,22 +635,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       //selectstyle 在ontap设置后生效
       //padding是计算字体和icon知道的
       //替换为cupertino或自己写
+
+      ///bottomNavigationBar展示在scaffold的底部，可以用来底部菜单
       bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Colors.deepPurple,
           currentIndex: 0,
           onTap: (index) {
-            setState(() {
-              _current = index;
-            });
             print(index);
           },
           type: BottomNavigationBarType.fixed,
           items: [
-            BottomNavigationBarItem(icon: Icon(Icons.add), title: buildText(0)),
-            BottomNavigationBarItem(icon: Icon(Icons.add), title: buildText(1)),
-            BottomNavigationBarItem(icon: Icon(Icons.add), title: buildText(2)),
-            BottomNavigationBarItem(icon: Icon(Icons.add), title: buildText(3)),
-            BottomNavigationBarItem(icon: Icon(Icons.add), title: buildText(4)),
+            BottomNavigationBarItem(icon: Icon(Icons.add), label: "推荐"),
+            BottomNavigationBarItem(icon: Icon(Icons.add), label: "推荐"),
+            BottomNavigationBarItem(icon: Icon(Icons.add), label: "推荐"),
+            BottomNavigationBarItem(icon: Icon(Icons.add), label: "推荐"),
+            BottomNavigationBarItem(icon: Icon(Icons.add), label: "推荐"),
           ]),
       body: SingleChildScrollView(
         key: Key("long_list"),
@@ -646,6 +667,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 child: Text(
                   "text",
                   key: Key("FlatButtonChild"),
+                )),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return SelectableTest();
+                  }));
+                },
+                child: Text(
+                  "SelectableTest",
                 )),
             FlatButton(
                 onPressed: () {
@@ -725,7 +755,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     return RouterPage();
                   }));
                 },
-                child: Text("路由")),
+                child: Text("RouterPage 路由")),
             Text("scroll ----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -741,6 +771,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   }));
                 },
                 child: Text("ListView")),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return MAnimatedList();
+                  }));
+                },
+                child: Text("MAnimatedList")),
             FlatButton(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -1041,6 +1078,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   }));
                 },
                 child: Text("path page")),
+            Text("network ----------------------- "),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return WebSocketClientPage();
+                  }));
+                },
+                child: Text("WebSocket调用原生")),
             Text("与原生通信 MethodChannel----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -1100,7 +1145,22 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   }));
                 },
                 child: Text("list view 内存")),
+            Text("layer ----------------------- "),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return CompositedTargetPage();
+                  }));
+                },
+                child: Text("滚动跟随 CompositedTransformTarget")),
             Text("酷炫效果和自定义----------------------- "),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return FourthPage();
+                  }));
+                },
+                child: Text("FourthPage")),
             FlatButton(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -1209,11 +1269,11 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             FlatButton(
                 onPressed: () {
                   Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) {
+                      ?.push(MaterialPageRoute(builder: (context) {
                     return ProxyRenderPage();
                   }));
                 },
-                child: Text('ProxyRenderPage')),
+                child: Text('ProxyRenderPage 多文本复制粘贴')),
             Text("测试第三方包 ----------------------- "),
             FlatButton(
                 onPressed: () {
@@ -1248,13 +1308,5 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         ),
       ),
     );
-  }
-
-  Text buildText(int current) {
-    if (current == _current) {
-      return Text("推荐", style: TextStyle(color: MyColor.PRIMARYCOLOR));
-    } else {
-      return Text("推荐", style: TextStyle(color: Colors.black));
-    }
   }
 }

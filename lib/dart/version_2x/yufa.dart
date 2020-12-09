@@ -3,7 +3,7 @@
 
 //var //一种不指定类型声明变量的方式
 var aVar = 1;
-double a;
+double? a;
 
 //42  /*一个数字字面量。数字字面量是编译时常量。*/
 
@@ -54,7 +54,7 @@ var list = [1, 2, 3];
 //没有元素，显示指定范型参数为int
 var list3 = <int>[];
 //使用构造函数创建对象
-var list1 = List<int>();
+List<int> list1 = [];
 //定义一个不变的 list 对象
 var list2 = const [1, 2, 3];
 
@@ -123,16 +123,17 @@ bool isNull(int atomicNumber) => map != null;
 //调用方法的时候，你可以使用这种形式 paramName: value 来指定命名参数
 //enableFlags(bold: true);
 //在定义方法的时候，使用 {param1, param2, …} 的形式来指定命名参数：
-void enableFlags({bool bold, bool hidden}) {
+void enableFlags({bool? bold, bool? hidden}) {
   // ...
 }
 
 //Optional positional parameters（可选位置参数）
 //把一些方法的参数放到 [] 中就变成可选 位置参数了：
-String say(String from, String msg, [String device]) {
+String say(String from, String msg, [String? device]) {
   if (null != device) {
     print(device);
   }
+  return "";
 }
 
 void callSay() {
@@ -143,6 +144,7 @@ void callSay() {
 //在定义方法的时候，可以使用 = 来定义可选参数的默认值。 默认值只能是编译时常量。 如果没有提供默认值，则默认值为 null
 bool enableFlags1({bool bold = false, bool hidden = false}) {
   // ...
+  return false;
 }
 
 //The main() function（入口函数）
@@ -434,8 +436,8 @@ class Vector {
 //使用命名构造函数可以为一个类实现多个构造函数， 或者使用命名构造函数来更清晰的表明你的意图：
 //构造函数不能继承，所以超类的命名构造函数 也不会被继承。如果你希望 子类也有超类一样的命名构造函数， 你必须在子类中自己实现该构造函数
 class Point {
-  num x;
-  num y;
+  num? x;
+  num? y;
 
   Point(this.x, this.y);
 
@@ -453,7 +455,7 @@ class Point {
 //main class’s no-arg constructor（主类的无名构造函数）
 //如果超类没有无名无参数构造函数， 则你需要手工的调用超类的其他构造函数。 在构造函数参数后使用冒号 (:) 可以调用 超类构造函数。
 class Person {
-  String firstName;
+  String? firstName;
 
   Person.fromJson(Map data) {
     print('in Person');
@@ -542,7 +544,7 @@ class Logger {
 
   factory Logger(String name) {
     if (_cache.containsKey(name)) {
-      return _cache[name];
+      return _cache[name]!;
     } else {
       final logger = new Logger._internal(name);
       _cache[name] = logger;
@@ -664,7 +666,7 @@ class Personn {
 // An implementation of the Person interface.
 class Imposter implements Personn {
   // We have to define this, but we don't use it.
-  final _name = "";
+  final dynamic _name = "";
 
   String greet(who) => 'Hi $who. Do you know who I am?';
 }
@@ -818,10 +820,10 @@ var pages = <String, String>{
 
 T first<T>(List<T> ts) {
   // ...Do some initial work or error checking, then...
-  T tmp;
+  T? tmp;
   tmp ??= ts[0];
   // ...Do some additional checking or processing...
-  return tmp;
+  return tmp!;
 }
 //这里的 first (<T>) 泛型可以在如下地方使用 参数 T ：
 //函数的返回值类型 (T).
@@ -938,7 +940,7 @@ T first<T>(List<T> ts) {
 /// Andean cultures have used llamas as meat and pack
 /// animals since pre-Hispanic times.
 class Llama {
-  String name;
+  String? name;
 
   /// Feeds your llama [Food].
   ///
@@ -979,13 +981,16 @@ class WannabeFunction {
 //  var wf = new WannabeFunction();
 //  var out = wf("Hi","there,","gang");
 //  print('$out');
+//
+//  VoidCallback voidCallBack;
+//  if(null!=voidCallBack) voidCallBack();  等同于 voidCallBack?.call();
 //}
 
 //Typedefs
 //使用 typedef, 或者 function-type alias 来为方法类型命名， 然后可以使用命名的方法。 当把方法类型赋值给一个变量的时候，typedef 保留类型信息
 //没有使用typedef
 class SortedCollection {
-  Function compare;
+  Function? compare;
 
   SortedCollection(int f(Object a, Object b)) {
     compare = f;

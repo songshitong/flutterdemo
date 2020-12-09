@@ -15,7 +15,7 @@ getB() {
 
 void main() {
   ///默认值是null
-  int value;
+  int? value;
   print("value 结果是 ");
   print(value);
 
@@ -95,7 +95,8 @@ void main() {
   print("hello world  unicode points $bytes");
 
   ///url URL转义   转义#或特殊字符
-  Uri.encodeComponent("www.baidu.com?#aaa");
+  print("${Uri.encodeComponent("www.baidu.com?#aaa")}");
+  print("${Uri.encodeFull("https://www.baidu.com?aaa='会话'")}");
 
   List<int> hBytes = utf8.encode("hello");
   print("hBytes ${hBytes.length} $hBytes");
@@ -106,6 +107,7 @@ void main() {
   print("h16Bytes ${h16Bytes.length} $h16Bytes");
   List<int> ni16Bytes = "你好".codeUnits;
   print("ni16Bytes ${ni16Bytes.length} $ni16Bytes");
+  //todo 测试表情的字符数
 
   Map map = {"a": "a", "b": "b", "c": "c"};
 //  json格式化

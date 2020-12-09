@@ -7,19 +7,21 @@ class CustomCurvePage extends StatefulWidget {
   _CustomCurvePageState createState() => _CustomCurvePageState();
 }
 
-class _CustomCurvePageState extends State<CustomCurvePage> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-  Animation<double> _animation;
-  Animation<Color> _colorAnimation;
-  Animation<TextStyle> _styleAnimation;
-  Animation<double> tweenSequenceAnimations;
+class _CustomCurvePageState extends State<CustomCurvePage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  late Animation<Color?> _colorAnimation;
+  late Animation<TextStyle> _styleAnimation;
+  late Animation<double> tweenSequenceAnimations;
   @override
   void initState() {
     //1  构造controller 通过drive，将tween连接到controller
 //    _controller = AnimationController(vsync: this)..drive(CurveTween(curve: CustomCurve()));
 
     //2
-    _controller = AnimationController(vsync: this, duration: Duration(seconds: 6));
+    _controller =
+        AnimationController(vsync: this, duration: Duration(seconds: 6));
     _animation = CurveTween(curve: CustomCurve()).animate(_controller)
       ..addListener(() {
 //        print("value ${_animation.value}");
@@ -29,15 +31,19 @@ class _CustomCurvePageState extends State<CustomCurvePage> with SingleTickerProv
     //chain 将多个tween作用于同一Animation
     //不加chain  颜色渐变
     //加chain  颜色以CustomCurve的曲线进行变化
-    _colorAnimation =
-        ColorTween(begin: Colors.green, end: Colors.red).chain(CurveTween(curve: CustomCurve())).animate(_controller);
-    _styleAnimation = TextStyleTween(begin: TextStyle(fontSize: 10), end: TextStyle(fontSize: 30)).animate(_controller);
+    _colorAnimation = ColorTween(begin: Colors.green, end: Colors.red)
+        .chain(CurveTween(curve: CustomCurve()))
+        .animate(_controller);
+    _styleAnimation = TextStyleTween(
+            begin: TextStyle(fontSize: 10), end: TextStyle(fontSize: 30))
+        .animate(_controller);
 
 //    例如，定义使用缓动曲线的动画在前40％的时间内插值介于5.0和10.0之间动画，在接下来的20％中保持10.0，然后最后的40％返回10.0
     tweenSequenceAnimations = TweenSequence(
       <TweenSequenceItem<double>>[
         TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 50.0, end: 100.0).chain(CurveTween(curve: Curves.ease)),
+          tween: Tween<double>(begin: 50.0, end: 100.0)
+              .chain(CurveTween(curve: Curves.ease)),
           weight: 40.0,
         ),
         TweenSequenceItem<double>(
@@ -45,7 +51,8 @@ class _CustomCurvePageState extends State<CustomCurvePage> with SingleTickerProv
           weight: 20.0,
         ),
         TweenSequenceItem<double>(
-          tween: Tween<double>(begin: 100.0, end: 50.0).chain(CurveTween(curve: Curves.ease)),
+          tween: Tween<double>(begin: 100.0, end: 50.0)
+              .chain(CurveTween(curve: Curves.ease)),
           weight: 40.0,
         ),
       ],
@@ -102,8 +109,10 @@ class _CustomCurvePageState extends State<CustomCurvePage> with SingleTickerProv
           /// 在builder中给child增加container控制大小，transform,transition各种动画，实现动画和组件的分离，而不是将动画和组件糅合在一起
           ///
           AnimatedBuilder(
-            animation: null,
-            builder: (BuildContext context, Widget child) {},
+            builder: (BuildContext context, Widget? child) {
+              return SizedBox();
+            },
+            animation: _controller,
             child: Text(""),
           )
         ],
@@ -126,5 +135,6 @@ class CustomCurve extends Curve {
     } else if (t <= 1) {
       return 1.0;
     }
+    return 1.0;
   }
 }

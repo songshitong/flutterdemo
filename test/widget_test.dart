@@ -20,6 +20,10 @@ void main() {
 
     //找到显示文字是title的widget
     final titleFinder = find.text('title');
+    Text title = tester.firstWidget(titleFinder);
+
+    ///widget的显示
+    title.data;
     expect(titleFinder, findsOneWidget);
     //找到指定key的widget
     final centerFinder = find.byKey(Key("center"));
@@ -71,9 +75,9 @@ class MyWidget extends StatefulWidget {
   String message;
 
   MyWidget({
-    Key key,
-    @required this.title,
-    @required this.message,
+    Key? key,
+    this.title = "",
+    this.message = "",
   }) : super(key: key);
 
   @override
@@ -106,7 +110,8 @@ class _MyWidgetState extends State<MyWidget> {
                   key: Key("message"),
                 )),
             TextField(),
-            Dismissible(key: Key("dismissble"), child: Text("this is dismissble")),
+            Dismissible(
+                key: Key("dismissble"), child: Text("this is dismissble")),
           ],
         ),
       ),

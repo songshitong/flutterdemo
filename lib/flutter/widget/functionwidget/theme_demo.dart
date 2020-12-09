@@ -36,7 +36,7 @@ class ThemePage extends StatefulWidget {
 }
 
 class _ThemePageState extends State<ThemePage> {
-  Color _themeColor; //当前路由主题色
+  Color? _themeColor; //当前路由主题色
   bool firstBuild = false;
   @override
   build(BuildContext context) {
@@ -48,8 +48,8 @@ class _ThemePageState extends State<ThemePage> {
 //    print("themeData $themeData");
     return Theme(
       data: ThemeData(
-          primarySwatch: _themeColor, //用于导航栏、FloatingActionButton的背景色等
-          iconTheme: IconThemeData(color: _themeColor) //用于Icon颜色
+          primarySwatch: _themeColor as MaterialColor, //用于导航栏、FloatingActionButton的背景色等
+          iconTheme: IconThemeData(color: _themeColor!) //用于Icon颜色
           ),
       child: Scaffold(
         appBar: AppBar(title: Text("主题测试")),

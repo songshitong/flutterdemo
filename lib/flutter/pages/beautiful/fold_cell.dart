@@ -50,20 +50,20 @@ class FoldCellPage extends StatelessWidget {
 }
 
 class FoldCell extends StatefulWidget {
-  final Widget front;
-  final Widget backagoundTop;
-  final Widget backagoundBottom;
+  final Widget? front;
+  final Widget? backagoundTop;
+  final Widget? backagoundBottom;
 
-  FoldCell({this.front, this.backagoundTop, this.backagoundBottom, Key key}) : super(key: key);
+  FoldCell({this.front, this.backagoundTop, this.backagoundBottom, required Key key}) : super(key: key);
 
   @override
   FoldCellState createState() => FoldCellState();
 }
 
 class FoldCellState extends State<FoldCell> with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
+  late AnimationController _animationController;
   CellState state = CellState.close;
-  Simulation simulation;
+  Simulation? simulation;
   @override
   void initState() {
     _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 300));
@@ -119,13 +119,13 @@ class FoldCellState extends State<FoldCell> with SingleTickerProviderStateMixin 
       child: Stack(
         children: <Widget>[
           //后面上半部分
-          Visibility(visible: state == CellState.open, child: widget.backagoundTop),
+          Visibility(visible: state == CellState.open, child: widget.backagoundTop!),
           //后面下半部分
           Visibility(
             visible: state == CellState.open,
             child: AnimatedBuilder(
               animation: _animationController,
-              child: widget.backagoundBottom,
+              child: widget.backagoundBottom!,
               builder: (context, child) {
                 double angle = _animationController.value * math.pi;
                 //翻转后background是倒的，在转动前预先绕z轴翻转180度一次，
@@ -143,7 +143,7 @@ class FoldCellState extends State<FoldCell> with SingleTickerProviderStateMixin 
           //前面部分
           AnimatedBuilder(
               animation: _animationController,
-              child: widget.front,
+              child: widget.front!,
               builder: (context, child) {
                 double angle = _animationController.value * math.pi;
                 return Visibility(

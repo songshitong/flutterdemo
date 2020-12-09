@@ -25,7 +25,6 @@ class _DraggablePageState extends State<DraggablePage> {
         children: <Widget>[
           Draggable<String>(
             //拖动的方向，横轴/纵轴，null两个方向都可以
-            axis: null,
             child: Container(
               width: 150,
               height: 150,
@@ -37,7 +36,8 @@ class _DraggablePageState extends State<DraggablePage> {
               width: 150,
               height: 150,
               decoration: BoxDecoration(color: Colors.green),
-              child: Text("draggable feedback", style: TextStyle(inherit: false)),
+              child:
+                  Text("draggable feedback", style: TextStyle(inherit: false)),
             ),
             data: data,
             //拖动时，代替child，停留在原地展示的widget，可选，默认展示child
@@ -74,10 +74,14 @@ class _DraggablePageState extends State<DraggablePage> {
               onWillAccept: (data) {
             print("onWillAccept $data");
             return true;
-          }, builder: (context, List<String> candidateData, rejectedData) {
-            print("builder candidateData $candidateData rejectedData $rejectedData");
+          }, builder: (context, List<String?> candidateData, rejectedData) {
+            print(
+                "builder candidateData $candidateData rejectedData $rejectedData");
             return Container(
-                width: 150, height: 150, decoration: BoxDecoration(color: Colors.red), child: Text(targetData));
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(color: Colors.red),
+                child: Text(targetData));
           })
         ],
       ),

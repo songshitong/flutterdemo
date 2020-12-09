@@ -115,7 +115,58 @@ main() async {
 //  await getName1();
 //  getName2();
 //  getName3();
+
+  ///测试for循环中使用future
+  Future.forEach(
+      List<int>.generate(10, (index) => index),
+      (dynamic element) => Future.delayed(Duration(seconds: 1)).then(
+          (value) => print("Future.forEach second ${DateTime.now().second}")));
+
+  ///不行 执行时间取最长的
+  future.then((value) => print("future 测试一个future 一个future的执行"));
+  future.then((value) async {
+    var a = await getA();
+    print("future get a $a");
+  });
+  future.then((value) async {
+    var b = await getB();
+    print("future get b $b");
+  });
+  future.then((value) => print("future 结束"));
+
+  ///可以
+  future
+      .then((value) => print("future1 测试一个future 一个future的执行"))
+      .then((value) async {
+    var a = await getA();
+    print("future1 get a $a");
+  }).then((value) async {
+    var b = await getB();
+    print("future1 get b $b");
+  }).then(((value) => print("future1 结束")));
+
+  ///自执行函数  保证执行顺序的,总共6秒
+  await () async {
+    print("start111111");
+  }();
+  await () async {
+    await Future.delayed(Duration(seconds: 3))
+        .then((value) => print("time3333"));
+  }();
+  await () async {
+    await Future.delayed(Duration(seconds: 1))
+        .then((value) => print("time1111"));
+  }();
+  await () async {
+    await Future.delayed(Duration(seconds: 2))
+        .then((value) => print("time2222"));
+  }();
+  await () async {
+    print("end111111");
+  }();
 }
+
+Future future = Future(() {});
 
 Future<String> getA() async {
   await Future.delayed(Duration(seconds: 3));

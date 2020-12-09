@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterdemo/flutter/common/MyImgs.dart';
 
 ///原始指针事件   使用[Listener]监听
 ///当指针按下时，Flutter会对应用程序执行命中测试(Hit Test)，以确定指针与屏幕接触的位置存在哪些widget，
@@ -66,6 +67,7 @@ class _PointerListenerState extends State<PointerListener> {
 //              behavior: HitTestBehavior.opaque,
                 onPointerDown: (event) => print("down A")),
             buildTranslucent(),
+            buildTranslucent1(),
             buildAbsorbPointer(),
             buildIgnorePointer()
           ],
@@ -140,6 +142,32 @@ class _PointerListenerState extends State<PointerListener> {
       ),
       onPointerDown: (event) => print("IgnorePointer up"),
       onPointerMove: (e) => print("IgnorePointer out move"),
+    );
+  }
+
+  buildTranslucent1() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: 100,
+      child: Stack(
+        children: [
+          GestureDetector(
+              onTap: () {
+                print("water_container tap");
+              },
+              child: Image.asset(MyImgs.water_container)),
+
+          ///ignoring: false 底层图片不可点击  true，点击事件传递到底部图片
+          IgnorePointer(
+            ignoring: false,
+            child: GestureDetector(
+                onTap: () {
+                  print("overlay tap");
+                },
+                child: Image.asset(MyImgs.overlay)),
+          )
+        ],
+      ),
     );
   }
 }

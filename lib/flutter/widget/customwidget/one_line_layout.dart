@@ -47,7 +47,7 @@ class CustomRB extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, CustomRbData>, RenderBoxContainerDefaultsMixin<RenderBox, CustomRbData> {
   double _width;
   bool _isExpanded;
-  List<Widget> _children;
+  List<Widget>? _children;
 
   set width(double w) {
     _width = w;
@@ -78,7 +78,7 @@ class CustomRB extends RenderBox
   @override
   void performLayout() {
     print("online layout performLayout");
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     if (child == null) {
       size = constraints.smallest;
       return;
@@ -99,7 +99,7 @@ class CustomRB extends RenderBox
 //      LogUtil.debug("index $index");
       index++;
 //      LogUtil.debug("parentdata ${child.parentData}");
-      final CustomRbData childParentData = child.parentData;
+      final CustomRbData childParentData = child.parentData as CustomRbData;
       child.layout(childConstraints, parentUsesSize: true);
       if (_isExpanded) {
         lineWidth += child.size.width;
@@ -131,13 +131,13 @@ class CustomRB extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     super.paint(context, offset);
-    RenderBox child = firstChild;
+    RenderBox? child = firstChild;
     final Size boxSize = size;
     double allWidth = 0;
     double allHeight = 0;
 //    LogUtil.debug("boxSize.width ${boxSize.width} isExpanded $_isExpanded");
     while (child != null) {
-      final CustomRbData childParentData = child.parentData;
+      final CustomRbData childParentData = child.parentData as CustomRbData;
 //      LogUtil.debug("childParentData $childParentData offset $offset");
       var last = allWidth;
       //上一行高度

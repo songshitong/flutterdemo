@@ -39,7 +39,7 @@ class ProviderTest extends StatelessWidget {
 }
 
 class ExampleLocalizations {
-  static ExampleLocalizations of(BuildContext context) =>
+  static ExampleLocalizations? of(BuildContext context) =>
       Localizations.of<ExampleLocalizations>(context, ExampleLocalizations);
 
   const ExampleLocalizations(this._count);
@@ -49,7 +49,8 @@ class ExampleLocalizations {
   String get title => 'Tapped $_count times';
 }
 
-class _ExampleLocalizationsDelegate extends LocalizationsDelegate<ExampleLocalizations> {
+class _ExampleLocalizationsDelegate
+    extends LocalizationsDelegate<ExampleLocalizations> {
   const _ExampleLocalizationsDelegate(this.count);
 
   final int count;
@@ -58,14 +59,15 @@ class _ExampleLocalizationsDelegate extends LocalizationsDelegate<ExampleLocaliz
   bool isSupported(Locale locale) => locale.languageCode == 'en';
 
   @override
-  Future<ExampleLocalizations> load(Locale locale) => SynchronousFuture(ExampleLocalizations(count));
+  Future<ExampleLocalizations> load(Locale locale) =>
+      SynchronousFuture(ExampleLocalizations(count));
 
   @override
   bool shouldReload(_ExampleLocalizationsDelegate old) => old.count != count;
 }
 
 class MyHomePage extends StatelessWidget {
-  const MyHomePage({Key key}) : super(key: key);
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +80,7 @@ class MyHomePage extends StatelessWidget {
 }
 
 class IncrementCounterButton extends StatelessWidget {
-  const IncrementCounterButton({Key key}) : super(key: key);
+  const IncrementCounterButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +97,7 @@ class IncrementCounterButton extends StatelessWidget {
 }
 
 class CounterLabel extends StatelessWidget {
-  const CounterLabel({Key key}) : super(key: key);
+  const CounterLabel({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -117,10 +119,10 @@ class CounterLabel extends StatelessWidget {
 }
 
 class Title extends StatelessWidget {
-  const Title({Key key}) : super(key: key);
+  const Title({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Text(ExampleLocalizations.of(context).title);
+    return Text(ExampleLocalizations.of(context)?.title ?? "");
   }
 }

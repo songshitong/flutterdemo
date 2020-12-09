@@ -7,7 +7,7 @@ class DemoLocalizations {
   //是否为中文
   bool isZh = false;
   //为了使用方便，我们定义一个静态方法
-  static DemoLocalizations of(BuildContext context) {
+  static DemoLocalizations? of(BuildContext context) {
     return Localizations.of<DemoLocalizations>(context, DemoLocalizations);
   }
 

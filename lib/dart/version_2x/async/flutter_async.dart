@@ -15,7 +15,7 @@ void main() {
   ///在flutter应用内运行，单独运行出错
   if (null != SchedulerBinding.instance) {
     //instance可能为null
-    SchedulerBinding.instance.scheduleTask(() {
+    SchedulerBinding.instance?.scheduleTask(() {
       return "结果";
     }, Priority.idle).then((result) {
       print("task result $result");

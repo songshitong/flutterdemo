@@ -28,7 +28,7 @@ class NativeWidgetPage extends StatefulWidget {
 }
 
 class NativeWidgetPageState extends State<NativeWidgetPage> {
-  MethodChannel _channel;
+  late MethodChannel _channel;
   @override
   Widget build(BuildContext context) {
     return Scaffold(

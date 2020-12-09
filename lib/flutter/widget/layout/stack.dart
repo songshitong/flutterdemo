@@ -47,7 +47,7 @@ class StackPageState extends State<StackPage> {
                   children: <Widget>[
                     DropdownButton(
                       hint: Text(stackFits[fitValue].toString()),
-                      onChanged: (value) {
+                      onChanged: (dynamic value) {
                         setState(() {
                           fitValue = value;
                         });
@@ -79,7 +79,7 @@ class StackPageState extends State<StackPage> {
                             value: 1,
                           ),
                         ],
-                        onChanged: (value) {
+                        onChanged: (dynamic value) {
                           setState(() {
                             overFlowValue = value;
                           });

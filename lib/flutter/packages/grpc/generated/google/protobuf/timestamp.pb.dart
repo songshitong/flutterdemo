@@ -28,13 +28,13 @@ class Timestamp extends $pb.GeneratedMessage {
       : super.fromJson(i, r);
   Timestamp clone() => new Timestamp()..mergeFromMessage(this);
   Timestamp copyWith(void Function(Timestamp) updates) =>
-      super.copyWith((message) => updates(message as Timestamp));
+      super.copyWith((message) => updates(message as Timestamp)) as Timestamp;
   $pb.BuilderInfo get info_ => _i;
   static Timestamp create() => new Timestamp();
   Timestamp createEmptyInstance() => create();
   static $pb.PbList<Timestamp> createRepeated() => new $pb.PbList<Timestamp>();
   static Timestamp getDefault() => _defaultInstance ??= create()..freeze();
-  static Timestamp _defaultInstance;
+  static Timestamp? _defaultInstance;
 
   Int64 get seconds => $_getI64(0);
   set seconds(Int64 v) {

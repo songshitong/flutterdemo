@@ -71,17 +71,17 @@ class LoadMoreNotification extends StatefulWidget {
   int maxCount;
   int itemCount;
   Widget listChild;
-  Widget loadingWidget;
-  Widget endWidget;
+  Widget? loadingWidget;
+  Widget? endWidget;
   ValueGetter<Future> loadData;
 
   LoadMoreNotification(
-      {@required this.maxCount,
-      @required this.itemCount,
-      @required this.listChild,
+      {required this.maxCount,
+      required this.itemCount,
+      required this.listChild,
       this.loadingWidget,
       this.endWidget,
-      @required this.loadData});
+      required this.loadData});
 
   @override
   _LoadMoreNotificationState createState() => _LoadMoreNotificationState();
@@ -108,7 +108,7 @@ class _LoadMoreNotificationState extends State<LoadMoreNotification> {
             contentVisible = true;
             loadVisible = true;
             isStartListen = false;
-            widget?.loadData().then((_) {
+            widget.loadData().then((_) {
               isStartListen = true;
               endVisible = false;
               contentVisible = true;
@@ -126,10 +126,14 @@ class _LoadMoreNotificationState extends State<LoadMoreNotification> {
             Visibility(visible: contentVisible, child: widget.listChild),
 
             ///loading
-            Visibility(visible: loadVisible, child: widget.loadingWidget ?? LoadDefaultIndicator()),
+            Visibility(
+                visible: loadVisible,
+                child: widget.loadingWidget ?? LoadDefaultIndicator()),
 
             ///endWidget
-            Visibility(visible: endVisible, child: widget.endWidget ?? DefaultEndWidget())
+            Visibility(
+                visible: endVisible,
+                child: widget.endWidget ?? DefaultEndWidget())
           ],
         ));
   }
@@ -147,15 +151,15 @@ class DefaultEndWidget extends StatelessWidget {
 class LoadMoreListWidget extends StatefulWidget {
   int maxCount;
   int itemCount;
-  Widget loadingWidget;
-  Widget endWidget;
+  Widget? loadingWidget;
+  Widget? endWidget;
   ValueGetter<Future> loadData;
   bool isInitData;
   ScrollController loadListenController;
-  ScrollController listController;
+  ScrollController? listController;
 
-  VoidCallback onEnd;
-  VoidCallback onLoading;
+  VoidCallback? onEnd;
+  VoidCallback? onLoading;
   bool isShowLoading;
   Axis scrollDirection;
   bool shrinkWrap;
@@ -163,13 +167,13 @@ class LoadMoreListWidget extends StatefulWidget {
   IndexedWidgetBuilder itemBuilder;
   bool isShowEndWidget;
   LoadMoreListWidget(
-      {@required this.maxCount,
-      @required this.itemCount,
+      {required this.maxCount,
+      required this.itemCount,
       this.loadingWidget,
       this.endWidget,
-      @required this.loadData,
+      required this.loadData,
       this.isInitData = true,
-      @required this.loadListenController,
+      required this.loadListenController,
       this.listController,
       this.onEnd,
       this.onLoading,
@@ -177,7 +181,7 @@ class LoadMoreListWidget extends StatefulWidget {
       this.scrollDirection = Axis.vertical,
       this.shrinkWrap = true,
       this.physics = const AlwaysScrollableScrollPhysics(),
-      @required this.itemBuilder,
+      required this.itemBuilder,
       this.isShowEndWidget = true})
       : assert(null != isShowLoading);
 
@@ -193,32 +197,34 @@ class _LoadMoreListWidgetState extends State<LoadMoreListWidget> {
   void initState() {
     super.initState();
     if (widget.isInitData) {
-      widget?.loadData();
+      widget.loadData();
     }
-    if (null != widget.loadListenController && widget.loadListenController.hasClients) {
+    if (null != widget.loadListenController &&
+        widget.loadListenController.hasClients) {
       widget.loadListenController.addListener(() {
-        if (widget.loadListenController.position.pixels == widget.loadListenController.position.maxScrollExtent) {
+        if (widget.loadListenController.position.pixels ==
+            widget.loadListenController.position.maxScrollExtent) {
           print(
               "widget.itemCount == widget.maxCount ${widget.itemCount} ${widget.maxCount} isStartListen $isStartListen");
           if (widget.itemCount == widget.maxCount) {
             //结束
             if (null != widget.onEnd) {
-              widget.onEnd();
+              widget.onEnd!();
             }
             print("scorll on End ====");
           } else if (widget.itemCount < widget.maxCount) {
             if (!isStartListen) return;
-            if (null != widget?.onLoading) {
-              widget.onLoading();
+            if (null != widget.onLoading) {
+              widget.onLoading!();
             }
             isStartListen = false;
             print("scorll on loading ====");
-            widget?.loadData().then((_) {
+            widget.loadData().then((_) {
               print("scorll on end ====");
               //结束
               isStartListen = true;
-              if (null != widget?.onLoading) {
-                widget.onLoading();
+              if (null != widget.onLoading) {
+                widget.onLoading!();
               }
             });
           }
@@ -234,12 +240,14 @@ class _LoadMoreListWidgetState extends State<LoadMoreListWidget> {
         scrollDirection: widget.scrollDirection,
         shrinkWrap: widget.shrinkWrap,
         physics: widget.physics,
-        controller: widget.listController,
+        controller: widget.listController!,
         itemBuilder: (context, index) {
           if (index != widget.maxCount) {
             if (index == widget.itemCount) {
               //最后一个
-              return Visibility(visible: widget.isShowLoading, child: widget.loadingWidget ?? LoadDefaultIndicator());
+              return Visibility(
+                  visible: widget.isShowLoading,
+                  child: widget.loadingWidget ?? LoadDefaultIndicator());
             } else {
               return widget.itemBuilder(context, index);
             }
@@ -257,7 +265,7 @@ class _LoadMoreListWidgetState extends State<LoadMoreListWidget> {
 }
 
 class DefaultLoadMoreEndWidget extends StatelessWidget {
-  ScrollController controller;
+  ScrollController? controller;
 
   ///监听滚动，小于一屏不展示
   bool isShowOnOverScreen;
@@ -266,7 +274,9 @@ class DefaultLoadMoreEndWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var visible = true;
-    if (null != controller && isShowOnOverScreen && controller.position.pixels < MediaQuery.of(context).size.height) {
+    if (null != controller &&
+        isShowOnOverScreen &&
+        controller!.position.pixels < MediaQuery.of(context).size.height) {
       visible = false;
     }
     return Visibility(

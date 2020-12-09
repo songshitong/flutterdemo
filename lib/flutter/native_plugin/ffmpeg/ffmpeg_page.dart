@@ -11,8 +11,8 @@ class FFmpegPage extends StatefulWidget {
 
 class _FFmpegPageState extends State<FFmpegPage> {
   final FlutterFFmpeg _flutterFFmpeg = new FlutterFFmpeg();
-  File _video;
-  Map info;
+  late File _video;
+  Map? info;
   @override
   void initState() {
     super.initState();
@@ -40,8 +40,8 @@ class _FFmpegPageState extends State<FFmpegPage> {
             Builder(
               builder: (context) {
                 dynamic rotate;
-                if (null != info && info['streams'] != null) {
-                  final streamsInfoArray = info['streams'];
+                if (null != info && info!['streams'] != null) {
+                  final streamsInfoArray = info!['streams'];
                   if (streamsInfoArray.length > 0) {
                     for (var streamsInfo in streamsInfoArray) {
                       print("Stream id: ${streamsInfo['index']}");

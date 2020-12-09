@@ -17,7 +17,7 @@ class _RouteAnimationPageState extends State<RouteAnimationPage> {
         children: <Widget>[
           RaisedButton(
             onPressed: () {
-              Navigator.of(context).push(customRoute());
+              Navigator.of(context)?.push(customRoute());
             },
             child: Text("跳转"),
           )
@@ -66,12 +66,12 @@ class _RouteAnimationPageState extends State<RouteAnimationPage> {
 ///[opaque]  true遮挡前一页  false不遮挡
 class FadeRoute extends PageRoute {
   FadeRoute({
-    @required this.builder,
+    required this.builder,
     this.transitionDuration = const Duration(milliseconds: 300),
     this.opaque = true,
     this.barrierDismissible = false,
-    this.barrierColor,
-    this.barrierLabel,
+    this.barrierColor = Colors.transparent,
+    this.barrierLabel = "FadeRoute",
     this.maintainState = true,
   });
 
@@ -96,12 +96,13 @@ class FadeRoute extends PageRoute {
   final bool maintainState;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
+  Widget buildPage(BuildContext context, Animation<double> animation,
+          Animation<double> secondaryAnimation) =>
       builder(context);
 
   @override
-  Widget buildTransitions(
-      BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(BuildContext context, Animation<double> animation,
+      Animation<double> secondaryAnimation, Widget child) {
     //当前路由被激活，是打开新路由
     if (isActive) {
       return FadeTransition(

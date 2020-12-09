@@ -124,7 +124,7 @@ class StatelessContainer extends StatelessWidget {
 class StatefulContainer extends StatefulWidget {
   @override
   _StatefulContainerState createState() => _StatefulContainerState();
-  StatefulContainer({Key key}) : super(key: key);
+  StatefulContainer({required Key key}) : super(key: key);
 }
 
 class _StatefulContainerState extends State<StatefulContainer> {

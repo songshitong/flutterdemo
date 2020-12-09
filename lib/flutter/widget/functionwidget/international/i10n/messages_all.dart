@@ -20,7 +20,7 @@ Map<String, LibraryLoader> _deferredLibraries = {
   'zh_CN': () => new Future.value(null),
 };
 
-MessageLookupByLibrary _findExact(localeName) {
+MessageLookupByLibrary? _findExact(localeName) {
   switch (localeName) {
     case 'messages':
       return messages_messages.messages;
@@ -35,8 +35,8 @@ MessageLookupByLibrary _findExact(localeName) {
 Future<bool> initializeMessages(String localeName) async {
   var availableLocale = Intl.verifiedLocale(
     localeName,
-    (locale) => _deferredLibraries[locale] != null,
-    onFailure: (_) => null);
+    ((locale) => _deferredLibraries[locale] != null) as bool Function(String),
+    onFailure: ((_) => null!) as String Function(String));
   if (availableLocale == null) {
     // ignore: unnecessary_new
     return new Future.value(false);
@@ -59,9 +59,9 @@ bool _messagesExistFor(String locale) {
   }
 }
 
-MessageLookupByLibrary _findGeneratedMessagesFor(locale) {
+MessageLookupByLibrary? _findGeneratedMessagesFor(locale) {
   var actualLocale = Intl.verifiedLocale(locale, _messagesExistFor,
-      onFailure: (_) => null);
+      onFailure: ((_) => null!) as String Function(String));
   if (actualLocale == null) return null;
   return _findExact(actualLocale);
 }

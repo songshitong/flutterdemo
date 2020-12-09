@@ -11,9 +11,9 @@ class OverlayChangePage extends StatefulWidget {
 }
 
 class _OverlayChangePageState extends State<OverlayChangePage> with TickerProviderStateMixin {
-  AnimationController _controller;
-  AnimationController _cuteController;
-  CurveTween _tween;
+  late AnimationController _controller;
+  late AnimationController _cuteController;
+  late CurveTween _tween;
   @override
   void initState() {
     _controller = AnimationController(vsync: this, duration: Duration(milliseconds: 1000));

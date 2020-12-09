@@ -1,9 +1,8 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
-
-import 'package:flutterdemo/flutter/common/MyImgs.dart';
+import 'package:flutterdemo/flutter/widget/customwidget/path2.dart';
 
 class PathPage extends StatelessWidget {
   @override
@@ -11,9 +10,20 @@ class PathPage extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: Text("path page"),
+          actions: <Widget>[
+            FlatButton(
+                onPressed: () {
+                  Navigator.of(context)!
+                      .push(MaterialPageRoute(builder: (context) {
+                    return Path2Page();
+                  }));
+                },
+                child: Text("Path2Page"))
+          ],
         ),
         body: CustomPaint(
-          size: Size(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height - 80),
+          size: Size(MediaQuery.of(context).size.width,
+              MediaQuery.of(context).size.height - 80),
           painter: _MyPainter(),
         ));
   }
@@ -25,9 +35,10 @@ class _MyPainter extends CustomPainter {
     canvas.drawPath(path, painter);
     //获得path片段  画了两条线，有两个独立的片段
     PathMetrics pms = path.computeMetrics();
+
     PathMetric pm = pms.first;
     print("pms length ${pms.length}");
-    Tangent tangent = pm.getTangentForOffset(10.0);
+    Tangent tangent = pm.getTangentForOffset(10.0)!;
     //60,50
     print("tangent position ${tangent.position}");
     //这个点在线上的矢量 比如代表方向
@@ -46,7 +57,8 @@ class _MyPainter extends CustomPainter {
     path.lineTo(size.width / 2, 0);
     // y=sin(x);    y对应x轴坐标，x对应y轴坐标
     for (int i = 0; i < size.height; i++) {
-      path.lineTo(-math.sin(i / (math.pi * 6)) * 25 + size.width / 2, i.toDouble() * math.pi);
+      path.lineTo(-math.sin(i / (math.pi * 6)) * 25 + size.width / 2,
+          i.toDouble() * math.pi);
     }
     path.lineTo(0, size.height);
     path.close();

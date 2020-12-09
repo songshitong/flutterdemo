@@ -14,7 +14,7 @@ main() async {
   // .stream 当前输出流  StreamSubscription监听流返回对象
   StreamSubscription ss = controller.stream.listen((data) {
     print("ss $data");
-  }, onDone: () {});
+  } as void Function(dynamic)?, onDone: () {});
 
   ss.onDone(() {
     print("ss listen on done ");

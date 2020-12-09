@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -37,13 +36,15 @@ class RepaintBoundaryAnalysis extends StatelessWidget {
   //1 使用RepaintBoundary包裹要截图的图片,设置key为globalKey
   //2 RenderRepaintBoundary.toImage()
   Future<void> _capturePng() async {
-    RenderRepaintBoundary boundary = globalKey.currentContext.findRenderObject();
+    RenderRepaintBoundary boundary =
+        globalKey.currentContext?.findRenderObject() as RenderRepaintBoundary;
     ui.Image image = await boundary.toImage();
 //    png是压缩后格式，如果需要图片的原始像素数据，请使用rawRgba
-    ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    Uint8List pngBytes = byteData.buffer.asUint8List();
+    ByteData? byteData =
+        await (image.toByteData(format: ui.ImageByteFormat.png));
+    Uint8List? pngBytes = byteData?.buffer.asUint8List();
     print(pngBytes);
-    Image.memory(pngBytes);
+    // Image.memory(pngBytes);
 //    File file;
 //    file.writeAsBytes(pngBytes);
   }

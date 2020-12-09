@@ -4,4 +4,4 @@ import 'package:source_gen/source_gen.dart';
 
 Builder todoBuilder(BuilderOptions options) =>
     LibraryBuilder(TodoTopGenerate(), generatedExtension: '.todo_generate.dart');
-PostProcessBuilder a;
+PostProcessBuilder? a;

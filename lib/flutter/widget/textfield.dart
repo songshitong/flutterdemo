@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutterdemo/flutter/pages/page_home.dart';
 
 class TextfieldPage extends StatefulWidget {
   @override
@@ -11,10 +12,10 @@ class TextfieldPage extends StatefulWidget {
 //todo ToolbarOptions
 ///todo TextCapitalization
 class _TextfieldPageState extends State<TextfieldPage> {
-  FocusNode fn;
-  TextEditingController controller;
-  TextEditingController controllerFocus;
-  bool _mouseIsConnected;
+  late FocusNode fn;
+  late TextEditingController controller;
+  late TextEditingController controllerFocus;
+  bool? _mouseIsConnected;
   @override
   void initState() {
     super.initState();
@@ -34,24 +35,25 @@ class _TextfieldPageState extends State<TextfieldPage> {
       print("textfield ${controller.text}");
     });
 
-    ///点击空白取消   Gesuredector包住scaffold hit 透明  foucus.request空node，点击后取消键盘  缺点必定取消键盘
+    ///点击空白取消   Gesuredector包住scaffold hit 透明  foucus.request空node，点击后取消键盘  缺点必定取消键盘 ，可在全局包裹Gesuredector
     ///
     ///[Tooltip] 代码   点击外部区域取消键盘  TODO MouseRegion
-    _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
+    ///GestureBinding 缺点，监听全局事件，如果上层还有其他事件点击，同样会触发，可能影响逻辑
+    _mouseIsConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
     // Listen to see when a mouse is added.
-    RendererBinding.instance.mouseTracker
+    RendererBinding.instance!.mouseTracker
         .addListener(_handleMouseTrackerChange);
     // Listen to global pointer events so that we can hide a tooltip immediately
     // if some other control is clicked on.
-    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
   @override
   void dispose() {
     ///不移除监听，dispose后仍然存在监听
-    RendererBinding.instance.mouseTracker
+    RendererBinding.instance!.mouseTracker
         .removeListener(_handleMouseTrackerChange);
-    GestureBinding.instance.pointerRouter
+    GestureBinding.instance!.pointerRouter
         .removeGlobalRoute(_handlePointerEvent);
     super.dispose();
   }
@@ -208,6 +210,20 @@ class _TextfieldPageState extends State<TextfieldPage> {
               ],
             ),
           ),
+          Row(
+            children: [
+              FlatButton(
+                  onPressed: () {
+                    fn.unfocus();
+                  },
+                  child: Text("unfocus")),
+              FlatButton(
+                  onPressed: () {
+                    fn.requestFocus();
+                  },
+                  child: Text("focus"))
+            ],
+          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
@@ -238,6 +254,20 @@ class _TextfieldPageState extends State<TextfieldPage> {
                   hintText: "isDense"),
             ),
           ),
+          Padding(
+              padding: EdgeInsets.all(8.0),
+              child: TextField(
+                enableSuggestions: false,
+                autocorrect: false,
+                decoration: InputDecoration(hintText: "suggest建议词关闭"),
+              )),
+          Padding(
+              padding: EdgeInsets.all(8.0),
+              child: TextField(
+                enableSuggestions: true,
+                autocorrect: true,
+                decoration: InputDecoration(hintText: "suggest建议词开启"),
+              ))
           //todo form 表单
           //todo 多行高度有问题，官网待修复    可以用 Container(
           //            constraints: BoxConstraints(maxHeight: 100)）来限制
@@ -262,12 +292,37 @@ class _TextfieldPageState extends State<TextfieldPage> {
       return;
     }
     final bool mouseIsConnected =
-        RendererBinding.instance.mouseTracker.mouseIsConnected;
+        RendererBinding.instance!.mouseTracker.mouseIsConnected;
     if (mouseIsConnected != _mouseIsConnected) {
       SystemChannels.textInput.invokeMethod('TextInput.hide');
       setState(() {
         _mouseIsConnected = mouseIsConnected;
       });
     }
+  }
+}
+
+///textfield的封装
+///1.页面退出自动隐藏键盘，防止布局出错，自动隐藏键盘
+class TextFieldWrapper extends StatefulWidget {
+  final TextField textField;
+
+  TextFieldWrapper(this.textField);
+
+  @override
+  _TextFieldWrapperState createState() => _TextFieldWrapperState();
+}
+
+class _TextFieldWrapperState extends State<TextFieldWrapper> {
+  @override
+  void dispose() {
+    super.dispose();
+    FocusScope.of(rootContext).requestFocus(FocusNode());
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.textField;
   }
 }

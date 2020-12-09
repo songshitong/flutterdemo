@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterdemo/flutter/common/MyImgs.dart';
+import 'package:flutterdemo/flutter/flutter_demo_debug.dart';
 
 ///[GestureDetector]是一个用于手势识别的功能性Widget，我们通过它可以来识别各种手势，它是指针事件的语义化封装
 ///
@@ -22,6 +23,14 @@ import 'package:flutterdemo/flutter/common/MyImgs.dart';
 ///
 /// TODO 子组件实现GestureDetector后，父组件无法继续监听？？？
 ///
+/// Gesture disambiguation
+///https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation
+/// When there is more than one gesture recognizer for a given pointer on the screen, the framework disambiguates which gesture the user intends by having each recognizer join the gesture arena. The gesture arena determines which gesture wins using the following rules:
+/// At any time, a recognizer can declare defeat and leave the arena. If there’s only one recognizer left in the arena, that recognizer is the winner.
+/// At any time, a recognizer can declare victory, which causes it to win and all the remaining recognizers to lose.
+///
+/// todo  GestureDectector->RawGestureDectector ->RenderListener
+/// GestureBinding 事件触发
 class GesureDetectorPage extends StatefulWidget {
   @override
   _GesureDetectorPageState createState() => _GesureDetectorPageState();
@@ -127,7 +136,8 @@ class _GesureDetectorPageState extends State<GesureDetectorPage> {
               TextSpan(text: "你好世界"),
               TextSpan(
                 text: "点我变色",
-                style: TextStyle(fontSize: 30.0, color: _toggle ? Colors.blue : Colors.red),
+                style: TextStyle(
+                    fontSize: 30.0, color: _toggle ? Colors.blue : Colors.red),
                 recognizer: _tapGestureRecognizer
                   ..onTap = () {
                     setState(() {
@@ -224,29 +234,34 @@ class _GesureDetectorPageState extends State<GesureDetectorPage> {
                     top: 0,
                     child: Listener(
                       onPointerDown: (e) {
-                        print("onPointerDown");
+                        print("$demoTag onPointerDown");
                       },
                       onPointerUp: (e) {
-                        print("onPointerUp");
+                        print("$demoTag onPointerUp");
                       },
                       child: GestureDetector(
-                        child: CircleAvatar(child: Text("手势冲突拖动")),
+                        child: CircleAvatar(
+                            child: Listener(
+                                onPointerDown: (_) {
+                                  print("$demoTag text listener");
+                                },
+                                child: Text("手势冲突拖动1"))),
                         onHorizontalDragUpdate: (DragUpdateDetails details) {
                           setState(() {
                             _left3 += details.delta.dx;
                           });
                         },
                         onHorizontalDragEnd: (details) {
-                          print("onHorizontalDragEnd");
+                          print("$demoTag onHorizontalDragEnd");
                         },
                         onHorizontalDragStart: (e) {
-                          print("onHorizontalDragStart");
+                          print("$demoTag onHorizontalDragStart");
                         },
                         onTapDown: (details) {
-                          print("down");
+                          print("$demoTag down");
                         },
                         onTapUp: (details) {
-                          print("up");
+                          print("$demoTag up");
                         },
                       ),
                     ),

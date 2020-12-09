@@ -7,7 +7,7 @@ abstract class People {
     print(" people hello");
   }
 
-  ContentA getContent();
+  ContentA? getContent();
 }
 
 ///继承
@@ -30,7 +30,9 @@ class Student extends People {
 class StudentA extends Student {
   //继承只继承父类的属性，不在向上查找
   @override
-  ContentB getContent() {}
+  ContentB getContent() {
+    return ContentB();
+  }
 }
 
 ///实现  类实现了一个默认接口
@@ -47,7 +49,7 @@ class Robot implements People {
 //  }
 
   @override
-  ContentA getContent() {
+  ContentA? getContent() {
     // TODO: implement getContent
     return null;
   }

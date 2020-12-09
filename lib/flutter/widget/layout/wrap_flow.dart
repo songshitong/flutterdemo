@@ -88,30 +88,30 @@ class _WrapAndFlowPageState extends State<WrapAndFlowPage> {
 }
 
 class TestFlowDelegate extends FlowDelegate {
-  EdgeInsets margin = EdgeInsets.zero;
+  EdgeInsets? margin = EdgeInsets.zero;
   TestFlowDelegate({this.margin});
   @override
   void paintChildren(FlowPaintingContext context) {
 //    FlowPaintingContext  FlowDelegate绘制的context，提供了container的size，child的size，child的绘制机制
-    var x = margin.left;
-    var y = margin.top;
+    var x = margin!.left;
+    var y = margin!.top;
     //计算每一个子widget的位置
     for (int i = 0; i < context.childCount; i++) {
       //最后一个不绘制
       if (i == 5) return;
 
-      var w = context.getChildSize(i).width + x + margin.right;
+      var w = context.getChildSize(i)!.width + x + margin!.right;
       if (w < context.size.width) {
         // 一行之内
         context.paintChild(i, transform: new Matrix4.translationValues(x, y, 0.0));
-        x = w + margin.left;
+        x = w + margin!.left;
       } else {
         //超过一行
-        x = margin.left;
-        y += context.getChildSize(i).height + margin.top + margin.bottom;
+        x = margin!.left;
+        y += context.getChildSize(i)!.height + margin!.top + margin!.bottom;
         //绘制子widget(有优化)
         context.paintChild(i, transform: new Matrix4.translationValues(x, y, 0.0));
-        x += context.getChildSize(i).width + margin.left + margin.right;
+        x += context.getChildSize(i)!.width + margin!.left + margin!.right;
       }
     }
   }

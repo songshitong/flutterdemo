@@ -55,9 +55,9 @@ class _Model3DPageState extends State<Model3DPage> {
 //1.0开始创建小部件
 class Widght_3D extends StatefulWidget {
   Widght_3D(
-      {@required this.size,
-      @required this.path,
-      @required this.asset,
+      {required this.size,
+      required this.path,
+      required this.asset,
       this.angleX,
       this.angleY,
       this.angleZ,
@@ -71,9 +71,9 @@ class Widght_3D extends StatefulWidget {
   bool asset;
   String path;
   double zoom;
-  double angleX;
-  double angleY;
-  double angleZ;
+  double? angleX;
+  double? angleY;
+  double? angleZ;
   bool angleValue = true;
 
   @override
@@ -91,10 +91,10 @@ class _Widght_3DState extends State<Widght_3D> {
   double _previousX = 0.0;
   double _previousY = 0.0;
 
-  double zoom;
+  double? zoom;
   String object = "V 1 1 1 1";
 
-  File file;
+  File? file;
   @override
   void initState() {
     super.initState();
@@ -185,17 +185,17 @@ class _ObjectPainter extends CustomPainter {
 
   double _viewPortX = 0.0, _viewPortY = 0.0;
 
-  List<Vector3> vertices;
-  List<dynamic> faces;
-  V.Matrix4 T;
-  Vector3 camera;
-  Vector3 light;
+  List<Vector3>? vertices;
+  List<dynamic>? faces;
+  late V.Matrix4 T;
+  late Vector3 camera;
+  late Vector3 light;
 
-  double angleX;
-  double angleY;
-  double angleZ;
+  double? angleX;
+  double? angleY;
+  double? angleZ;
 
-  Color color;
+  late Color color;
 
   Size size;
 
@@ -247,7 +247,7 @@ class _ObjectPainter extends CustomPainter {
   }
 
   bool _shouldDrawFace(List face) {
-    var normalVector = _normalVector3(vertices[face[0] - 1], vertices[face[1] - 1], vertices[face[2] - 1]);
+    var normalVector = _normalVector3(vertices![face[0] - 1], vertices![face[1] - 1], vertices![face[2] - 1]);
 
     var dotProduct = normalVector.dot(camera);
     double vectorLengths = normalVector.length * camera.length;
@@ -277,9 +277,9 @@ class _ObjectPainter extends CustomPainter {
     T = new V.Matrix4.translationValues(_viewPortX, _viewPortY, ZERO);
     T.scale(_zoomFactor, -_zoomFactor);
 
-    T.rotateX(_degreeToRadian(angleX != null ? angleX : 0.0));
-    T.rotateY(_degreeToRadian(angleY != null ? angleY : 0.0));
-    T.rotateZ(_degreeToRadian(angleZ != null ? angleZ : 0.0));
+    T.rotateX(_degreeToRadian(angleX != null ? angleX! : 0.0));
+    T.rotateY(_degreeToRadian(angleY != null ? angleY! : 0.0));
+    T.rotateZ(_degreeToRadian(angleZ != null ? angleZ! : 0.0));
 
     return T.transform3(vertex);
   }
@@ -360,7 +360,7 @@ class _ObjectPainter extends CustomPainter {
     faces = parsedFile["faces"];
 
     List<Vector3> verticesToDraw = [];
-    vertices.forEach((vertex) {
+    vertices!.forEach((vertex) {
       verticesToDraw.add(new Vector3.copy(vertex));
     });
 
@@ -369,8 +369,8 @@ class _ObjectPainter extends CustomPainter {
     }
 
     final List avgOfZ = <Map>[];
-    for (int i = 0; i < faces.length; i++) {
-      List face = faces[i];
+    for (int i = 0; i < faces!.length; i++) {
+      List face = faces![i];
       double z = 0.0;
       face.forEach((x) {
         z += verticesToDraw[x - 1].z;
@@ -383,8 +383,8 @@ class _ObjectPainter extends CustomPainter {
     }
     avgOfZ.sort((var a, var b) => a['z'].compareTo(b['z']));
 
-    for (int i = 0; i < faces.length; i++) {
-      List face = faces[avgOfZ[i]["index"]];
+    for (int i = 0; i < faces!.length; i++) {
+      List face = faces![avgOfZ[i]["index"]];
       if (_shouldDrawFace(face) || true) {
         final List<dynamic> faceProp = _drawFace(verticesToDraw, face);
         canvas.drawPath(faceProp[0], faceProp[1]);

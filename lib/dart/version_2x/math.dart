@@ -25,4 +25,11 @@ void main() {
 
   //0.0 到1.0
   print("random double ${math.Random.secure().nextDouble()}");
+
+  ///0.2+0.1不等0.3；  数值计算decimal: ^0.3.0
+  var a02 = 0.2;
+  var a01 = 0.1;
+  print("0.2+0.1=${a01 + a02}");
+  var a06 = 0.6;
+  print("0.1+0.6=${a01 + a06}");
 }

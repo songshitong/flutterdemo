@@ -1,6 +1,6 @@
 class Button {
-  String text;
-  String color;
+  String text = "";
+  String color = "";
   String _btn = "btn";
 
   setText(String tText) {

@@ -12,7 +12,7 @@ void main() {
 }
 
 class TestHashCode {
-  int beforeCode;
+  int? beforeCode;
   String _name = "TestHashCode";
   @override
   int get hashCode {

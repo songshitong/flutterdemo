@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutterdemo/flutter/pages/beautiful/OfpColor.dart';
 
@@ -22,13 +20,17 @@ class LableWidget extends StatefulWidget {
 
   ///点击状态下，背景是否改变
   bool isChangeBg;
-  final GestureTapCallback onTap;
-  Widget leftWidget;
+  final GestureTapCallback? onTap;
+  Widget? leftWidget;
 
   ///使用index避免随机数每次变化
   int index;
   LableWidget(this.content, this.index,
-      {this.isSelectable = false, this.onTap, this.isSelected = true, this.leftWidget, this.isChangeBg = true}) {
+      {this.isSelectable = false,
+      this.onTap,
+      this.isSelected = true,
+      this.leftWidget,
+      this.isChangeBg = true}) {
     if (null == this.leftWidget) {
       this.leftWidget = Container();
     }
@@ -61,7 +63,7 @@ class LableWidgetState extends State<LableWidget> {
             }
           });
           if (null != widget.onTap) {
-            widget.onTap(widget.isSelected);
+            widget.onTap!(widget.isSelected);
           }
         }
       },
@@ -69,11 +71,12 @@ class LableWidgetState extends State<LableWidget> {
         painter: _MyCustomPainter(bgColor, widget.isSelected, widget.index),
         child: RepaintBoundary(
           child: Padding(
-            padding: const EdgeInsets.only(left: 12, right: 12, top: 5, bottom: 5),
+            padding:
+                const EdgeInsets.only(left: 12, right: 12, top: 5, bottom: 5),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                widget.leftWidget,
+                widget.leftWidget ?? SizedBox(),
                 Text(
                   widget.content,
                 ),
@@ -106,17 +109,19 @@ class _MyCustomPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
   }
 
-  Paint bgPaint;
-  Paint linePaint;
+  late Paint bgPaint;
+  late Paint linePaint;
   Color bgColor;
   @override
   void paint(Canvas canvas, Size size) {
 //    LogUtil.debug(size);
     _radius = size.height / 2;
     //背景
-    canvas.drawRect(Rect.fromLTRB(0, 0, size.width - _radius, size.height), bgPaint);
+    canvas.drawRect(
+        Rect.fromLTRB(0, 0, size.width - _radius, size.height), bgPaint);
     //右侧半圆
-    canvas.drawCircle(Offset(size.width - _radius, size.height - _radius), _radius, bgPaint);
+    canvas.drawCircle(
+        Offset(size.width - _radius, size.height - _radius), _radius, bgPaint);
     //左侧线
     if (isSelected) {
       canvas.drawRect(Rect.fromLTRB(0, 0, 3, size.height), linePaint);

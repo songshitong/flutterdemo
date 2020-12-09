@@ -1,6 +1,8 @@
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:flutterdemo/main.dart' as app;
 
+///flutter drive 图片不展示
+///https://github.com/flutter/flutter/issues/30641
 void main() {
   //集成测试   单元测试和widget测试只能测试单个类，集成测试可以运行在设备上测试各个部件作为整体，或者捕获运行的性能
   //测试步骤

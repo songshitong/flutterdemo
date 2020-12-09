@@ -16,6 +16,15 @@ import 'package:flutter/services.dart';
 
 /// MethodChannel与EventChannel 命名时注意带有view的ID，比如VideoPlayer注册了一个EventChannel，
 /// flutter两个nativeview存在，创建了两个EventChannel，此时第二个会顶掉第一个
+///
+/// Future<void>的方法，原生最好也进行回调，防止dart await后不往下走
+/// android result.success(null)   /   ios  result(nil);
+/// 异常拦截同样返回result.err
+/// if(a==null){
+///  result.error("-1","","");
+/// }
+///
+///
 
 class MethodChannelPage extends StatefulWidget {
   @override
@@ -44,15 +53,22 @@ class _MethodChannelPageState extends State<MethodChannelPage> {
             onPressed: _getBatteryLevel,
           ),
           new Text(_batteryLevel),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: RaisedButton(onPressed: () async {
+              await setVoidLog();
+              print("after setVoidLog ===");
+            }),
+          )
         ],
       ),
     );
   }
 
-  Future<Null> _getBatteryLevel() async {
+  Future<void> _getBatteryLevel() async {
     String batteryLevel;
     try {
-      final int result = await platform.invokeMethod('getBatteryLevel');
+      final int? result = await platform.invokeMethod('getBatteryLevel');
       batteryLevel = 'Battery level at $result % .';
     } on PlatformException catch (e) {
       batteryLevel = "Failed to get battery level: '${e.message}'.";
@@ -61,5 +77,9 @@ class _MethodChannelPageState extends State<MethodChannelPage> {
     setState(() {
       _batteryLevel = batteryLevel;
     });
+  }
+
+  Future<void> setVoidLog() {
+    return platform.invokeMethod("setVoidLog");
   }
 }

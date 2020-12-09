@@ -23,8 +23,8 @@ class ApiPayAnim extends StatefulWidget {
 
 class _ApiPayAnimState extends State<ApiPayAnim>
     with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-  TreeScaleTween treeScaleTween;
+  late AnimationController _controller;
+  late TreeScaleTween treeScaleTween;
   @override
   void initState() {
     _controller =
@@ -69,7 +69,7 @@ class _ApiPayAnimState extends State<ApiPayAnim>
                 },
                 child: SizedBox(
                   width: 160,
-                  height: 195 * treeScaleTween.evaluate(_controller),
+                  height: 195 * treeScaleTween.evaluate(_controller) as double,
                   child: Image.asset(
                     MyImgs.green_home_sapling_little,
                     fit: BoxFit.fill,
@@ -106,9 +106,9 @@ class WaterDropWidget extends StatefulWidget {
 }
 
 class WaterDrop {
-  double xInitSpeed;
-  double yInitSpeed;
-  double ySpeed;
+  late double xInitSpeed;
+  double yInitSpeed = 0;
+  double ySpeed = 0;
   double xOffset = 100;
   double yOffset = 0;
   final double dropAccelerationSpeed = 0.8;
@@ -127,10 +127,10 @@ class WaterDrop {
 
 class _WaterDropWidgetState extends State<WaterDropWidget>
     with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-  List<WaterDrop> waters;
-  ui.Image waterImage;
-  List<Offset> offsets;
+  late AnimationController _controller;
+  late List<WaterDrop> waters;
+  ui.Image? waterImage;
+  List<Offset>? offsets;
   @override
   void initState() {
     _controller =
@@ -158,7 +158,7 @@ class _WaterDropWidgetState extends State<WaterDropWidget>
 
         ///对dx做限制
         if (waterDrop.xOffset > 50) {
-          offsets.add(Offset(
+          offsets!.add(Offset(
               waterDrop.xOffset.toDouble(), waterDrop.yOffset.toDouble()));
         } else {
           waterDrop.reset();
@@ -217,9 +217,9 @@ class _WaterDropWidgetState extends State<WaterDropWidget>
 }
 
 class WaterDropPaint extends CustomPainter {
-  Paint mPaint;
-  List<Offset> waters;
-  ui.Image waterImage;
+  late Paint mPaint;
+  List<Offset>? waters;
+  ui.Image? waterImage;
   WaterDropPaint(this.waters, this.waterImage) {
     mPaint = Paint()
       ..color = Colors.green
@@ -230,9 +230,9 @@ class WaterDropPaint extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (null != waters) {
-      waters.forEach((offset) {
+      waters!.forEach((offset) {
 //        print("offset $offset");
-        canvas.drawImage(waterImage, offset, mPaint);
+        canvas.drawImage(waterImage!, offset, mPaint);
       });
     }
   }

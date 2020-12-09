@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodCall;
@@ -19,7 +20,15 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin;
 //todo FlutterPlugin干嘛用的 webview_plugin用到了
 public class MainActivity extends FlutterActivity {
   private static final String CHANNEL = "samples.flutter.io/battery";
+  static final String  TAG = "MainActivity === ";
   Context context;
+
+  @Override
+  protected void onDestroy() {
+    Log.d(TAG,"MainActivity  onDestroy -------------");
+    super.onDestroy();
+  }
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -43,7 +52,11 @@ public class MainActivity extends FlutterActivity {
                   } else {
                     result.error("UNAVAILABLE", "Battery level not available.", null); ///进入flutter 的异常 future.catchErr
                   }
-                } else {
+                } else  if(call.method.equals("setVoidLog")){
+                  Log.d(TAG,"native setVoidLog=====");
+                  result.success(null);
+                }
+                else {
                   result.notImplemented();
                 }
               }

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutterdemo/flutter/common/transform.dart';
 
 //将widget裁剪，将widget分成几份   自定义canvas超出绘制可以使使用clip进行限制
@@ -56,7 +56,8 @@ class _ClipWidgetState extends State<ClipWidget> {
             padding: const EdgeInsets.all(8.0),
             child: ClipPath(
               clipper: ShapeBorderClipper(shape: CircleBorder()),
-              child: Container(width: 100, height: 100, child: TextContent("ClipPath")),
+              child: Container(
+                  width: 100, height: 100, child: TextContent("ClipPath")),
             ),
           ),
           Center(
@@ -109,7 +110,10 @@ class Flip3DWidget extends StatefulWidget {
   double childWidth;
   int count;
   Flip3DWidget(
-      {@required this.widgetBuilder, @required this.childHeight, @required this.childWidth, @required this.count});
+      {required this.widgetBuilder,
+      required this.childHeight,
+      required this.childWidth,
+      required this.count});
 
   @override
   _Flip3DWidgetState createState() => _Flip3DWidgetState();
@@ -121,16 +125,18 @@ enum FlipDirection { up, down }
 //forward   reverse
 enum ControllerState { none, forward, reverse }
 
-class _Flip3DWidgetState extends State<Flip3DWidget> with TickerProviderStateMixin {
+class _Flip3DWidgetState extends State<Flip3DWidget>
+    with TickerProviderStateMixin {
   int index = 0;
-  AnimationController _controller;
-  FlipDirection _direction;
+  late AnimationController _controller;
+  FlipDirection? _direction;
   bool _isReverse = false;
   final _perspective = 0.004;
   ControllerState _controllerState = ControllerState.none;
   @override
   void initState() {
-    _controller = AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    _controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.forward) {
         _controllerState = ControllerState.forward;
@@ -157,9 +163,9 @@ class _Flip3DWidgetState extends State<Flip3DWidget> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    Widget currentWidget;
-    Widget nextWidget;
-    Widget preWidget;
+    late Widget currentWidget;
+    Widget? nextWidget;
+    Widget? preWidget;
 
     if (index >= 0 && index <= widget.count - 1) {
       currentWidget = widget.widgetBuilder(context, index);
@@ -204,7 +210,8 @@ class _Flip3DWidgetState extends State<Flip3DWidget> with TickerProviderStateMix
     );
   }
 
-  Widget buildColumn(Widget currentWidget, Widget nextWidget, Widget preWidget, BuildContext context) {
+  Widget buildColumn(Widget currentWidget, Widget? nextWidget,
+      Widget? preWidget, BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -226,7 +233,8 @@ class _Flip3DWidgetState extends State<Flip3DWidget> with TickerProviderStateMix
             //下一个的下半部
             Visibility(
                 visible: _controllerState != ControllerState.none,
-                child: clipBottom(_direction == FlipDirection.up ? nextWidget : preWidget)),
+                child: clipBottom(
+                    _direction == FlipDirection.up ? nextWidget! : preWidget!)),
             //当前下部分
             buildCurrentBottom(currentWidget)
           ],
@@ -265,10 +273,12 @@ class _Flip3DWidgetState extends State<Flip3DWidget> with TickerProviderStateMix
         animation: _controller,
         child: currentWidget,
         builder: (context, widget) {
-          double angle = !_isReverse ? math.pi / 2 * _controller.value : math.pi / 2;
+          double angle =
+              !_isReverse ? math.pi / 2 * _controller.value : math.pi / 2;
           return Transform(
               alignment: Alignment.topCenter,
-              transform: TransformUtil.perspectiveRotateX(-angle, perspective: _perspective),
+              transform: TransformUtil.perspectiveRotateX(-angle,
+                  perspective: _perspective),
               child: clipBottom(widget));
         },
       ),
@@ -276,19 +286,20 @@ class _Flip3DWidgetState extends State<Flip3DWidget> with TickerProviderStateMix
   }
 
   //下一个/上一个的上半部分
-  Widget buildNextPreTop(Widget nextWidget, Widget preWidget) {
+  Widget buildNextPreTop(Widget? nextWidget, Widget? preWidget) {
     return Visibility(
       visible: _controllerState == ControllerState.reverse,
       child: AnimatedBuilder(
           animation: _controller,
-          child: _direction == FlipDirection.up ? nextWidget : preWidget,
+          child: _direction == FlipDirection.up ? nextWidget! : preWidget!,
           builder: (context, child) {
             double angle = math.pi / 2 * _controller.value;
             double rotateX = _isReverse && angle > 0 ? angle : math.pi / 2;
 //                print("rotateX $rotateX");
             return Transform(
               alignment: Alignment.bottomCenter,
-              transform: TransformUtil.perspectiveRotateX(rotateX, perspective: _perspective),
+              transform: TransformUtil.perspectiveRotateX(rotateX,
+                  perspective: _perspective),
               child: clipTop(child),
             );
           }),
@@ -296,8 +307,10 @@ class _Flip3DWidgetState extends State<Flip3DWidget> with TickerProviderStateMix
   }
 
   //当前上半部分
-  Container buildCurrentTop(Widget currentWidget) =>
-      Container(width: widget.childWidth, height: widget.childHeight * 2 + 1, child: clipTop(currentWidget));
+  Container buildCurrentTop(Widget currentWidget) => Container(
+      width: widget.childWidth,
+      height: widget.childHeight * 2 + 1,
+      child: clipTop(currentWidget));
 
   //中间线
   Container buildLine(BuildContext context) {
@@ -308,7 +321,7 @@ class _Flip3DWidgetState extends State<Flip3DWidget> with TickerProviderStateMix
     );
   }
 
-  Widget clipTop(Widget child) {
+  Widget clipTop(Widget? child) {
     return ClipRect(
       child: Align(
         alignment: Alignment.topCenter,
@@ -318,7 +331,7 @@ class _Flip3DWidgetState extends State<Flip3DWidget> with TickerProviderStateMix
     );
   }
 
-  Widget clipBottom(Widget child) {
+  Widget clipBottom(Widget? child) {
     return ClipRect(
       child: Align(
         alignment: Alignment.bottomCenter,

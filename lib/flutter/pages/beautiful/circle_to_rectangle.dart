@@ -7,7 +7,7 @@ class Circle2Rectangle extends StatefulWidget {
 }
 
 class _Circle2RectangleState extends State<Circle2Rectangle> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+  late AnimationController _controller;
   @override
   void initState() {
     super.initState();
@@ -66,46 +66,46 @@ class Circle2RectPaint extends CustomPainter {
 //用四个贝塞尔拟合圆形，https://github.com/GcsSloop/AndroidNote/blob/master/CustomView/Advance/%5B06%5DPath_Bezier.md
   //每个线段一半是pointLength
   static const double pointLength = 0.551915024494;
-  double progress = 0.0;
+  double? progress = 0.0;
   //半径
   double r = 50.0;
   double width = 100.0;
   double height = 100.0;
-  Offset center;
+  late Offset center;
   //四个控制点
-  Offset controlTop;
-  Offset controlLeft;
-  Offset controlBottom;
-  Offset controlRightTop;
+  late Offset controlTop;
+  late Offset controlLeft;
+  late Offset controlBottom;
+  late Offset controlRightTop;
 
   //要变为方形右侧增加一个控制点
-  Offset controlRightBottom;
+  late Offset controlRightBottom;
 
   //8个起始点
-  Offset topStart;
-  Offset topEnd;
-  Offset leftStart;
-  Offset leftEnd;
-  Offset bottomStart;
-  Offset bottomEnd;
-  Offset rightStart;
-  Offset rightEnd;
+  late Offset topStart;
+  late Offset topEnd;
+  late Offset leftStart;
+  late Offset leftEnd;
+  late Offset bottomStart;
+  late Offset bottomEnd;
+  late Offset rightStart;
+  late Offset rightEnd;
   Paint mPaint = Paint()..color = Colors.red;
   Path mPath = Path();
   @override
   void paint(Canvas canvas, Size size) {
     //变为方形时  controlRightBottom rightStart右下角   controlRightTop rightEnd右上角
     if (controlRightBottom.dy > -r + center.dy) {
-      controlRightBottom = controlRightBottom.translate(0, -r * progress);
+      controlRightBottom = controlRightBottom.translate(0, -r * progress!);
     }
     if (controlRightTop.dy < r + center.dy) {
-      controlRightTop = controlRightTop.translate(0, r * progress);
+      controlRightTop = controlRightTop.translate(0, r * progress!);
     }
     if (rightStart.dy > -r + center.dy) {
-      rightStart = rightStart.translate(0, (-r + r * pointLength) * progress);
+      rightStart = rightStart.translate(0, (-r + r * pointLength) * progress!);
     }
     if (rightEnd.dy < r + center.dy) {
-      rightEnd = rightEnd.translate(0, (r - r * pointLength) * progress);
+      rightEnd = rightEnd.translate(0, (r - r * pointLength) * progress!);
     }
     //开始画圆
     mPath.moveTo(controlTop.dx, controlTop.dy);

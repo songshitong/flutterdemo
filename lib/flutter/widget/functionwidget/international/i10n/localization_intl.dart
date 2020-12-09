@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'messages_all.dart'; //1
 
 class IntlLocalizations {
   static Future<IntlLocalizations> load(Locale locale) {
-    final String name = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
+    final String name =
+        locale.countryCode!.isEmpty ? locale.languageCode : locale.toString();
     final String localeName = Intl.canonicalizedLocale(name);
     //2
     return initializeMessages(localeName).then((b) {
@@ -14,18 +16,21 @@ class IntlLocalizations {
     });
   }
 
-  static IntlLocalizations of(BuildContext context) {
+  static IntlLocalizations? of(BuildContext context) {
     return Localizations.of<IntlLocalizations>(context, IntlLocalizations);
   }
 
   String get title {
     return Intl.message('Flutter APP',
-        name: 'title', desc: 'Title for the Demo application', locale: Intl.getCurrentLocale());
+        name: 'title',
+        desc: 'Title for the Demo application',
+        locale: Intl.getCurrentLocale());
   }
 }
 
 //Locale代理类
-class IntlLocalizationsDelegate extends LocalizationsDelegate<IntlLocalizations> {
+class IntlLocalizationsDelegate
+    extends LocalizationsDelegate<IntlLocalizations> {
   const IntlLocalizationsDelegate();
 
   //是否支持某个Local

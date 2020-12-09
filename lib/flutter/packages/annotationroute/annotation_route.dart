@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:annotation_route/route.dart';
+import 'package:flutter/material.dart';
 import 'package:flutterdemo/flutter/packages/annotationroute/my_router.dart';
 
 //咸鱼路由注解  https://pub.dartlang.org/packages/annotation_route#-readme-tab-
@@ -25,10 +25,10 @@ class AnnotationRoutePage1 extends StatelessWidget {
               ..urlpattern = url
               ..params = params);
             if (page is ARouterResult) {
-              var widget = page?.widget;
+              var widget = page.widget;
               print("get page $widget");
               if (widget == null) return;
-              Navigator.of(context).push(MaterialPageRoute(
+              Navigator.of(context)?.push(MaterialPageRoute(
                   settings: RouteSettings(name: url),
                   builder: (context) {
                     return widget;
@@ -41,7 +41,7 @@ class AnnotationRoutePage1 extends StatelessWidget {
     );
   }
 
-  AnnotationRoutePage1(String param);
+  AnnotationRoutePage1(String? param);
 }
 
 @ARoute(url: page2_url)

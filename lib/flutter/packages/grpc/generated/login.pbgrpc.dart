@@ -2,30 +2,31 @@
 //  Generated code. Do not modify.
 //  source: login.proto
 ///
-// ignore_for_file: non_constant_identifier_names,library_prefixes,unused_import
-
 import 'dart:async' as $async;
 
 import 'package:grpc/service_api.dart' as $grpc;
+
 import 'login.pb.dart';
+
 export 'login.pb.dart';
 
 class LoginClient extends $grpc.Client {
   static final _$startLogin = new $grpc.ClientMethod<Empty, LoginResponse>(
       '/login.Login/startLogin',
-      (Empty value) => value.writeToBuffer(),
+      ((Empty value) => value.writeToBuffer()) as List<int> Function(Empty),
       (List<int> value) => new LoginResponse.fromBuffer(value));
   static final _$startLoginAgain =
       new $grpc.ClientMethod<LoginResponse, LoginResponse>(
           '/login.Login/startLoginAgain',
-          (LoginResponse value) => value.writeToBuffer(),
+          ((LoginResponse value) => value.writeToBuffer()) as List<int>
+              Function(LoginResponse),
           (List<int> value) => new LoginResponse.fromBuffer(value));
 
-  LoginClient($grpc.ClientChannel channel, {$grpc.CallOptions options})
+  LoginClient($grpc.ClientChannel channel, {$grpc.CallOptions? options})
       : super(channel, options: options);
 
   $grpc.ResponseFuture<LoginResponse> startLogin(Empty request,
-      {$grpc.CallOptions options}) {
+      {required $grpc.CallOptions options}) {
     final call = $createCall(
         _$startLogin, new $async.Stream.fromIterable([request]),
         options: options);
@@ -34,7 +35,7 @@ class LoginClient extends $grpc.Client {
 
   $grpc.ResponseStream<LoginResponse> startLoginAgain(
       $async.Stream<LoginResponse> request,
-      {$grpc.CallOptions options}) {
+      {$grpc.CallOptions? options}) {
     final call = $createCall(_$startLoginAgain, request, options: options);
     return new $grpc.ResponseStream(call);
   }
@@ -62,7 +63,7 @@ abstract class LoginServiceBase extends $grpc.Service {
 
   $async.Future<LoginResponse> startLogin_Pre(
       $grpc.ServiceCall call, $async.Future request) async {
-    return startLogin(call, await request);
+    return startLogin(call, await (request as $async.FutureOr<Empty>));
   }
 
   $async.Future<LoginResponse> startLogin(

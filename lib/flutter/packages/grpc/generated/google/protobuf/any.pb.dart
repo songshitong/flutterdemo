@@ -25,13 +25,13 @@ class Any extends $pb.GeneratedMessage {
       : super.fromJson(i, r);
   Any clone() => new Any()..mergeFromMessage(this);
   Any copyWith(void Function(Any) updates) =>
-      super.copyWith((message) => updates(message as Any));
+      super.copyWith((message) => updates(message as Any)) as Any;
   $pb.BuilderInfo get info_ => _i;
   static Any create() => new Any();
   Any createEmptyInstance() => create();
   static $pb.PbList<Any> createRepeated() => new $pb.PbList<Any>();
   static Any getDefault() => _defaultInstance ??= create()..freeze();
-  static Any _defaultInstance;
+  static Any? _defaultInstance;
 
   String get typeUrl => $_getS(0, '');
   set typeUrl(String v) {

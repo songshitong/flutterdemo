@@ -22,12 +22,13 @@ class InheritedWidgetPage extends StatelessWidget {
 }
 
 class ShareDataWidget extends InheritedWidget {
-  ShareDataWidget({@required this.data, Widget child}) : super(child: child);
+  ShareDataWidget({required this.data, required Widget child})
+      : super(child: child);
 
   int data; //需要在子树中共享的数据，保存点击次数
 
   //定义一个便捷方法，方便子树中的widget获取共享数据
-  static ShareDataWidget of(BuildContext context) {
+  static ShareDataWidget? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType(aspect: ShareDataWidget);
   }
 
@@ -49,7 +50,7 @@ class __TestWidgetState extends State<_TestWidget> {
   @override
   Widget build(BuildContext context) {
     //使用InheritedWidget中的共享数据
-    return Text(ShareDataWidget.of(context).data.toString());
+    return Text(ShareDataWidget.of(context)?.data.toString() ?? "");
   }
 
   @override
@@ -63,7 +64,8 @@ class __TestWidgetState extends State<_TestWidget> {
 
 class InheritedWidgetTestRoute extends StatefulWidget {
   @override
-  _InheritedWidgetTestRouteState createState() => new _InheritedWidgetTestRouteState();
+  _InheritedWidgetTestRouteState createState() =>
+      new _InheritedWidgetTestRouteState();
 }
 
 class _InheritedWidgetTestRouteState extends State<InheritedWidgetTestRoute> {

@@ -77,7 +77,7 @@ class ListViewPageState extends State<ListViewPage> {
                   value: index,
                 );
               }),
-              onChanged: (value) {
+              onChanged: (dynamic value) {
                 setState(() {
                   physicIndex = value;
                 });
@@ -85,7 +85,7 @@ class ListViewPageState extends State<ListViewPage> {
           RaisedButton(
               onPressed: () {
                 Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (context) {
+                    ?.push(MaterialPageRoute(builder: (context) {
                   return LoadMorePage();
                 }));
               },
@@ -115,7 +115,8 @@ class ListViewPageState extends State<ListViewPage> {
                 GestureDetector(
                     key: keyBBB,
                     onTap: () {
-                      RenderBox rb = keyBBB.currentContext.findRenderObject();
+                      RenderBox rb = keyBBB.currentContext?.findRenderObject()
+                          as RenderBox;
 
                       setState(() {
                         print("rb.paintBounds ${rb.paintBounds}");
@@ -144,7 +145,7 @@ class ListViewPageState extends State<ListViewPage> {
                     onChanged: (value) {
                       //todo 自定义ScrollConfiguration ScrollBehavior 去掉蓝色回弹https://www.jianshu.com/p/b9e92c37f4ec
                       ///与[CustomScrollPhysics]去掉TODO
-                      ScrollConfiguration(behavior: null, child: null);
+                      ScrollConfiguration(behavior: null!, child: null!);
                       print("onchaged1 $value");
                     }),
                 Checkbox(
@@ -207,13 +208,13 @@ class ListViewPageState extends State<ListViewPage> {
                     return GestureDetector(
                       onTap: () async {
                         var listRenderObj =
-                            infoKey.currentContext.findRenderObject();
+                            infoKey.currentContext?.findRenderObject();
 //                        print("listRenderObj $listRenderObj");
 //                        var renderObj1 = listRenderObj.child as RenderCustomPaint;
 //                        print("renderObj1 $renderObj1");
                         var childSemantics =
                             await callbackHellVisitChildrenSemantics(
-                                listRenderObj);
+                                listRenderObj!);
                         var visitChildrenSemanticsCount = 0;
                         while (null !=
                             (childSemantics =
@@ -421,6 +422,18 @@ class ListViewPageState extends State<ListViewPage> {
                       child: ListTile(title: Text(_words[index])),
                     );
                   }),
+            ),
+            SizedBox(
+              height: 500,
+              child: ScrollConfiguration(
+                behavior: BouncingScrollBehavior(),
+                child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: 20,
+                    itemBuilder: (context, index) {
+                      return Text("ScrollConfiguration index $index");
+                    }),
+              ),
             )
           ],
         ),
@@ -467,27 +480,27 @@ class ListViewPageState extends State<ListViewPage> {
   //setsate 更新范围，机制
   double getAllPaintExtentToIndex(GlobalKey key, int index) {
     RenderSliverMultiBoxAdaptor renderObject =
-        key.currentContext.findRenderObject() as RenderSliverMultiBoxAdaptor;
+        key.currentContext?.findRenderObject() as RenderSliverMultiBoxAdaptor;
     //list的属性
     var top = renderObject.paintBounds.top;
     var bottom = renderObject.paintBounds.bottom;
     var left = renderObject.paintBounds.left;
     var right = renderObject.paintBounds.right;
     print("list  top $top  bottom $bottom left $left right $right ");
-    var child = renderObject.firstChild;
+    var child = renderObject.firstChild!;
     var paintExtent = 0.0;
     paintExtent = renderObject.paintExtentOf(child) +
-        renderObject.childScrollOffset(child);
+        renderObject.childScrollOffset(child)!;
     print("firstChild paintExtent $paintExtent");
     if (index > 0) {
       //缺点在绘制完成后使用
       //第0个已经取得高度了，所以进行判断
       //不进行判断，while中childIndex一直大于0，此时获取的第一个高度为list的总高度
-      while ((child = renderObject.childAfter(child)) != null) {
+      while ((child = renderObject.childAfter(child)!) != null) {
         //todo 方法性能分析，缓存区存在，first一直是缓存区第一个，方法时间复杂度不会太高
         // childScrollOffset是什么 由于缓存存在，只有可见及缓存区的总高度可加，第一个到index的高度通过childScrollOffset来获得
         paintExtent = renderObject.paintExtentOf(child) +
-            renderObject.childScrollOffset(child);
+            renderObject.childScrollOffset(child)!;
         var childIndex = renderObject.indexOf(child);
         if (childIndex == index) {
           break;
@@ -503,8 +516,8 @@ class ListViewPageState extends State<ListViewPage> {
   //todo 获取第一个可见https://github.com/flutter/flutter/issues/19941
   double getPaintExtentOfIndex(GlobalKey key, int index) {
     RenderSliverMultiBoxAdaptor renderObject =
-        key.currentContext.findRenderObject() as RenderSliverMultiBoxAdaptor;
-    var child = renderObject.firstChild;
+        key.currentContext?.findRenderObject() as RenderSliverMultiBoxAdaptor;
+    var child = renderObject.firstChild!;
     var paintExtent = 0.0;
     paintExtent = renderObject.paintExtentOf(child);
     print("firstChild paintExtent $paintExtent");
@@ -512,7 +525,7 @@ class ListViewPageState extends State<ListViewPage> {
       //缺点在绘制完成后使用
       //第0个已经取得高度了，所以进行判断
       //不进行判断，while中childIndex一直大于0，此时获取的第一个高度为list的总高度
-      while ((child = renderObject.childAfter(child)) != null) {
+      while ((child = renderObject.childAfter(child)!) != null) {
         paintExtent = renderObject.paintExtentOf(child);
         var childIndex = renderObject.indexOf(child);
         if (childIndex == index) {
@@ -543,8 +556,8 @@ class ListViewPageState extends State<ListViewPage> {
 //item 累加 RenderSliverMultiBoxAdaptor renderObject进行计算
 
 class AliveListItem extends StatefulWidget {
-  BuildContext context;
-  int index;
+  BuildContext? context;
+  int? index;
 
   AliveListItem({this.context, this.index});
 
@@ -568,13 +581,13 @@ typedef BoolReturnFunction = bool Function();
 
 //加载更多指示器
 class IndicatorLoadMore extends StatefulWidget {
-  VoidCallback loadData;
-  Widget indicator;
-  int maxCount;
-  BoolReturnFunction isReachEnd;
-  BoolReturnFunction isLoadMore;
-  Widget child;
-  Widget endWidget;
+  VoidCallback? loadData;
+  Widget? indicator;
+  int? maxCount;
+  BoolReturnFunction? isReachEnd;
+  BoolReturnFunction? isLoadMore;
+  Widget? child;
+  Widget? endWidget;
   bool isShowIndicator;
 
   ///解决网络问题时，一直加载的  网络问题改为false
@@ -604,15 +617,15 @@ class _IndicatorLoadMoreState extends State<IndicatorLoadMore> {
   Widget build(BuildContext context) {
     if (widget.isLoadData) {
       //如果到了表尾
-      if (widget.isLoadMore()) {
+      if (widget.isLoadMore!()) {
         //不足maxCount条，继续获取数据
-        if (widget.isReachEnd()) {
+        if (widget.isReachEnd!()) {
           //获取数据
-          widget.loadData();
+          widget.loadData!();
           //加载时显示loading
           if (widget.isShowIndicator) {
             if (null != widget.indicator) {
-              return widget.indicator;
+              return widget.indicator!;
             }
             return LoadDefaultIndicator();
           } else {
@@ -620,10 +633,10 @@ class _IndicatorLoadMoreState extends State<IndicatorLoadMore> {
           }
         } else {
           //已经加载了maxCount条数据，不再获取数据。
-          return widget.endWidget;
+          return widget.endWidget!;
         }
       } else {
-        return widget.child;
+        return widget.child!;
       }
     } else {
       return SizedBox.shrink();
@@ -634,10 +647,10 @@ class _IndicatorLoadMoreState extends State<IndicatorLoadMore> {
 //加载更多指示器2.0版  将触发条件，内置tag统一
 class IndicatorLoadMore2 extends StatefulWidget {
   VoidCallback loadData;
-  Widget indicator;
+  Widget? indicator;
   int maxCount;
   Widget child;
-  Widget endWidget;
+  Widget? endWidget;
   bool isShowIndicator;
   int index;
   var loadTag;
@@ -646,13 +659,13 @@ class IndicatorLoadMore2 extends StatefulWidget {
   ///解决网络问题时，一直加载的  网络问题改为false
   bool isLoadData;
   IndicatorLoadMore2(
-      {@required this.index,
-      @required this.loadData,
+      {required this.index,
+      required this.loadData,
       this.indicator,
-      @required this.maxCount,
-      @required this.child,
-      @required this.loadTag,
-      @required this.data,
+      required this.maxCount,
+      required this.child,
+      required this.loadTag,
+      required this.data,
       this.endWidget,
       this.isShowIndicator = true,
       this.isLoadData = true});
@@ -683,7 +696,7 @@ class _IndicatorLoadMore2State extends State<IndicatorLoadMore2> {
           //加载时显示loading
           if (widget.isShowIndicator) {
             if (null != widget.indicator) {
-              return widget.indicator;
+              return widget.indicator!;
             }
             return LoadDefaultIndicator();
           } else {
@@ -692,7 +705,7 @@ class _IndicatorLoadMore2State extends State<IndicatorLoadMore2> {
         } else {
           if (widget.data.length > 0) {
             //已经加载了maxCount条数据，不再获取数据。
-            return widget.endWidget;
+            return widget.endWidget!;
           } else {
             ///空list返回 空box
             return Container();
@@ -728,14 +741,28 @@ typedef OnFinishLayout = void Function(int firstIndex, int lastIndex);
 ///获取布局结束的 [firstIndex] [lastIndex]
 class LayoutIndexSliverChildBuilderDelegate extends SliverChildBuilderDelegate {
   LayoutIndexSliverChildBuilderDelegate(builder,
-      {int itemCount, this.onFinishLayout})
+      {required int itemCount, this.onFinishLayout})
       : super(builder, childCount: itemCount);
-  OnFinishLayout onFinishLayout;
+  OnFinishLayout? onFinishLayout;
   @override
   void didFinishLayout(int firstIndex, int lastIndex) {
     super.didFinishLayout(firstIndex, lastIndex);
     if (null != onFinishLayout) {
-      onFinishLayout(firstIndex, lastIndex);
+      onFinishLayout!(firstIndex, lastIndex);
     }
+  }
+}
+
+class BouncingScrollBehavior extends ScrollBehavior {
+  @override
+  Widget buildViewportChrome(
+      BuildContext context, Widget child, AxisDirection axisDirection) {
+    // Never build any overscroll glow indicators.
+    return child;
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const BouncingScrollPhysics();
   }
 }

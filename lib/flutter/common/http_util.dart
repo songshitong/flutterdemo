@@ -1,21 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 ///代码来自 https://medium.com/@petehouston/download-files-in-dart-4f382f86a9f9
 class HttpUtil {
-  static Future getUrl(String url) async {
+  static Future? getUrl(String url) async {
     HttpClient client = new HttpClient();
     HttpClientRequest request = await client.getUrl(Uri.parse(url));
     HttpClientResponse response = await request.close();
+    Future<String>? result;
     response.transform(utf8.decoder).listen((contents) {
-      return Future.value(contents);
+      result = Future.value(contents);
     });
+    return result;
   }
 
   static void downloadFile(String saveFile, String downloadUrl) {
     HttpClient client = new HttpClient();
-    var _downloadData = List<int>();
+    List<int> _downloadData = [];
     var fileSave = new File(saveFile);
     if (!fileSave.existsSync()) {
       fileSave.createSync();
@@ -40,7 +41,7 @@ class HttpUtil {
         .set("Authorization", "APPCODE 1fe27223b011401db9e110e42f715252");
     request.write(data);
     final response = await request.close();
-    String httpValue = await response.transform(utf8.decoder)?.first;
+    String httpValue = await response.transform(utf8.decoder).first;
     return httpValue;
   }
 }

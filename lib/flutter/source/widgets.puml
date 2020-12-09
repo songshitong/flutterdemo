@@ -307,6 +307,7 @@ abstract class RenderObject{
 
 abstract class RenderBox{
    bool hitTest(HitTestResult result, { @required Offset position })
+   handleEvent("处理事件")
 }
 'note right of RenderBox{
 '

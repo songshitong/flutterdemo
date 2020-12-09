@@ -5,8 +5,8 @@
 // **************************************************************************
 
 import 'dart:convert';
+
 import 'package:annotation_route/route.dart';
-import 'package:flutterdemo/flutter/packages/annotationroute/annotation_route.dart';
 import 'package:flutterdemo/flutter/packages/annotationroute/annotation_route.dart';
 
 class ARouterInternalImpl extends ARouterInternal {
@@ -53,12 +53,12 @@ class ARouterInternalImpl extends ARouterInternal {
 
   ARouterResult implFromPageConfig(
       Map<String, dynamic> pageConfig, dynamic option) {
-    final String interceptor = pageConfig['interceptor'];
+    final String? interceptor = pageConfig['interceptor'];
     if (interceptor != null) {
       return ARouterResult(
           state: ARouterResultState.REDIRECT, interceptor: interceptor);
     }
-    final Type clazz = pageConfig['clazz'];
+    final Type? clazz = pageConfig['clazz'];
     if (clazz == null) {
       return ARouterResult(state: ARouterResultState.NOT_FOUND);
     }
@@ -73,14 +73,14 @@ class ARouterInternalImpl extends ARouterInternal {
   }
 
   dynamic findPageConfig(ARouteOption option) {
-    final List<Map<String, dynamic>> pageConfigList =
+    final List<Map<String, dynamic>>? pageConfigList =
         innerRouterMap[option.urlpattern];
     if (null != pageConfigList) {
       for (int i = 0; i < pageConfigList.length; i++) {
         final Map<String, dynamic> pageConfig = pageConfigList[i];
-        final String paramsString = pageConfig['params'];
+        final String? paramsString = pageConfig['params'];
         if (null != paramsString) {
-          Map<String, dynamic> params;
+          Map<String, dynamic>? params;
           try {
             params = json.decode(paramsString);
           } catch (e) {
@@ -89,12 +89,12 @@ class ARouterInternalImpl extends ARouterInternal {
           if (null != params) {
             bool match = true;
             final Function matchParams = (String k, dynamic v) {
-              if (params[k] != option?.params[k]) {
+              if (params![k] != option.params[k]) {
                 match = false;
                 print('not match:A{params[k]}:A{option?.params[k]}');
               }
             };
-            params.forEach(matchParams);
+            params.forEach(matchParams as void Function(String, dynamic));
             if (match) {
               return pageConfig;
             }

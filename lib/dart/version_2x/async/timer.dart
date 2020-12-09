@@ -1,7 +1,7 @@
 import 'dart:async';
 
 void main() {
-  Timer outTimer;
+  Timer? outTimer;
   outTimer = Timer.periodic(Duration(seconds: 5), (_timer) {
     print("${outTimer == _timer}  outTimer.hashCode  ${outTimer.hashCode} _timer.hashCode ${_timer.hashCode}");
     outTimer = _timer;

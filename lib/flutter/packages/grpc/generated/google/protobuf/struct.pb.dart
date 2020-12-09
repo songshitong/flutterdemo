@@ -23,8 +23,8 @@ class Struct extends $pb.GeneratedMessage {
         $pb.PbFieldType.OS,
         $pb.PbFieldType.OM,
         Value.create,
-        null,
-        null,
+        null!,
+        null!,
         const $pb.PackageName('google.protobuf'))
     ..hasRequiredFields = false;
 
@@ -37,13 +37,13 @@ class Struct extends $pb.GeneratedMessage {
       : super.fromJson(i, r);
   Struct clone() => new Struct()..mergeFromMessage(this);
   Struct copyWith(void Function(Struct) updates) =>
-      super.copyWith((message) => updates(message as Struct));
+      super.copyWith((message) => updates(message as Struct)) as Struct;
   $pb.BuilderInfo get info_ => _i;
   static Struct create() => new Struct();
   Struct createEmptyInstance() => create();
   static $pb.PbList<Struct> createRepeated() => new $pb.PbList<Struct>();
   static Struct getDefault() => _defaultInstance ??= create()..freeze();
-  static Struct _defaultInstance;
+  static Struct? _defaultInstance;
 
   Map<String, Value> get fields => $_getMap(0);
 }
@@ -71,7 +71,7 @@ class Value extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = new $pb.BuilderInfo('Value',
       package: const $pb.PackageName('google.protobuf'))
     ..e<NullValue>(1, 'nullValue', $pb.PbFieldType.OE, NullValue.NULL_VALUE,
-        NullValue.valueOf, NullValue.values)
+        NullValue.valueOf as $pb.ProtobufEnum Function(int), NullValue.values)
     ..a<double>(2, 'numberValue', $pb.PbFieldType.OD)
     ..aOS(3, 'stringValue')
     ..aOB(4, 'boolValue')
@@ -91,15 +91,15 @@ class Value extends $pb.GeneratedMessage {
       : super.fromJson(i, r);
   Value clone() => new Value()..mergeFromMessage(this);
   Value copyWith(void Function(Value) updates) =>
-      super.copyWith((message) => updates(message as Value));
+      super.copyWith((message) => updates(message as Value)) as Value;
   $pb.BuilderInfo get info_ => _i;
   static Value create() => new Value();
   Value createEmptyInstance() => create();
   static $pb.PbList<Value> createRepeated() => new $pb.PbList<Value>();
   static Value getDefault() => _defaultInstance ??= create()..freeze();
-  static Value _defaultInstance;
+  static Value? _defaultInstance;
 
-  Value_Kind whichKind() => _Value_KindByTag[$_whichOneof(0)];
+  Value_Kind? whichKind() => _Value_KindByTag[$_whichOneof(0)];
   void clearKind() => clearField($_whichOneof(0));
 
   NullValue get nullValue => $_getN(0);
@@ -166,13 +166,13 @@ class ListValue extends $pb.GeneratedMessage {
       : super.fromJson(i, r);
   ListValue clone() => new ListValue()..mergeFromMessage(this);
   ListValue copyWith(void Function(ListValue) updates) =>
-      super.copyWith((message) => updates(message as ListValue));
+      super.copyWith((message) => updates(message as ListValue)) as ListValue;
   $pb.BuilderInfo get info_ => _i;
   static ListValue create() => new ListValue();
   ListValue createEmptyInstance() => create();
   static $pb.PbList<ListValue> createRepeated() => new $pb.PbList<ListValue>();
   static ListValue getDefault() => _defaultInstance ??= create()..freeze();
-  static ListValue _defaultInstance;
+  static ListValue? _defaultInstance;
 
   List<Value> get values => $_getList(0);
 }

@@ -42,8 +42,8 @@ void decode(DeocdeParam deocdeParam) {
 class _GifTestPageState extends State<GifTestPage>
     with SingleTickerProviderStateMixin {
   bool isRefreshFrame = false;
-  Uint8List imgBytes;
-  Uint8List sourceBytes;
+  Uint8List? imgBytes;
+  Uint8List? sourceBytes;
   @override
   void initState() {
     super.initState();
@@ -68,7 +68,7 @@ class _GifTestPageState extends State<GifTestPage>
           value.buffer.asUint8List(value.offsetInBytes, value.lengthInBytes));
       setState(() {
         var start = DateTime.now().millisecondsSinceEpoch;
-        imgBytes = gifDecoder.decodeFirstFrame();
+        imgBytes = gifDecoder.decodeFirstFrame() as Uint8List?;
         print(
             "main thread time  ${DateTime.now().millisecondsSinceEpoch - start}");
       });
@@ -129,7 +129,7 @@ class _GifTestPageState extends State<GifTestPage>
       return Container();
     } else {
       return GestureDetector(
-        child: Image.memory(imgBytes, gaplessPlayback: true),
+        child: Image.memory(imgBytes!, gaplessPlayback: true),
         onLongPress: () {
           setState(() {
             imgBytes = sourceBytes;
@@ -161,7 +161,7 @@ class _GifTestPageState extends State<GifTestPage>
 
 class GifAnimation extends StatefulWidget {
   GifAnimation(
-      {@required this.image,
+      {required this.image,
       this.semanticLabel,
       this.excludeFromSemantics = false,
       this.width,
@@ -177,17 +177,17 @@ class GifAnimation extends StatefulWidget {
       this.scale = 1.0,
       this.refreshFrame = false});
   final ImageProvider image;
-  final double width;
-  final double height;
-  final Color color;
-  final BlendMode colorBlendMode;
-  final BoxFit fit;
+  final double? width;
+  final double? height;
+  final Color? color;
+  final BlendMode? colorBlendMode;
+  final BoxFit? fit;
   final AlignmentGeometry alignment;
   final ImageRepeat repeat;
-  final Rect centerSlice;
+  final Rect? centerSlice;
   final bool matchTextDirection;
   final bool gaplessPlayback;
-  final String semanticLabel;
+  final String? semanticLabel;
   final bool excludeFromSemantics;
   final double scale;
   final bool refreshFrame;
@@ -199,12 +199,12 @@ class GifAnimation extends StatefulWidget {
 
 class _AnimatedImageState extends State<GifAnimation>
     with WidgetsBindingObserver {
-  ImageStream _imageStream;
-  ImageInfo _imageInfo;
+  ImageStream? _imageStream;
+  ImageInfo? _imageInfo;
   bool _isListeningToStream = false;
-  bool _invertColors;
+  late bool _invertColors;
   int frameNum = 0;
-  ImageStreamListener _imageStreamListener;
+  late ImageStreamListener _imageStreamListener;
 
   @override
   void initState() {
@@ -212,13 +212,13 @@ class _AnimatedImageState extends State<GifAnimation>
     _imageStreamListener = ImageStreamListener(
       _handleImageFrame,
     );
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
   }
 
   @override
   void dispose() {
     assert(_imageStream != null);
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance?.removeObserver(this);
     _stopListeningToStream();
     super.dispose();
   }
@@ -240,7 +240,7 @@ class _AnimatedImageState extends State<GifAnimation>
   void didUpdateWidget(GifAnimation oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_isListeningToStream) {
-      _imageStream.addListener(_imageStreamListener);
+      _imageStream!.addListener(_imageStreamListener);
     }
     if (widget.image != oldWidget.image) _resolveImage();
   }
@@ -260,8 +260,7 @@ class _AnimatedImageState extends State<GifAnimation>
   }
 
   void _updateInvertColors() {
-    _invertColors = MediaQuery.of(context, nullOk: true)?.invertColors ??
-        SemanticsBinding.instance.accessibilityFeatures.invertColors;
+    _invertColors = MediaQuery.of(context).invertColors;
   }
 
   void _resolveImage() {
@@ -279,8 +278,8 @@ class _AnimatedImageState extends State<GifAnimation>
         widget.image.resolve(createLocalImageConfiguration(
       context,
       size: widget.width != null && widget.height != null
-          ? Size(widget.width, widget.height)
-          : null,
+          ? Size(widget.width!, widget.height!)
+          : null!,
     ));
     assert(newStream != null);
     _updateSourceStream(newStream);
@@ -302,7 +301,7 @@ class _AnimatedImageState extends State<GifAnimation>
       });
     } else {
       //当不播放GIF动画时，移除监听防止一直读取监听
-      _imageStream.removeListener(_imageStreamListener);
+      _imageStream!.removeListener(_imageStreamListener);
     }
   }
 
@@ -310,10 +309,10 @@ class _AnimatedImageState extends State<GifAnimation>
   // registration from the old stream to the new stream (if a listener was
   // registered).
   void _updateSourceStream(ImageStream newStream) {
-    if (_imageStream?.key == newStream?.key) return;
+    if (_imageStream?.key == newStream.key) return;
 
     if (_isListeningToStream) {
-      _imageStream.removeListener(_imageStreamListener);
+      _imageStream!.removeListener(_imageStreamListener);
     }
 
     if (!widget.gaplessPlayback)
@@ -322,20 +321,20 @@ class _AnimatedImageState extends State<GifAnimation>
       });
 
     _imageStream = newStream;
-    if (_isListeningToStream) _imageStream.addListener(_imageStreamListener);
+    if (_isListeningToStream) _imageStream!.addListener(_imageStreamListener);
   }
 
   void _listenToStream() {
     if (_isListeningToStream) return;
-    _imageStream.addListener(_imageStreamListener);
+    _imageStream!.addListener(_imageStreamListener);
     _isListeningToStream = true;
   }
 
   void _stopListeningToStream() {
     print("_stopListeningToStream  _isListeningToStream $_isListeningToStream");
     if (!_isListeningToStream) return;
-    _imageStream.removeListener(_imageStreamListener);
-    _imageStream.completer.removeListener(_imageStreamListener);
+    _imageStream!.removeListener(_imageStreamListener);
+    _imageStream!.completer!.removeListener(_imageStreamListener);
     _isListeningToStream = false;
   }
 
@@ -343,15 +342,15 @@ class _AnimatedImageState extends State<GifAnimation>
   Widget build(BuildContext context) {
     final RawImage image = new RawImage(
       image: _imageInfo?.image,
-      width: widget.width,
-      height: widget.height,
+      width: widget.width!,
+      height: widget.height!,
       scale: widget.scale,
-      color: widget.color,
-      colorBlendMode: widget.colorBlendMode,
-      fit: widget.fit,
+      color: widget.color!,
+      colorBlendMode: widget.colorBlendMode!,
+      fit: widget.fit!,
       alignment: widget.alignment,
       repeat: widget.repeat,
-      centerSlice: widget.centerSlice,
+      centerSlice: widget.centerSlice!,
       invertColors: _invertColors,
       matchTextDirection: widget.matchTextDirection,
     );
@@ -359,7 +358,7 @@ class _AnimatedImageState extends State<GifAnimation>
     return new Semantics(
       container: widget.semanticLabel != null,
       image: true,
-      label: widget.semanticLabel == null ? '' : widget.semanticLabel,
+      label: widget.semanticLabel == null ? '' : widget.semanticLabel!,
       child: image,
     );
   }

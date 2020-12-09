@@ -7,8 +7,8 @@ import 'dart:math' as math;
 class SliverFooter extends SingleChildRenderObjectWidget {
   /// Creates a sliver that fills the remaining space in the viewport.
   const SliverFooter({
-    Key key,
-    Widget child,
+    required Key key,
+    required Widget child,
   }) : super(key: key, child: child);
 
   @override
@@ -19,7 +19,7 @@ class RenderSliverFooter extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a [RenderBox] which is sized to fit
   /// the remaining space in the viewport.
   RenderSliverFooter({
-    RenderBox child,
+    RenderBox? child,
   }) : super(child: child);
 
   @override
@@ -28,8 +28,8 @@ class RenderSliverFooter extends RenderSliverSingleBoxAdapter {
     var childGrowthSize = .0; // added
     if (child != null) {
       // changed maxExtent from 'extent' to double.infinity
-      child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: double.infinity), parentUsesSize: true);
-      childGrowthSize = constraints.axis == Axis.vertical ? child.size.height : child.size.width; // added
+      child!.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: double.infinity), parentUsesSize: true);
+      childGrowthSize = constraints.axis == Axis.vertical ? child!.size.height : child!.size.width; // added
     }
     final paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
@@ -42,7 +42,7 @@ class RenderSliverFooter extends RenderSliverSingleBoxAdapter {
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
     if (child != null) {
-      setChildParentData(child, constraints, geometry);
+      setChildParentData(child!, constraints, geometry!);
     }
   }
 }

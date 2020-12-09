@@ -23,11 +23,11 @@ class Empty extends $pb.GeneratedMessage {
       : super.fromJson(i, r);
   Empty clone() => new Empty()..mergeFromMessage(this);
   Empty copyWith(void Function(Empty) updates) =>
-      super.copyWith((message) => updates(message as Empty));
+      super.copyWith((message) => updates(message as Empty)) as Empty;
   $pb.BuilderInfo get info_ => _i;
   static Empty create() => new Empty();
   Empty createEmptyInstance() => create();
   static $pb.PbList<Empty> createRepeated() => new $pb.PbList<Empty>();
   static Empty getDefault() => _defaultInstance ??= create()..freeze();
-  static Empty _defaultInstance;
+  static Empty? _defaultInstance;
 }

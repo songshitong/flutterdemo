@@ -54,7 +54,7 @@ class RowAndColumnPageState extends State<RowAndColumnPage> {
                 DropdownMenuItem(child: Text(column), value: column),
                 DropdownMenuItem(child: Text(row), value: row)
               ],
-              onChanged: (value) {
+              onChanged: (dynamic value) {
                 setState(() {
                   layoutType = value;
                 });
@@ -62,7 +62,7 @@ class RowAndColumnPageState extends State<RowAndColumnPage> {
           DropdownButton(
               hint: Text(mainAxisAlignments[mainIndex].toString()),
               items: buildDropMenus(mainAxisAlignments),
-              onChanged: (value) {
+              onChanged: (dynamic value) {
                 setState(() {
                   mainIndex = value;
                 });
@@ -70,7 +70,7 @@ class RowAndColumnPageState extends State<RowAndColumnPage> {
           DropdownButton(
               hint: Text(crossAxisAlignments[crossIndex].toString()),
               items: buildDropMenus(crossAxisAlignments),
-              onChanged: (value) {
+              onChanged: (dynamic value) {
                 setState(() {
                   crossIndex = value;
                 });
@@ -81,7 +81,7 @@ class RowAndColumnPageState extends State<RowAndColumnPage> {
                 DropdownMenuItem(child: Text(textDirections[0].toString()), value: 0),
                 DropdownMenuItem(child: Text(textDirections[1].toString()), value: 1)
               ],
-              onChanged: (value) {
+              onChanged: (dynamic value) {
                 setState(() {
                   textDirectionIndex = value;
                 });
@@ -92,7 +92,7 @@ class RowAndColumnPageState extends State<RowAndColumnPage> {
                 DropdownMenuItem(child: Text(verticalDirections[0].toString()), value: 0),
                 DropdownMenuItem(child: Text(verticalDirections[1].toString()), value: 1)
               ],
-              onChanged: (value) {
+              onChanged: (dynamic value) {
                 setState(() {
                   verticalIndex = value;
                 });

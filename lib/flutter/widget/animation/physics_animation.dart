@@ -7,8 +7,8 @@ class Physics_Animation extends StatefulWidget {
 }
 
 class _Physics_AnimationState extends State<Physics_Animation> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-  Simulation simulation;
+  late AnimationController _controller;
+  late Simulation simulation;
   @override
   void initState() {
     _controller = AnimationController(vsync: this, lowerBound: 50, upperBound: 150)

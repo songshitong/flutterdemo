@@ -1,16 +1,17 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutterdemo/flutter/common/MyImgs.dart';
-import 'dart:math' as math;
-
-import 'CourseCenter.dart';
+import 'package:flutterdemo/flutter/widget/sliver/CourseCenter.dart';
 
 class SliverAppBarPage extends StatefulWidget {
   @override
   _SliverAppBarPageState createState() => _SliverAppBarPageState();
 }
 
-class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerProviderStateMixin {
+class _SliverAppBarPageState extends State<SliverAppBarPage>
+    with SingleTickerProviderStateMixin {
 //  介绍Sliver布局，必须得先介绍Viewport组件，因为Sliver相关组件需要在Viewport组件下使用，而Viewport组件的主要作用就是提供滚动机制，可以根据传入的offset参数来显示特定的内容
   // todo https://segmentfault.com/a/1190000015086603 viewport
   List<int> datas = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -38,7 +39,8 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerPr
             actions: <Widget>[
               RaisedButton(
                 onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (contxt) {
+                  Navigator.of(context)
+                      ?.push(MaterialPageRoute(builder: (contxt) {
                     return CourseCenter();
                   }));
                 },
@@ -65,32 +67,39 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerPr
           SliverPadding(
             padding: new EdgeInsets.all(8),
             sliver: SliverList(
-                delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+                delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
               //不设置childcount 默认无限个
               return Text("SliverList $index");
             }, childCount: 40)),
           ),
           SliverList(
             key: keyListHeight,
-            delegate: SliverChildListDelegate(List.generate(datas.length, (index) {
+            delegate:
+                SliverChildListDelegate(List.generate(datas.length, (index) {
               return GestureDetector(
                   onTap: () {
                     print("sliver list ontap");
                     getHeightToIndex(index);
                   },
-                  child: SizedBox(width: 50, height: 20, child: Text("all height sliver list $index")));
+                  child: SizedBox(
+                      width: 50,
+                      height: 20,
+                      child: Text("all height sliver list $index")));
             })),
           ),
           SliverGrid(
               //使用数量较少的情况
-              delegate: SliverChildListDelegate(List<Widget>.generate(datas.length, (index) {
+              delegate: SliverChildListDelegate(
+                  List<Widget>.generate(datas.length, (index) {
                 return Padding(
                   padding: const EdgeInsets.all(18.0),
                   child: Text("SliverGrid ${datas[index]}"),
                 );
               })),
               //决定grid 的横竖布局    crossAxisCount 一行几个
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4)),
+              gridDelegate:
+                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4)),
           //与appbar 类似，任意位置，随内容滚动收缩，展开   appbar的内部实现就是SliverPersistentHeader
           SliverPersistentHeader(
             //保持最小高度
@@ -114,7 +123,8 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerPr
           //固定长度列表，不用performlayout比SliverList高效
           SliverFixedExtentList(
             itemExtent: 120.0,
-            delegate: SliverChildListDelegate(List<Widget>.generate(datas.length, (index) {
+            delegate: SliverChildListDelegate(
+                List<Widget>.generate(datas.length, (index) {
               return Text("SliverFixedExtentList item $index");
             })),
           ),
@@ -122,24 +132,28 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerPr
             key: centerKey,
             //false child只占用剩余的长度  true child可以超出viewport并滚动
             hasScrollBody: true,
-            child: TabBarView(controller: new TabController(vsync: this, length: 2), children: [
-              ListView(
-                children: List<Widget>.generate(longDatas.length, (index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: Text("SliverFillRemaining TabBarView1 ${longDatas[index]}"),
-                  );
-                }),
-              ),
-              ListView(
-                children: List<Widget>.generate(longDatas.length, (index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(18.0),
-                    child: Text("SliverFillRemaining TabBarView2 ${longDatas[index]}"),
-                  );
-                }),
-              )
-            ]),
+            child: TabBarView(
+                controller: new TabController(vsync: this, length: 2),
+                children: [
+                  ListView(
+                    children: List<Widget>.generate(longDatas.length, (index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Text(
+                            "SliverFillRemaining TabBarView1 ${longDatas[index]}"),
+                      );
+                    }),
+                  ),
+                  ListView(
+                    children: List<Widget>.generate(longDatas.length, (index) {
+                      return Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Text(
+                            "SliverFillRemaining TabBarView2 ${longDatas[index]}"),
+                      );
+                    }),
+                  )
+                ]),
           )
         ],
       ),
@@ -147,9 +161,9 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerPr
   }
 
   double getHeightToIndex(int index) {
-    RenderSliverMultiBoxAdaptor renderObject =
-        keyListHeight.currentContext.findRenderObject() as RenderSliverMultiBoxAdaptor;
-    var child = renderObject.firstChild;
+    RenderSliverMultiBoxAdaptor renderObject = keyListHeight.currentContext
+        ?.findRenderObject() as RenderSliverMultiBoxAdaptor;
+    var child = renderObject.firstChild!;
     var allHeight = 0.0;
     allHeight = renderObject.paintExtentOf(child);
     print("firstChild allHeight $allHeight");
@@ -157,7 +171,7 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerPr
       //缺点在绘制完成后使用
       //第0个已经取得高度了，所以进行判断
       //不进行判断，while中childIndex一直大于0，此时获取的第一个高度为list的总高度
-      while ((child = renderObject.childAfter(child)) != null) {
+      while ((child = renderObject.childAfter(child)!) != null) {
         allHeight += renderObject.paintExtentOf(child);
         var childIndex = renderObject.indexOf(child);
         if (childIndex == index) {
@@ -176,16 +190,17 @@ class _SliverAppBarPageState extends State<SliverAppBarPage> with SingleTickerPr
 /// 需要重写build，maxExtent，minExtent，shouldRebuild
 class _SPHD extends SliverPersistentHeaderDelegate {
   _SPHD({
-    @required this.minHeight,
-    @required this.maxHeight,
-    @required this.child,
+    required this.minHeight,
+    required this.maxHeight,
+    required this.child,
   });
 
   final double minHeight;
   final double maxHeight;
   final Widget child;
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return new SizedBox.expand(child: child);
   }
 
@@ -197,6 +212,8 @@ class _SPHD extends SliverPersistentHeaderDelegate {
 
   @override
   bool shouldRebuild(_SPHD oldDelegate) {
-    return maxHeight != oldDelegate.maxHeight || minHeight != oldDelegate.minHeight || child != oldDelegate.child;
+    return maxHeight != oldDelegate.maxHeight ||
+        minHeight != oldDelegate.minHeight ||
+        child != oldDelegate.child;
   }
 }

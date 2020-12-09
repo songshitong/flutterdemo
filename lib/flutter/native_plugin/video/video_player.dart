@@ -7,7 +7,7 @@ class VideoPlayerPage extends StatefulWidget {
 }
 
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
-  VideoPlayerController _controller;
+  late VideoPlayerController _controller;
   //获取时光网地址 http:/api.m.mtime.cn/PageSubArea/TrailerList.api
   String url1 = "http://vfx.mtime.cn/Video/2017/03/31/mp4/170331093811717750.mp4";
   String url3 = "http://vfx.mtime.cn/Video/2019/06/29/mp4/190629004821240734.mp4";

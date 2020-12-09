@@ -21,12 +21,14 @@ void main() {
   // This captures errors reported by the Flutter framework.
   FlutterError.onError = (FlutterErrorDetails details) async {
     if (kDebugMode) {
+      ///重置错误数，防止多个错误抛出Another exception was thrown，而没有具体的错误信息
+      FlutterError.resetErrorCount();
       // In development mode simply print to console.
       FlutterError.dumpErrorToConsole(details);
     } else {
       // In production mode report to the application zone to report to
       // Sentry.
-      Zone.current.handleUncaughtError(details.exception, details.stack);
+      Zone.current.handleUncaughtError(details.exception, details.stack!);
     }
   };
 
@@ -41,10 +43,15 @@ void main() {
   //
   // - https://api.dartlang.org/stable/1.24.2/dart-async/Zone-class.html
   // - https://www.dartlang.org/articles/libraries/zones
-  runZonedGuarded<Future<Null>>(() async {
+//  runZonedGuarded<Future<Null>>(() async {
+//    runApp(/*IosPage()*/ HomePage());
+//  }, (error, stackTrace) async {
+//    print("$error \n $stackTrace");
+//  });
+  runZoned<Future<Null>>(() async {
     runApp(/*IosPage()*/ HomePage());
-  }, (error, stackTrace) async {
-    print("$error \n $stackTrace");
+  }, onError: (error, stackTrace) async {
+    print("error $error stackTrace $stackTrace");
   });
 }
 

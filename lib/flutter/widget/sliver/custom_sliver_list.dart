@@ -1,10 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutterdemo/flutter/pages/beautiful/lable_widget.dart';
-import 'dart:math' as math;
-
-import 'package:intl/intl.dart';
 
 ///
 /// 自定义sliver  实现类似FlowLayout的效果
@@ -23,9 +19,10 @@ class _CustomSliverState extends State<CustomSliverPage> {
   var textIndex = 0;
   @override
   Widget build(BuildContext context) {
-    var widget;
+    late var widget;
     if (textIndex == 0) {
-      widget = FlowBoxList(childrenDelegate: SliverChildBuilderDelegate((context, index) {
+      widget = FlowBoxList(
+          childrenDelegate: SliverChildBuilderDelegate((context, index) {
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text("index$index"),
@@ -46,7 +43,8 @@ class _CustomSliverState extends State<CustomSliverPage> {
               child: Text("index$index"),
             );
           },
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4));
+          gridDelegate:
+              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4));
     }
 
     return Scaffold(
@@ -73,23 +71,25 @@ class FlowBoxList extends BoxScrollView {
   @override
   Widget buildChildLayout(BuildContext context) {
     return SliverFlow(
-      delegate: this.childrenDelegate,
+      delegate: this.childrenDelegate!,
+      key: Key(""),
     );
   }
 
-  final SliverChildDelegate childrenDelegate;
+  final SliverChildDelegate? childrenDelegate;
   FlowBoxList({this.childrenDelegate});
 }
 
 class SliverFlow extends SliverMultiBoxAdaptorWidget {
   const SliverFlow({
-    Key key,
-    @required SliverChildDelegate delegate,
+    Key? key,
+    required SliverChildDelegate delegate,
   }) : super(key: key, delegate: delegate);
 
   @override
   RenderSliverFlow createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context;
+    final SliverMultiBoxAdaptorElement element =
+        context as SliverMultiBoxAdaptorElement;
     return RenderSliverFlow(childManager: element);
   }
 
@@ -100,21 +100,24 @@ class SliverFlow extends SliverMultiBoxAdaptorWidget {
 }
 
 class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
-  RenderSliverFlow({RenderSliverBoxChildManager childManager}) : super(childManager: childManager);
+  RenderSliverFlow({required RenderSliverBoxChildManager childManager})
+      : super(childManager: childManager);
   @override
   void setupParentData(RenderObject child) {
-    if (child.parentData is! SliverFlowParentData) child.parentData = SliverFlowParentData();
+    if (child.parentData is! SliverFlowParentData)
+      child.parentData = SliverFlowParentData();
   }
 
   @override
   double childCrossAxisPosition(RenderBox child) {
-    final SliverFlowParentData childParentData = child.parentData;
-    double childCrossAxisPosition = 0.0;
+    final SliverFlowParentData childParentData =
+        child.parentData as SliverFlowParentData;
+    double? childCrossAxisPosition = 0.0;
     if (null != childParentData.crossAxisOffset) {
       childCrossAxisPosition = childParentData.crossAxisOffset;
     }
 //    print("index ${indexOf(child)} crossAxisOffset $childCrossAxisPosition");
-    return childCrossAxisPosition;
+    return childCrossAxisPosition!;
   }
 
   @override
@@ -123,12 +126,13 @@ class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
     childManager.didStartLayout();
     childManager.setDidUnderflow(false);
     print("constraints $constraints");
-    final double scrollOffset = constraints.scrollOffset + constraints.cacheOrigin;
+    final double scrollOffset =
+        constraints.scrollOffset + constraints.cacheOrigin;
     assert(scrollOffset >= 0.0);
     final double remainingExtent = constraints.remainingCacheExtent;
     assert(remainingExtent >= 0.0);
     final double targetEndScrollOffset = scrollOffset + remainingExtent;
-    final BoxConstraints childConstraints = transform2BoxConstraints();
+    final BoxConstraints? childConstraints = transform2BoxConstraints();
     int leadingGarbage = 0;
     int trailingGarbage = 0;
     bool reachedEnd = false;
@@ -154,12 +158,13 @@ class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
 
     //这些变量跟踪我们所安排的孩子的范围。在这个范围内，孩子们有连续的指数。在这个范围之外，孩子有可能在没有通知的情况下被移除
     // （布局cache部分）
-    RenderBox leadingChildWithLayout, trailingChildWithLayout;
+    RenderBox? leadingChildWithLayout, trailingChildWithLayout;
 //    查找scrollOffset处或之前的最后一个子项
-    RenderBox earliestUsefulChild = firstChild;
+    RenderBox earliestUsefulChild = firstChild!;
     double firstChildScrollOffset = 0.0;
     double leadingLineCross = 0.0;
-    print("init for earliestScrollOffset ${childScrollOffset(earliestUsefulChild)} scrollOffset $scrollOffset");
+    print(
+        "init for earliestScrollOffset ${childScrollOffset(earliestUsefulChild)} scrollOffset $scrollOffset");
     //sliver list 只要有一个满足earliestScrollOffset > scrollOffset就退出for循环
     //在该list中，有多个满足
 //    for (double earliestScrollOffset = childScrollOffset(earliestUsefulChild);
@@ -240,28 +245,31 @@ class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
     int collectLeadingIndex = 0;
 
 //  todo 有意思的for 结构体判断条件 break退出  for (int i = 0; true; i += 1) {}
-    var allArray = List<List<LineItem>>();
+    List<List<LineItem>> allArray = [];
     var lineArray = <LineItem>[];
     allArray.add(lineArray);
     for (;;) {
-      double earliestScrollOffset = childScrollOffset(earliestUsefulChild);
+      double earliestScrollOffset = childScrollOffset(earliestUsefulChild)!;
       print(
           "earliestScrollOffset $earliestScrollOffset  earliestPaintExtent $earliestPaintExtent         scrollOffset $scrollOffset");
-      if (!(earliestScrollOffset > scrollOffset || earliestScrollOffset + earliestPaintExtent > scrollOffset)) {
+      if (!(earliestScrollOffset > scrollOffset ||
+          earliestScrollOffset + earliestPaintExtent > scrollOffset)) {
         break;
       }
 
-      earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
-      earliestPaintExtent = paintExtentOf(firstChild);
+      earliestUsefulChild =
+          insertAndLayoutLeadingChild(childConstraints!, parentUsesSize: true)!;
+      earliestPaintExtent = paintExtentOf(firstChild!);
       print("earliestUsefulChild==null ${earliestUsefulChild == null}");
       if (earliestUsefulChild == null) {
-        final SliverFlowParentData childParentData = firstChild.parentData;
+        final SliverFlowParentData childParentData =
+            firstChild!.parentData as SliverFlowParentData;
         childParentData.layoutOffset = 0.0;
         childParentData.crossAxisOffset = 0.0;
 
         if (scrollOffset == 0.0) {
-          firstChild.layout(childConstraints, parentUsesSize: true);
-          earliestUsefulChild = firstChild;
+          firstChild!.layout(childConstraints, parentUsesSize: true);
+          earliestUsefulChild = firstChild!;
           leadingChildWithLayout = earliestUsefulChild;
           trailingChildWithLayout ??= earliestUsefulChild;
           break;
@@ -273,29 +281,33 @@ class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
         }
       }
       isInsertLeading = true;
-      leadingLineCross += paintWidthOf(firstChild);
+      leadingLineCross += paintWidthOf(firstChild!);
       if (leadingLineCross > constraints.crossAxisExtent) {
-        leadingLineCross = paintWidthOf(firstChild);
+        leadingLineCross = paintWidthOf(firstChild!);
       }
-      final SliverFlowParentData childParentData = earliestUsefulChild.parentData;
-      if (leadingLineCross == paintWidthOf(firstChild)) {
-        firstChildScrollOffset = earliestScrollOffset - paintExtentOf(firstChild);
+      final SliverFlowParentData childParentData =
+          earliestUsefulChild.parentData as SliverFlowParentData;
+      if (leadingLineCross == paintWidthOf(firstChild!)) {
+        firstChildScrollOffset =
+            earliestScrollOffset - paintExtentOf(firstChild!);
         lineArray = [];
         allArray.add(lineArray);
       }
       childParentData.layoutOffset = firstChildScrollOffset;
-      childParentData.crossAxisOffset = leadingLineCross - paintWidthOf(firstChild);
+      childParentData.crossAxisOffset =
+          leadingLineCross - paintWidthOf(firstChild!);
       lineArray
         ..add(LineItem()
           ..child = firstChild
           ..childParentData = childParentData
-          ..childWidth = paintWidthOf(firstChild)
-          ..childHeight = paintExtentOf(firstChild));
-      if (childParentData.layoutOffset + paintExtentOf(firstChild) < scrollOffset) {
+          ..childWidth = paintWidthOf(firstChild!)
+          ..childHeight = paintExtentOf(firstChild!));
+      if (childParentData.layoutOffset! + paintExtentOf(firstChild!) <
+          scrollOffset) {
         collectLeadingIndex++;
       }
       print(
-          "insertAndLayoutLeadingChild index ${indexOf(firstChild)} layoutOffset ${childParentData.layoutOffset}  crossAxisOffset ${childParentData.crossAxisOffset}");
+          "insertAndLayoutLeadingChild index ${indexOf(firstChild!)} layoutOffset ${childParentData.layoutOffset}  crossAxisOffset ${childParentData.crossAxisOffset}");
       assert(earliestUsefulChild == firstChild);
       leadingChildWithLayout ??= earliestUsefulChild;
       trailingChildWithLayout ??= earliestUsefulChild;
@@ -309,9 +321,10 @@ class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
       var allCross = 0.0;
       line
         ..reversed.forEach((item) {
-          final SliverFlowParentData childParentData = item.child.parentData;
+          final SliverFlowParentData childParentData =
+              item.child!.parentData as SliverFlowParentData;
           childParentData.crossAxisOffset = allCross;
-          allCross += item.childWidth;
+          allCross += item.childWidth!;
         });
     });
     //回收多余的  重新赋值leadingChildWithLayout  回收的属于不可见的，下一次布局时从firstchild开始  即insetleading最后一个不可见,下次布局从这个child开始，属于应该回收的，不回收对下一次布局有影响(高度不正确)
@@ -319,24 +332,26 @@ class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
       collectGarbage(collectLeadingIndex, 0);
       leadingChildWithLayout ??= firstChild;
       trailingChildWithLayout ??= firstChild;
-      earliestUsefulChild = firstChild;
+      earliestUsefulChild = firstChild!;
     }
 
 //    此时，earliestUseVolectChild是第一个子级，并且是其scrollOffset位于或早于scrollOffset的子级，
 //    并且leadingChildWithLayout和trailingChildWithLayout要么为空，要么覆盖一系列的呈现框，其中第一个与EarliesTouseChild相同，
 //    最后一个位于滚动偏移处或之后。
-    print("earliestUsefulChild == firstChild earliestUsefulChild $earliestUsefulChild  firstChild $firstChild");
+    print(
+        "earliestUsefulChild == firstChild earliestUsefulChild $earliestUsefulChild  firstChild $firstChild");
     assert(earliestUsefulChild == firstChild);
-    assert(childScrollOffset(earliestUsefulChild) <= scrollOffset);
+    assert(childScrollOffset(earliestUsefulChild)! <= scrollOffset);
     print("leadingChildWithLayout == null ${leadingChildWithLayout == null}");
     //确保至少放置一个child
     if (leadingChildWithLayout == null) {
       isInsertLeading = false;
-      earliestUsefulChild.layout(childConstraints, parentUsesSize: true);
+      earliestUsefulChild.layout(childConstraints!, parentUsesSize: true);
       leadingChildWithLayout = earliestUsefulChild;
       trailingChildWithLayout = earliestUsefulChild;
       //此时child在默认位置
-      SliverFlowParentData childParentData = earliestUsefulChild.parentData;
+      SliverFlowParentData childParentData =
+          earliestUsefulChild.parentData as SliverFlowParentData;
       childParentData.layoutOffset = childScrollOffset(earliestUsefulChild);
       print(
           "default at least one index  ${indexOf(earliestUsefulChild)} left ${childParentData.crossAxisOffset} top ${childParentData.layoutOffset}");
@@ -346,14 +361,15 @@ class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
 //    实际上是我们的leadingChildWithLayout。有可能除此之外的一些孩子也被安排好了。
     bool inLayoutRange = true;
     //sliverlist 使用earliestUsefulChild从第一个开始布局(一行有一个)  slivergrid使用trailingChildWithLayout(一行有多个) 从insertAndLayoutLeadingChild前的第一个布局
-    RenderBox child = trailingChildWithLayout;
+    RenderBox child = trailingChildWithLayout!;
     int index = indexOf(child);
     //多次调用advance后变为 endScrollOffset代表这些child的高度和
-    double endScrollOffset;
+    double? endScrollOffset;
     if (!isInsertLeading) {
       endScrollOffset = childScrollOffset(child);
     } else {
-      endScrollOffset = childScrollOffset(child) + paintExtentOf(child); //初始代表 child行的结束
+      endScrollOffset =
+          childScrollOffset(child)! + paintExtentOf(child); //初始代表 child行的结束
     }
     double lineCrossOffset;
     if (isInsertLeading) {
@@ -369,30 +385,31 @@ class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
     bool advance() {
       assert(child != null);
       if (child == trailingChildWithLayout) inLayoutRange = false;
-      child = childAfter(child);
+      child = childAfter(child)!;
       if (child == null) inLayoutRange = false;
       index += 1;
       if (!inLayoutRange) {
         if (child == null || indexOf(child) != index) {
 //         我们少了一个孩子。如有可能，请将其插入（并展开）
           child = insertAndLayoutChild(
-            childConstraints,
+            childConstraints!,
             after: trailingChildWithLayout,
             parentUsesSize: true,
-          );
+          )!;
           if (child == null) {
             return false;
           }
         } else {
           //把孩子摆出来
-          child.layout(childConstraints, parentUsesSize: true);
+          child.layout(childConstraints!, parentUsesSize: true);
         }
         trailingChildWithLayout = child;
         lineCrossOffset += paintWidthOf(child);
       }
       assert(child != null);
       //更新child的位置
-      final SliverFlowParentData childParentData = child.parentData;
+      final SliverFlowParentData childParentData =
+          child.parentData as SliverFlowParentData;
 
 //      print(
 //          "index ${indexOf(child)} lineCrossOffset $lineCrossOffset constraints.crossAxisExtent ${constraints.crossAxisExtent}");
@@ -408,8 +425,9 @@ class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
           "advance index ${indexOf(child)}  paintWidthOf(child) ${paintWidthOf(child)} lineCrossOffset $lineCrossOffset}");
 
       //insetleading 情况下第一个可见的后不回行
-      if (lineCrossOffset == paintWidthOf(child) && !(isInsertLeading && leadingFirst)) {
-        endScrollOffset = childScrollOffset(child) + paintExtentOf(child);
+      if (lineCrossOffset == paintWidthOf(child) &&
+          !(isInsertLeading && leadingFirst)) {
+        endScrollOffset = childScrollOffset(child)! + paintExtentOf(child);
         childParentData.layoutOffset = endScrollOffset;
       }
       leadingFirst = false;
@@ -418,20 +436,23 @@ class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
     }
 
     //找到在滚动偏移之后结束的第一个子项
-    print("endScrollOffset < scrollOffset endScrollOffset $endScrollOffset scrollOffset  $scrollOffset");
-    while (endScrollOffset + paintExtentOf(child) < scrollOffset) {
+    print(
+        "endScrollOffset < scrollOffset endScrollOffset $endScrollOffset scrollOffset  $scrollOffset");
+    while (endScrollOffset! + paintExtentOf(child) < scrollOffset) {
 //      print(
 //          "endScrollOffset < scrollOffset endScrollOffset $endScrollOffset scrollOffset $scrollOffset  leadingGarbage $leadingGarbage");
       //缓存区待回收
       leadingGarbage += 1;
       if (!advance()) {
-        print("endScrollOffset < scrollOffset !advance  leadingGarbage $leadingGarbage");
+        print(
+            "endScrollOffset < scrollOffset !advance  leadingGarbage $leadingGarbage");
         assert(leadingGarbage == childCount);
         assert(child == null);
         // 我们要确保保留最后一个子对象，以便知道结束滚动偏移量
         collectGarbage(leadingGarbage - 1, 0);
         assert(firstChild == lastChild);
-        final double extent = childScrollOffset(lastChild) + paintExtentOf(lastChild);
+        final double extent =
+            childScrollOffset(lastChild!)! + paintExtentOf(lastChild!);
         geometry = SliverGeometry(
           scrollExtent: extent,
           paintExtent: 0.0,
@@ -443,7 +464,7 @@ class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
     }
 
     //现在找到我们结束后的第一个孩子  当前布局结束(cache+viewport)
-    while (endScrollOffset < targetEndScrollOffset) {
+    while (endScrollOffset! < targetEndScrollOffset) {
 //      print(
 //          "endScrollOffset < targetEndScrollOffset endScrollOffset $endScrollOffset targetEndScrollOffset $targetEndScrollOffset");
 
@@ -455,68 +476,74 @@ class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
 
     //最后把剩下的孩子都数一数，然后把他们标为垃圾
     if (child != null) {
-      child = childAfter(child);
+      child = childAfter(child)!;
       while (child != null) {
         trailingGarbage += 1;
-        child = childAfter(child);
+        child = childAfter(child)!;
       }
     }
 
     //在这一点上，一切都应该是好的，我们只需要清理垃圾和报告几何。 回收头和尾不需要布局的child
     collectGarbage(leadingGarbage, trailingGarbage);
-    print("collectGarbage last leadingGarbage $leadingGarbage trailingGarbage $trailingGarbage");
+    print(
+        "collectGarbage last leadingGarbage $leadingGarbage trailingGarbage $trailingGarbage");
 
     //确定SliverGeometry
     assert(debugAssertChildListIsNonEmptyAndContiguous());
-    double estimatedMaxScrollOffset;
+    double? estimatedMaxScrollOffset;
 //    print("reachedEnd $reachedEnd");
     if (reachedEnd) {
       estimatedMaxScrollOffset = endScrollOffset;
     } else {
       estimatedMaxScrollOffset = childManager.estimateMaxScrollOffset(
         constraints,
-        firstIndex: indexOf(firstChild),
-        lastIndex: indexOf(lastChild),
-        leadingScrollOffset: childScrollOffset(firstChild),
+        firstIndex: indexOf(firstChild!),
+        lastIndex: indexOf(lastChild!),
+        leadingScrollOffset: childScrollOffset(firstChild!),
         trailingScrollOffset: endScrollOffset,
       );
-      assert(estimatedMaxScrollOffset >= endScrollOffset - childScrollOffset(firstChild));
+      assert(estimatedMaxScrollOffset >=
+          endScrollOffset! - childScrollOffset(firstChild!)!);
     }
     final double paintExtent = calculatePaintOffset(
       constraints,
-      from: childScrollOffset(firstChild),
-      to: endScrollOffset,
+      from: childScrollOffset(firstChild!)!,
+      to: endScrollOffset!,
     );
     final double cacheExtent = calculateCacheOffset(
       constraints,
-      from: childScrollOffset(firstChild),
-      to: endScrollOffset,
+      from: childScrollOffset(firstChild!)!,
+      to: endScrollOffset!,
     );
-    final double targetEndScrollOffsetForPaint = constraints.scrollOffset + constraints.remainingPaintExtent;
+    final double targetEndScrollOffsetForPaint =
+        constraints.scrollOffset + constraints.remainingPaintExtent;
     geometry = SliverGeometry(
-      scrollExtent: estimatedMaxScrollOffset,
+      scrollExtent: estimatedMaxScrollOffset!,
       paintExtent: paintExtent,
       cacheExtent: cacheExtent,
       maxPaintExtent: estimatedMaxScrollOffset,
       // Conservative to avoid flickering away the clip during scroll.   为避免在滚动期间闪烁
-      hasVisualOverflow: endScrollOffset > targetEndScrollOffsetForPaint || constraints.scrollOffset > 0.0,
+      hasVisualOverflow: endScrollOffset! > targetEndScrollOffsetForPaint ||
+          constraints.scrollOffset > 0.0,
     );
 
 //    print("geometry $geometry");
 
 //    我们可能在滚动到结尾时启动了布局，这不会公开新的子级。
-    if (estimatedMaxScrollOffset == endScrollOffset) childManager.setDidUnderflow(true);
+    if (estimatedMaxScrollOffset == endScrollOffset)
+      childManager.setDidUnderflow(true);
     childManager.didFinishLayout();
   }
 
-  BoxConstraints transform2BoxConstraints() {
+  BoxConstraints? transform2BoxConstraints() {
     switch (constraints.axis) {
       case Axis.horizontal:
-        return BoxConstraints.loose(Size(double.infinity, constraints.crossAxisExtent));
+        return BoxConstraints.loose(
+            Size(double.infinity, constraints.crossAxisExtent));
       case Axis.vertical:
-        return BoxConstraints.loose(Size(constraints.crossAxisExtent, double.infinity));
+        return BoxConstraints.loose(
+            Size(constraints.crossAxisExtent, double.infinity));
     }
-    return null;
   }
 
   double paintWidthOf(RenderBox child) {
@@ -528,20 +555,19 @@ class RenderSliverFlow extends RenderSliverMultiBoxAdaptor {
       case Axis.vertical:
         return child.size.width;
     }
-    return null;
   }
 }
 
 class SliverFlowParentData extends SliverMultiBoxAdaptorParentData {
-  double crossAxisOffset;
+  double? crossAxisOffset;
 
   @override
   String toString() => 'crossAxisOffset=$crossAxisOffset; ${super.toString()}';
 }
 
 class LineItem {
-  RenderBox child;
-  SliverFlowParentData childParentData;
-  double childWidth;
-  double childHeight;
+  RenderBox? child;
+  SliverFlowParentData? childParentData;
+  double? childWidth;
+  double? childHeight;
 }

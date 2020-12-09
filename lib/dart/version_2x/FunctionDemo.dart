@@ -10,13 +10,12 @@ typedef TestFunction = dynamic Function(String param);
 //(T,action)=>T  函数式
 typedef ApplyLikeEnhancer = TestFunction Function(TestFunction functor);
 
-class LocaleErrors{
-
-}
+class LocaleErrors {}
 
 ///声明一个返回值为LocaleErrors的function
 typedef GetLocaleErrors = LocaleErrors Function(String key);
 
+///顶级函数 一般初始化一次
 ///代码简化  此时i18nLabels==getLocaleLabels   CustomLocalizations.of(Constant().rootContext)获取的对象只执行了一次
 //GetLocaleErrors i18nLabels =
 //    CustomLocalizations.of(Constant().rootContext).getLocaleLabels;
@@ -36,7 +35,7 @@ ApplyLikeEnhancer delay(int millis) {
 }
 
 class SortedCollection {
-  Function compare;
+  Function? compare;
 
   SortedCollection(f(int a, int b)) {
     compare = f;
@@ -71,7 +70,7 @@ void main(List<String> args) async {
 //  say("from2", "msg2", "device2");
 
   ///匿名函数
-  var list = new List<String>();
+  var list = <String>[];
   list.add("tom");
   list.add("jack");
   list.add("Rose");
@@ -126,11 +125,11 @@ void main(List<String> args) async {
   TestBuilder tb = TestBuilder(realBuild);
   print("测试call ${tb.inintCall()}");
 
-  TestBuilder((str) {}, subscribe: ((void Function() fc) {
-    if (null != fc) {
-      _listeners.add(fc);
-    }
-  }));
+  // TestBuilder((str) {}, subscribe: ((void Function() fc) {
+  //   if (null != fc) {
+  //     _listeners.add(fc);
+  //   }
+  // }));
 
   print("ApplyLikeEnhancer $ApplyLikeEnhancer");
 
@@ -141,6 +140,12 @@ void main(List<String> args) async {
 //  * A function value, or an instance of a class with a "call" method, is a
 //  * subtype of a function type, and as such, a subtype of [Function].
 
+//call 运行
+//   它是怎样运行的？
+//   当对x(a1, …, an)求值的时候，在支持相应参数的情况下，如果它是一个标准的函数，它会以正常的方式被调用。如果并不是标准函数，则会调用call()。
+//   否则，noSuchMethod()被调用。noSuchMethod()的默认实现会检查该方法是否是因为企图使用call()而被调用，
+//   如果是这样的问题，建议使用闭包，以获取有用的错误信息
+
 // Create a function that adds 2.     add2 现在是个function  (i)=>2+i;
   var add2 = makeAdder(2);
   // Create a function that adds 4.   add4 现在是个function  (i)=>4+i;
@@ -148,6 +153,32 @@ void main(List<String> args) async {
   //调用函数
   print(add2(3));
   print(add4(3));
+
+  ///Function.apply  通过制定的args动态的调用function
+  Function a = (int b) => b + 1;
+  print("Function.apply result ${Function.apply(a, [1])}");
+
+  ///箭头函数
+  var functionArrow = () => {"aa": "aa", "bb": "bb"};
+  print("functionArrow $functionArrow \nfunctionArrow call ${functionArrow()}");
+
+  var functionArrow1 = () => ({"aa": "aa", "bb": "bb"});
+  print(
+      "functionArrow1 $functionArrow1 \nfunctionArrow1 call ${functionArrow1()}");
+
+  ///动态返回函数 返回一个函数，函数的具体逻辑逻辑依赖于外部参数，使用与参数为函数但其实现逻辑需要动态改变的情况
+  var validateMaxLength =
+      (maxLength, name) => (rule, value, Function callback) {
+            if (null != value) {
+              if (value.length > maxLength)
+                callback("error");
+              else
+                callback(name);
+            } else
+              callback();
+          };
+  print(
+      "validateMaxLength $validateMaxLength \nvalidateMaxLength call ${validateMaxLength(10, "success")}");
 }
 
 /// Returns a function that adds [addBy] to the
@@ -172,12 +203,12 @@ typedef StringBuilder = String Function(String str);
 
 class TestBuilder {
   StringBuilder sb;
-  Subscribe subscribe;
+  Subscribe? subscribe;
   TestBuilder(this.sb, {this.subscribe});
 
   inintCall() {
     //function可以用call调用自己
-    return sb?.call("测试call");
+    return sb.call("测试call");
   }
 }
 
@@ -190,15 +221,20 @@ enableFlags1(String flag, {bold: String, hidden: String}) {
       " hidden $hidden runtimeType  ${hidden.runtimeType}");
 }
 
-enableFlags(String flag, {String bold, bool hidden}) {
-  print("flag " + flag + " bold " + bold.toString() + " hidden " + hidden.toString());
+enableFlags(String flag, {String? bold, bool? hidden}) {
+  print("flag " +
+      flag +
+      " bold " +
+      bold.toString() +
+      " hidden " +
+      hidden.toString());
   print("flag " +
       flag +
       " bold $bold runtimeType ${bold.runtimeType} " +
       " hidden $hidden runtimeType  ${hidden.runtimeType}");
 }
 
-say(String from, String msg, [String device]) {
+say(String from, String msg, [String? device]) {
   print("from " + from + " msg " + msg);
 
   ///device 不存在的情况下，无法输出
@@ -222,14 +258,23 @@ class RadioGroup extends Widget {
 
 //协变修饰符也可用于可变字段。这样做对应于将隐式生成的该字段的setter中的参数
 class Widget1 {
-  covariant Widget child;
+  covariant Widget? child;
 }
 
 //这是语法糖
 class Widget2 {
-  Widget _child;
-  Widget get child => _child;
-  set child(covariant Widget value) {
+  Widget? _child;
+  Widget? get child => _child;
+  set child(covariant Widget? value) {
     _child = value;
   }
+}
+
+// 与Mirror和noSuchMethod()进行交互，Function.apply的动态调用
+// noSuchMethod 覆写，当方法找不到时，进行调用转发
+class NoMethodClass {
+  noSuchMethod(Invocation invocation) => invocation.memberName == #foo
+      ? Function.apply(
+          say, invocation.positionalArguments, invocation.namedArguments)
+      : super.noSuchMethod(invocation);
 }

@@ -1,11 +1,11 @@
 //List<Widget>.generate       生成list
 
 import 'dart:math';
-
 import 'dart:typed_data';
 
 void main() {
   List<int> inits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  print("runtimeType ${inits.runtimeType}");
 
   //生成长度为5的list
   List<String> strs = List<String>.generate(5, (index) {
@@ -94,9 +94,11 @@ void main() {
   print("lastIndex1 $lastIndex1");
 
   //  lastIndexWhere 符合条件的index
-  int lastIndexWhere1 = notes.lastIndexWhere((note) => note.startsWith('r')); //3  re,mi,re,do
+  int lastIndexWhere1 =
+      notes.lastIndexWhere((note) => note.startsWith('r')); //3  re,mi,re,do
   print("lastIndexWhere1 $lastIndexWhere1");
-  int lastIndexWhere2 = notes.lastIndexWhere((note) => note.startsWith('r'), 2); //1  me,re,do
+  int lastIndexWhere2 =
+      notes.lastIndexWhere((note) => note.startsWith('r'), 2); //1  me,re,do
   print("lastIndexWhere2 $lastIndexWhere2");
   Uint8List t;
   //shuffle  洗牌,打乱顺顺序
@@ -105,7 +107,16 @@ void main() {
   print("shuffle $list4");
 
   //嵌套list
-  var lists = List<List<LineItem>>();
+  List<List<LineItem>> lists = [];
+
+  var items = [LineItem()..name = "1"];
+  print(
+      "runtimeType ${items.runtimeType} index of ${items.indexOf(LineItem()..name = "1")}");
+
+  var strItems = ["1", "2", "3"];
+  print("index of ${strItems.indexOf("2")}");
 }
 
-class LineItem {}
+class LineItem {
+  String? name;
+}

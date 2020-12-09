@@ -17,7 +17,7 @@ class NullValue extends $pb.ProtobufEnum {
 
   static final Map<int, NullValue> _byValue =
       $pb.ProtobufEnum.initByValue(values);
-  static NullValue valueOf(int value) => _byValue[value];
+  static NullValue? valueOf(int value) => _byValue[value];
 
   const NullValue._(int v, String n) : super(v, n);
 }

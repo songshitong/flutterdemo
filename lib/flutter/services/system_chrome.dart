@@ -33,10 +33,11 @@ class _SystemChromePageState extends State<SystemChromePage> {
       value: regionStyle,
       child: SafeArea(
         top: false,
+        maintainBottomViewPadding: true,
         child: Stack(
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(top: 50),
+            Positioned(
+              top: 50,
               child: Column(
                 children: <Widget>[
                   RaisedButton(

@@ -31,11 +31,11 @@ class _CheckBoxPageState extends State<CheckBoxPage> {
               value: _checkValue,
               onChanged: (value) {
                 print("onchaged2 $value");
-                _checkValue = value;
+                _checkValue = value ?? false;
                 setState(() {});
               }),
           Checkbox(
-              value: null,
+              value: null!,
               tristate: true,
               onChanged: (value) {
                 print("onchaged3 $value");
@@ -50,14 +50,14 @@ class AliveCheckbox extends StatefulWidget {
   ValueChanged<bool> onChange;
   bool value;
 
-  AliveCheckbox({@required this.onChange, this.value = false});
+  AliveCheckbox({required this.onChange, this.value = false});
 
   @override
   _AliveCheckboxState createState() => _AliveCheckboxState();
 }
 
 class _AliveCheckboxState extends State<AliveCheckbox> {
-  bool active;
+  late bool active;
   @override
   void initState() {
     active = widget.value;
@@ -70,8 +70,8 @@ class _AliveCheckboxState extends State<AliveCheckbox> {
         value: active,
         onChanged: (result) {
           setState(() {
-            if (null != widget.onChange) widget.onChange(result);
-            active = result;
+            widget.onChange.call(result ?? false);
+            active = result ?? false;
           });
         });
   }

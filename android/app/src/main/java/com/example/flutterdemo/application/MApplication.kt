@@ -6,6 +6,7 @@ import io.flutter.app.FlutterApplication
 class MApplication :FlutterApplication() {
     override fun onCreate() {
         super.onCreate()
-
     }
+    
+    
 }
